@@ -8,21 +8,23 @@ function trigger() {
     shell.config.silent = !shell.config.silent;
 }
 
-export async function CreateNetwork(execStr) {
+export function generateNetworkFiles(execStr) {
     const dir = shell.exec(`find ${ROOT_APP_DIR} -name \"${CREATE_NETWORK_TEMPLATE_FOLDER}\" 2>/dev/null`).stdout.trim();
     shell.config.silent = true;
     shell.pushd(dir);
     trigger();
-    await shell.exec(`./generateNetwork.sh ${execStr}`, (code) => {
+    shell.exec(`./generateNetwork.sh ${execStr}`, (code) => {
         if(code != "0")
         throw new errors.execution_failed.withDetails("Error while generating the network configuration...Please check logs for more information");
+        else
+        StartNetwork();
     });
     trigger();
     shell.popd();
     trigger();
 }
 
-export function StartNetwork() {
+function StartNetwork() {
         shell.config.silent = true;
         shell.pushd(`${ROOT_APP_DIR}/Application/`)
         trigger();
@@ -32,7 +34,7 @@ export function StartNetwork() {
           });
         trigger();
         shell.popd();
-        trigger(); 
+    trigger(); 
 }; 
 
 export function StopNetwork() {
