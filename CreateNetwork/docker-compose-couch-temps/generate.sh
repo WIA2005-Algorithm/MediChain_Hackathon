@@ -19,7 +19,7 @@ function orgs {
 
 function all {
     awk -v r="`orgs`" \
-        -v nn="$NETWORKNAME"  \
+        -v nn="$NETWORKNAME" \
         -v nk="$NETWORKNICK" '{
         gsub(/\${couchdbservices}/,r);
         gsub(/\${networkname}/,nn);

@@ -22,7 +22,7 @@ rm -rf TodoBackend/wallet/*
 exec > >(tee -i $PWD/logfile.txt)
 exec 2>&1
 pushd ../CreateNetwork
-./generateNetwork.sh -netName Medi_Chain -netID mvn -netAdd um.edu.my -org UMMC Asura Asurapw Malaysia Selongor "KL" 7051 7054 5984 -org PPUM BAsura BAsurapw Malaysia Selongor "KL" 9051 8054 7984
+./generateNetwork.sh -netName "Medi Chain" -netID mvn -netAdd um.edu.my -org UMMC Asura Asurapw Malaysia Selongor "KL" 7051 7054 5984 -org PPUM BAsura BAsurapw Malaysia Selongor "KL" 9051 8054 7984
 popd
 pushd ../ApplicationNetwork
 ./network.sh down

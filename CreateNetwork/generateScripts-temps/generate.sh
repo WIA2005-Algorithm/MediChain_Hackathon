@@ -262,7 +262,6 @@ fi
 mkdir -p $NETDIR/scripts/
 NETDIR=$NETDIR/scripts
 cp -u $CURR/utils.sh $NETDIR
-echo $NETDIR
 all
 mkdir -p $NETDIR/../system-genesis-block
 gitignore="

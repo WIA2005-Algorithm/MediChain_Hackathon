@@ -113,3 +113,6 @@ echo "Generating registerEnroll.sh in $DIR"
 echo "$total" | sed "s/example.com/$NETADD/g" > $DIR/registerEnroll.sh
 chmod +x $DIR/registerEnroll.sh
 
+
+
+

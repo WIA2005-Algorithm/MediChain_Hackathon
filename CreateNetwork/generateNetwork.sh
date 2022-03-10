@@ -165,3 +165,6 @@ fabric-ca-temps/generate.sh $(fabric)
 
 export CURR="$PWD/generateScripts-temps"
 generateScripts-temps/generate.sh $(testNetO)
+
+successln "\nSuccessfully generated the network config in $NETDIR"
+exit 0
