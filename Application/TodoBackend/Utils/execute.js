@@ -8,12 +8,12 @@ function trigger() {
     shell.config.silent = !shell.config.silent;
 }
 
-async function CreateNetwork() {
+export async function CreateNetwork(execStr) {
     const dir = shell.exec(`find ${ROOT_APP_DIR} -name \"${CREATE_NETWORK_TEMPLATE_FOLDER}\" 2>/dev/null`).stdout.trim();
     shell.config.silent = true;
     shell.pushd(dir);
     trigger();
-    shell.exec('./generateNetwork.sh -netName Medi_Chain -netID mvn -netAdd um.edu.my -org UMMC Asura Asurapw Malaysia Selongor "KL" 7051 7054 5984 -org PPUM BAsura BAsurapw Malaysia Selongor "KL" 9051 8054 7984', (code) => {
+    await shell.exec(`./generateNetwork.sh ${execStr}`, (code) => {
         if(code != "0")
         throw new errors.execution_failed.withDetails("Error while generating the network configuration...Please check logs for more information");
     });
@@ -22,7 +22,7 @@ async function CreateNetwork() {
     trigger();
 }
 
-async function StartNetwork() {
+export function StartNetwork() {
         shell.config.silent = true;
         shell.pushd(`${ROOT_APP_DIR}/Application/`)
         trigger();
@@ -35,7 +35,7 @@ async function StartNetwork() {
         trigger(); 
 }; 
 
-async function StopNetwork() {
+export function StopNetwork() {
     shell.config.silent = true;
     shell.pushd(`${ROOT_APP_DIR}/Application/`)
     trigger();

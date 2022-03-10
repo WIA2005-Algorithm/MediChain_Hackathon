@@ -13,7 +13,7 @@ app.use(json());
 MongoDB();
 // Start the server
 app.use('/api/users', enrollRoute);
-app.use('/api', superUserRoute);
+app.use('/api/superuser', superUserRoute);
 app.listen(port, ()=>{
     console.log(`Server is running on ${url}`);
 });

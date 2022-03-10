@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 import errors from '../Utils/Errors.js';
 import {  p0ports, caports, couchports} from "../Utils/NetworkConstants.js";
 const { Schema } = mongoose;
-const counter = mongoose.model('counter', new mongoose.Schema({
-    nom: {type: String, default: "PORTS", index: true},
-    seq: {type: Number, default: -1}
-}));
 
 export const Block_Network = mongoose.model(
     // Model Name: Block_Network with 4 fields + 2 timestamp fields (createdAt+updatedAt),
@@ -119,22 +115,26 @@ export const Organizations = mongoose.model(
         COUCHPORT: {
             type: Number,
             unique: true
+        },
+        // Counter Type
+        OrganizationType: {
+            type: String,
+            default: "Hospital"
         }
     // Timestamp
     }, {timestamps: true})
     // Run a function using this schema before saving it: Middleware called before going to "next" function
     .pre('save', function(next) {
         var doc = this;
-        counter.findOneAndUpdate({nom: 'PORTS'}, {$inc: { seq: 1} }, {new: true, upsert: true})
-        .lean()
-        .exec(function(error, count){
-            if(error)
-            return next(error);
-            if(!p0ports[count.seq])
+        // To check the maximum limit for number of organizations
+        Organizations.countDocuments({OrganizationType: "Hospital"}).exec(function(err, count){
+            if(err)
+            return next(err);
+            if(!p0ports[count])
             return next(errors.maximum_organizations_reached);
-            doc.P0PORT = p0ports[count.seq];
-            doc.CAPORT = caports[count.seq];
-            doc.COUCHPORT = couchports[count.seq];
+            doc.P0PORT = p0ports[count];
+            doc.CAPORT = caports[count];
+            doc.COUCHPORT = couchports[count];
             next();
-        });
+        })
     }));

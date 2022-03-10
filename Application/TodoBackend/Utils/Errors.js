@@ -30,13 +30,14 @@ export const response = {
   };
 errors.ApiError = ApiError;
 //--------------------- GENERIC ERRORS -------------------------/
-errors.invalid_host = new ApiError(401, 'Unknown Host Organisation', 'The request could not be completed due to the missing requirements')
+errors.invalid_host = new ApiError(401, 'UNKNOWN HOST ORGANIZATION', 'The request could not be completed due to the missing requirements')
 errors.duplicate_identity = new ApiError(409, 'DUPLICATE IDENTITY', 'The request could not be completed due to a conflict with the current state of the resource')
 errors.required_admin = new ApiError(401, 'ADMIN ENROLLMENT REQUIRED', 'The request could not be completed due to the missing requirements')
-errors.file_not_found = new ApiError(500, 'Internal Server Error', 'If you are the developer, please check your server logs for more information');
-errors.execution_failed = new ApiError(500, 'Internal Server Error', 'The request for creating network has failed');
-errors.network_not_found = new ApiError(400, 'Property Not Found', 'The requested blockchain network doesn\'t exists');
-errors.maximum_organizations_reached = new ApiError(409, 'Maximum Limit Reached', 'The number of organizations are reached');
+errors.file_not_found = new ApiError(500, 'INTERNAL SERVER ERROR', 'If you are the developer, please check your server logs for more information');
+errors.execution_failed = new ApiError(500, 'SCRIPT EXECUTION ERROR', 'The request for creating network has failed');
+errors.network_not_found = new ApiError(400, 'PROPERTY REQUESTED NOT FOUND', 'The requested blockchain network doesn\'t exists');
+errors.maximum_organizations_reached = new ApiError(409, 'MAXIMUM LIMIT REACHED', 'The number of organizations are reached');
+errors.request_failed = new ApiError(500, 'FAILED TO FULFIL REQUEST', "There was an error while fulfilling the request. Try again later");
 
 errors.required_key = new ApiError(400, 'REQUIRED_KEY','Api key is required. Please provide a valid api key along with request.');
 errors.required_auth = new ApiError(400, 'REQUIRED_AUTH_TOKEN','Auth Token is required. Please provide a valid auth token along with request.');
