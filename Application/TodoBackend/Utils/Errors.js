@@ -1,3 +1,4 @@
+'use-strict';
 var errors = {};
 /**
 * Used to create errors

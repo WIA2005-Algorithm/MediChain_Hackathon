@@ -1,3 +1,4 @@
+'use-strict';
 import { Router } from 'express';
 import { response, ApiError } from "../Utils/Errors.js";
 import { EnrollAdmin, RegisterUser } from '../controllers/register.js';

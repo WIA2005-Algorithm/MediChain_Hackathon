@@ -1,5 +1,5 @@
+'use-strict';
 import { Block_Network, Organizations } from "../models/Network.model.js";
-import errors, { ApiError } from "../Utils/Errors.js";
 
 export const createNetwork = async (network) => {
     const NETWORK= await Block_Network.create(network);
@@ -18,3 +18,11 @@ export const createOrganization = async function(NetworkID, Org) {
         { new: true, useFindAndModify: false }
     );
 };
+
+export const setNetworkStatus = async function (NetworkName, status) {
+    return await Block_Network.findOneAndUpdate({Name: NetworkName}, {Status: status});
+}
+
+export const getNetworkStatus = async function (NetworkName){
+    return await Block_Network.findOne({Name: NetworkName});
+}

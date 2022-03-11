@@ -1,3 +1,4 @@
+'use-strict';
 import mongoose from 'mongoose';
 import errors from '../Utils/Errors.js';
 import {  p0ports, caports, couchports} from "../Utils/NetworkConstants.js";
@@ -10,8 +11,8 @@ export const Block_Network = mongoose.model(
         Name: {
             type: String,
             validate: {
-                validator: (v)=> /^[a-zA-z ,.'-]+$/.test(v),
-                message: props => `${props.value} is not a valid network name!\nA valid network name contains only alphabets and spaces`
+                validator: (v)=> /^(?=[a-zA-Z0-9._]{5,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/.test(v),
+                message: props => `${props.value} is not a valid network Name!\nA valid network Name contains atleast 5 characters with no spaces, no special characters in the beginning or end. \nAllowed special characters include 'underscore' and 'dot'`
             },
             required: [true, 'Network Name cannot be empty'],
             trim: true,
@@ -39,22 +40,35 @@ export const Block_Network = mongoose.model(
               type: mongoose.Schema.Types.ObjectId,
               ref: "Organizations"
             }
-          ]
+          ],
+        Status: {
+            type: Object,
+            default: {code: 0, message: "Not Started", description: "Fabric Network has not started yet"}
+        }
     },
-{timestamps: true}));
+    {timestamps: true}));
 
 export const Organizations = mongoose.model(
     // Model Name: Organizations with 6 fields + 2 timestamp fields (createdAt+updatedAt)
     "Organizations",
     new Schema({
         //Name Field
-        Name: {
+        FullName: {
             type: String, 
             validate: {
                 validator: (v)=> /^[a-zA-z ,.'-]+$/.test(v),
                 message: props => `${props.value} is not a valid hospital name!\nA valid hospital name contains only alphabets and spaces`
             },
             required: [true, 'Hospital name is required'], 
+            trim: true,
+        },
+        Name: {
+            type: String, 
+            validate: {
+                validator: (v)=> /^(?=[a-zA-Z0-9._]{2,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/.test(v),
+                message: props => `${props.value} is not a valid hospital ID!\nA valid hospital ID contains atleast 5 characters with no spaces, no special characters in the beginning or end. \nAllowed special characters include 'underscore' and 'dot'`
+            },
+            required: [true, 'Hospital short name (ID) is required'], 
             trim: true,
             unique: [true, "Hospital with the same name exists"],
             index: true
