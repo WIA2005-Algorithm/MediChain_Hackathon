@@ -1,3 +1,4 @@
+#!/bin/bash
 ORGANISATIONS=()
 ORGANISATIONSADD=()
 while [[ $# -gt 0 ]]; do

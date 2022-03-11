@@ -1,3 +1,4 @@
+#!/bin/bash
 function CreateOrg {
     local total=""
     for i in "${ORGANISATIONS[@]}"; do
@@ -255,6 +256,11 @@ elif [ "${#ORGANISATIONS[@]}" -eq "3" ]; then
 truefalse+=("true" "false" "false")
 truefalse+=("true" "true" "false")
 truefalse+=("true" "true" "true")
+elif [ "${#ORGANISATIONS[@]}" -eq "4" ]; then
+truefalse+=("true" "false" "false" "false")
+truefalse+=("true" "true" "false" "false")
+truefalse+=("true" "true" "true" "false")
+truefalse+=("true" "true" "true" "true")
 else
 echo 'Maximum Organisations reached'
 exit 1
