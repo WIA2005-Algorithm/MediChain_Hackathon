@@ -10,6 +10,7 @@ export const organisationPath = (orgName) => path.resolve(__dirname, '..', '..',
 export const p0ports = [7051, 9051, 1051, 2051];
 export const caports = [7054, 8054, 1054, 2054];
 export const couchports = [5984, 7984, 9984, 8984];
+export const SALT_WORK_FACTOR=10;
 //console Colors
 export const black = "\x1b[30m"
 export const red = "\x1b[31m"

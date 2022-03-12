@@ -1,8 +1,8 @@
 'use-strict';
 import { query, Router } from 'express';
 import errors, { response, ApiError } from "../Utils/Errors.js";
-import { createNetwork, createOrganization, getNetworkStatus } from '../controllers/CreateNetwork.controller.js';
-import { Block_Network } from '../models/Network.model.js';
+import { createNetwork, createOrganization } from '../controllers/CreateNetwork.controller.js';
+import { Block_Network, Superuser } from '../models/Network.model.js';
 import { generateNetworkFiles, StopNetwork } from "../Utils/execute.js";
 const router = Router();
 
@@ -64,6 +64,7 @@ router.post('/network/start', (req, res) => {
         }
     })
 })
+
 router.post('/network/stop', (req, res) => {
     Block_Network.findOne({Name: req.body.networkName}).exec(function(err, network) {
         if(!network){
@@ -80,13 +81,27 @@ router.post('/network/stop', (req, res) => {
 })
 
 router.get('/network/status', (req, res) => {
-    console.log(req.query);
     Block_Network.findOne({Name: req.query.networkName}, 'Status').exec(function(_, status){
         if(!status)
         res.status(400).json({code: 300, message: "pending", description: "Pending status"})
         return res.status(200).json(status.Status);
     })
-    req.params.networkName
+})
+
+router.post('/login', (req, res) => {
+    Superuser.findOne({ username: req.body.username }, function(err, user) {
+        if (err){
+            err = errors.invalid_auth.withDetails("Username/Password is incorrect");
+            return res.status(err.status).json(new response.errorResponse(err));
+        }
+        user.comparePassword(req.body.password, function(_, isMatch) {
+            if (!isMatch){
+                const err = errors.invalid_auth.withDetails("Username/Password is incorrect");
+                return res.status(err.status).json(new response.errorResponse(err));
+            }
+            return res.status(200).json({message: "Authentication was successfull"});
+        });
+    });
 })
 export default router
 

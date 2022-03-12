@@ -22,7 +22,3 @@ export const createOrganization = async function(NetworkID, Org) {
 export const setNetworkStatus = async function (NetworkName, status) {
     return await Block_Network.findOneAndUpdate({Name: NetworkName}, {Status: status});
 }
-
-export const getNetworkStatus = async function (NetworkName){
-    return await Block_Network.findOne({Name: NetworkName});
-}

@@ -39,12 +39,12 @@ errors.execution_failed = new ApiError(500, 'SCRIPT EXECUTION ERROR', 'The reque
 errors.network_not_found = new ApiError(400, 'PROPERTY REQUESTED NOT FOUND', 'The requested blockchain network doesn\'t exists');
 errors.maximum_organizations_reached = new ApiError(409, 'MAXIMUM LIMIT REACHED', 'The number of organizations are reached');
 errors.request_failed = new ApiError(500, 'FAILED TO FULFIL REQUEST', "There was an error while fulfilling the request. Try again later");
+errors.invalid_auth = new ApiError(401, 'INVALID_AUTH','Make sure the login details are correct');
 
 errors.required_key = new ApiError(400, 'REQUIRED_KEY','Api key is required. Please provide a valid api key along with request.');
 errors.required_auth = new ApiError(400, 'REQUIRED_AUTH_TOKEN','Auth Token is required. Please provide a valid auth token along with request.');
 errors.internal_error = new ApiError(500, 'INTERNAL_ERROR','Something went wrong on server. Please contact server admin.');
 errors.invalid_key = new ApiError(401, 'INVALID_KEY','Valid api key is required. Please provide a valid api key along with request.');
-errors.invalid_auth = new ApiError(401, 'INVALID_AUTH','Valid auth token is required. Please provide a valid auth token along with request.');
 errors.invalid_permission = new ApiError(401, 'INVALID_PERMISSION','Permission denied. Current user does not has required permissions for this resource.');
 errors.invalid_access = new ApiError(401, 'INVALID_ACCESS','Access denied. Current user does not has access for this resource.');
 errors.invalid_input = new ApiError(400, 'INVALID_INPUT','The request input is not as expected by API. Please provide valid input.');
