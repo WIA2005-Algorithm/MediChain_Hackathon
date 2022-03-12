@@ -1,5 +1,6 @@
 'use-strict';
 import mongoose from 'mongoose';
+import  bcrypt from "bcrypt";
 import errors from '../Utils/Errors.js';
 import {  p0ports, caports, couchports} from "../Utils/NetworkConstants.js";
 const { Schema } = mongoose;
@@ -152,3 +153,35 @@ export const Organizations = mongoose.model(
             next();
         })
     }));
+
+export const Superuser = mongoose.model(
+    "Superuser",
+    // Superuser admin - username and password
+    new Schema({
+        username: { type: String, required: true, index: { unique: true } },
+        password: { type: String, required: true }
+    }, {timestamps: true})
+    // function called before saving
+    .pre('save', function(next){
+        var user = this;
+        if (!user.isModified('password')) return next();
+        bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
+            if (err) return next(err);
+        
+            // hash the password along with our new salt
+            bcrypt.hash(user.password, salt, function(err, hash) {
+                if (err) return next(err);
+        
+                // override the cleartext password with the hashed one
+                user.password = hash;
+                next();
+            });
+        });
+    })
+    // Extra method to compare passwords when logging in
+    .methods.comparePassword =  function(candidatePassword, cb){
+        bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+            if (err) return cb(err);
+            cb(null, isMatch);
+    });
+    });

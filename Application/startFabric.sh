@@ -21,6 +21,7 @@ rm -rf TodoBackend/wallet/*
 # launch network; create channel and join peer to channel
 exec > >(tee -i $PWD/logfile.txt)
 exec 2>&1
+sudo service docker start
 pushd ../ApplicationNetwork
 ./network.sh down
 ./network.sh up createChannel -ca -s couchdb
