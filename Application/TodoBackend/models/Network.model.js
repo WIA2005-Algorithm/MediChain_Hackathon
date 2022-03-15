@@ -17,7 +17,8 @@ export const Block_Network = mongoose.model(
             },
             required: [true, 'Network Name cannot be empty'],
             trim: true,
-            index: true
+            index: true,
+            unique: true
         },
         NetID: {
             type: String,
@@ -26,12 +27,13 @@ export const Block_Network = mongoose.model(
                 message: props => `${props.value} is not a valid network ID!\nA valid network ID contains atleast 5 characters with no spaces, no special characters in the beginning or end. \nAllowed special characters include 'underscore' and 'dot'`
             },
             required: [true, 'Network ID cannot be empty'],
-            trim: true},
+            trim: true
+        },
         Address: {
             type: String,
             validate: {
                 validator: (v)=> /^[a-vx-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/.test(v),
-                message: props => `${props.value} is not a valid organisation address!\nFor valid blockchain address please remove http|https:// and www., if any`
+                message: props => `${props.value} is not a valid network address!\nFor valid address please remove http|https:// and www., if any`
             },
             required: [true, "Network Address cannot be empty"],
             trim: true
