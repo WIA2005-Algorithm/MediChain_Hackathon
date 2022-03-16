@@ -7,7 +7,7 @@ import { Box } from '@mui/system';
 import { ExpandCircleDown} from '@mui/icons-material';
 import { NetStatus, SectionContainer } from '../StyledComponents';
 import NetworkImage from '../../static/images/NetworkImg.svg'
-import { Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import EnhancedTable from './organizationTable';
 
 function NothingYet(props) {
@@ -86,9 +86,11 @@ function NetworkAvailable() {
                 </Typography>
             </Box>
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+               <Link to={`${response.Name}`}>
                <IconButton size='large' sx={{color: 'text.primary'}}>
                    <ExpandCircleDown sx={{transform: 'rotate(-90deg)'}}/>
                </IconButton>
+               </Link>
             </div>
         </SectionContainer>
     )

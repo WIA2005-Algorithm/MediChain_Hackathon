@@ -19,7 +19,7 @@ export function generateNetworkFiles(execStr, NetworkName) {
     trigger();
     shell.exec(`./generateNetwork.sh ${execStr}`, (code) => {
         if(code != "0")
-        setNetworkStatus(NetworkName, {code: 500, message: "Failed", description: "Failed to generate fabric network"})
+        setNetworkStatus(NetworkName, {code: 500, message: "Failed to start", description: "Failed to generate fabric network"})
         .then(()=>console.log("Status changed"))
         .catch((err)=> console.log(err.message));
         else
@@ -36,7 +36,7 @@ function StartNetwork(NetworkName) {
         trigger();
         shell.exec(`echo "${PASSWORD}" | sudo -S "./startFabric.sh"`, function(code) {
             if(code != "0")
-            setNetworkStatus(NetworkName, {code: 500, message: "Failed", description: "Failed to start the fabric network, files were generated successfully"})
+            setNetworkStatus(NetworkName, {code: 500, message: "Failed to start", description: "Failed to start the fabric network, files were generated successfully"})
             .then(()=>console.log("Status changed"))
             .catch((err)=> console.log(err.message));
             else
@@ -57,7 +57,9 @@ export function StopNetwork(NetworkName) {
     shell.pushd(`${ROOT_APP_DIR}/Application/`)
     trigger();
     shell.exec(`echo "${PASSWORD}" | sudo -S "./networkDown.sh"`, function(code) {
-        if(code == "0")
+        if(code != "0")
+        setNetworkStatus(NetworkName, {code: 400, message: "Failed to Stop", description: "Fabric Network has failed stopped successfully"});
+        else
         setNetworkStatus(NetworkName, {code: 0, message: "Stopped", description: "Fabric Network is stopped successfully"})
         .then(()=>console.log("Status changed"))
         .catch((err)=> console.log(err.message));

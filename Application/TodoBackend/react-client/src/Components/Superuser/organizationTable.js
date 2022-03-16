@@ -1,6 +1,5 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
-import { lighten, alpha, darken } from '@mui/material/styles';
+import {alpha} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -19,7 +18,6 @@ import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useParams } from 'react-router-dom';
@@ -27,7 +25,7 @@ import { deleteOrganization, getNetworkExists, startNetwork, stopNetwork } from 
 import { Alert, Avatar, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from '@mui/material';
 import { AddCircle } from '@mui/icons-material';
 import emptyTable from '../../static/images/emptyTable.png'
-import { NetStatus, Status } from '../StyledComponents';
+import { Status } from '../StyledComponents';
 
 function createData(objID, name, id, admin, state, country, createAt) {
   return {
@@ -165,26 +163,46 @@ const EnhancedTableToolbar = (props) => {
   const { numSelected, selected, rows, setRows, setSelected, network } = props;
   const [openDialog, setOpenDialog] = React.useState(false);
   const [completedDeletion, setCompletedDeletion] = React.useState(false);
-  const [pending, setPending] = React.useState(network.Status);
+  const [pending, setPending] = React.useState(network.Status || {code: 300, message: "Pending"});
 
   const handleClose = () => {
+    if(pending.code !== 300){
       setCompletedDeletion(true);
       setOpenDialog(!openDialog);
+    }
   }
-  const toggleNetwork = () => {
+  const toggleNetwork = async () => {
+      let status = pending;
+      console.log(pending);
       setPending({code: 300, message: "Pending"});
-      startNetwork(network.Name).then((res)=>{
-        console.log(res.data.Status)
-        setPending(res.data.Status);
-      })
-      .catch((e)=> console.log(e));
+      switch (status.code) {
+        case 0:
+        case 500:
+          await startNetwork(network.Name).then((res)=>{
+            setPending(res.data.Status);
+          })
+          .catch((e)=> console.log(e));
+          break;
+        case 200:
+        case 400:
+          await stopNetwork(network.Name).then((res)=>{
+            setPending(res.data.Status);
+          })
+          .catch((e)=> console.log(e));
+          break;
+        default:
+          setPending(status);
+          break;
+      }
   }
   const deleteSelected = async () => {
     setCompletedDeletion(false);
-    var temprows = rows.map((x) => x);
-    await stopNetwork(network.Name).then(()=>{
-      setPending({code: 300, message: "Pending"});
+    setPending({code: 300, message: "Pending"});
+    await stopNetwork(network.Name).then((res)=>{
+      console.log(res.data);
+      setPending(res.data.Status);
     })
+    var temprows = rows.map((x) => x);
     for (let k = 0; k < selected.length; k++) {
         const org = selected[k];
         let deleted = await deleteOrganization(network.Name, org);
@@ -270,15 +288,15 @@ const EnhancedTableToolbar = (props) => {
         <>
         <Tooltip title="Start/Stop Network">
           <span style={{minWidth: 'fit-content' }}>
+          {pending.code === 300 && <Status state={setPending} />}
           <LoadingButton
               variant="contained"
-              color={pending.code===200?'success': pending.code===500? 'error': 'primary'}
+              color={pending.code===200?'success': pending.code===500 || pending.code===400? 'error': 'primary'}
               loading={pending.code===300}
-              disabled={rows.length===0 || pending.code===300}
-              sx={{fontWeight: 'bolder'}}
+              disabled={(pending.code!==500 && pending.code!==400) && (rows.length===0 || pending.code===300)}
+              sx={{fontWeight: 'bolder', ":hover": {bgcolor: 'primary.main', color: 'text.reverse'}}}
               onClick={toggleNetwork}
             >
-             {pending.code === 300 && <Status state={setPending} />}
             {pending.message}
             </LoadingButton>
           </span>
@@ -309,7 +327,6 @@ export default function EnhancedTable({nav, setNav}) {
   const [rows, setrows] = React.useState([]);
   let networkExists = async () => {
     let res = await getNetworkExists(networkName);
-    // console.log(res.data);
     if(res.data.network==undefined)
     {
         setNetwork(res.data);

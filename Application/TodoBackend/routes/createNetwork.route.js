@@ -62,7 +62,7 @@ router.post('/network/start', (req, res) => {
                 execution+=`-org ${hosp.Name} ${hosp.AdminID} ${hosp.Password} "${hosp.Country}" "${hosp.State}" "${hosp.Location}" ${hosp.P0PORT} ${hosp.CAPORT} ${hosp.COUCHPORT} `;
             });
             generateNetworkFiles(execution, network.Name);
-            res.status(200).json({message: "Request to start network was successfull", Status: network.Status});  
+            res.status(200).json({message: "Request to start network was successfull", Status: {code: 300, message: "Pending"}});  
         }
     })
 })
@@ -75,9 +75,9 @@ router.post('/network/stop', (req, res) => {
         }
         else{
             if(network.Status.code == 0 || network.Status.code == 300)
-            return res.status(200).json({status: network.Status.message, message: network.Status.description});
+            return res.status(200).json({Status: network.Status, message: network.Status.description});
             StopNetwork(req.body.networkName);
-            res.status(200).json({message: "Request to stop the network was successfull"});  
+            res.status(200).json({message: "Request to stop the network was successfull", Status: {code: 300, message: "Pending"}});  
         }
     })
 })

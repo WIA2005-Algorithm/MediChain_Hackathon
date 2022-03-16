@@ -45,10 +45,12 @@ const getDesignTokens = (mode) => ({
         ? {
             primary: '#000',
             secondary: '#A4A4A4',
+            reverse: '#fff'
           }
         : {
             primary: '#fff',
             secondary: '#C4C4C4',
+            reverse: '#000'
           }),
     },
   },
