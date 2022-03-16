@@ -19,12 +19,13 @@ import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { useParams } from 'react-router-dom';
+import { Link, Route, Routes, useParams } from 'react-router-dom';
 import { deleteOrganization, getNetworkExists, startNetwork, stopNetwork } from '../../APIs/Superuser/network.api';
 import { Alert, Avatar, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from '@mui/material';
 import { AddCircle } from '@mui/icons-material';
 import emptyTable from '../../static/images/emptyTable.png'
 import { Status, TransitionsSnackbar } from '../StyledComponents';
+import FullScreenDialog from './CreateOrganizationForm';
 
 function createData(objID, name, id, admin, state, country, createAt) {
   return {
@@ -309,12 +310,14 @@ const EnhancedTableToolbar = (props) => {
           </span>
         </Tooltip>
         <Tooltip title="Add Hospital">
+           <Link to='new'>
            <IconButton
               variant="contained"
               sx={{ fontWeight: 'bolder', minWidth: 'fit-content', ml: 1 }}
             >
             <AddCircle sx={{color: 'text.primary', width: '30px', height: '30px'}}/>
             </IconButton>
+           </Link>
         </Tooltip>
         </>
       )}
@@ -322,44 +325,36 @@ const EnhancedTableToolbar = (props) => {
   );
 };
 
-export default function EnhancedTable({nav, setNav}) {
+function EnhancedTable({nav, setNav, networkName, network}) {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('fullName');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const {networkName} = useParams();
-  const [network, setNetwork] = React.useState(false);
   const [rows, setrows] = React.useState([]);
-  const networkExists = React.useCallback(async () => {
-    let res = await getNetworkExists(networkName);
-    if(res.data.network===undefined)
-    {
-        setNetwork(res.data);
-        let columns = [];
-        res.data.Organizations.forEach(org => {
-          let date = new Date(org.createdAt);
-          columns.push(createData(
-              org._id,
-              org.FullName,
-              org.Name,
-              org.AdminID,
-              org.State,
-              org.Country,
-              `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}`
-          ))
-        })
-        console.log(columns);
-        setrows(columns);
-    }
-  }, [networkName]);
   React.useEffect(() => {
-      networkExists();
-  }, [networkExists]);
+    if(network!==false){
+      let columns = [];
+      network.Organizations.forEach(org => {
+        let date = new Date(org.createdAt);
+        columns.push(createData(
+            org._id,
+            org.FullName,
+            org.Name,
+            org.AdminID,
+            org.State,
+            org.Country,
+            `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}`
+        ))
+      })
+      console.log(columns);
+      setrows(columns);
+  }
+  }, [network]);
   React.useEffect(() => {
     setNav({...nav, networkName: networkName});
-}, [networkName]);  
+  }, [networkName]); 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -518,4 +513,24 @@ export default function EnhancedTable({nav, setNav}) {
       />
     </Box>
   );
+}
+
+export default function OrganizationTables({nav, setNav}) {
+  const {networkName} = useParams();
+  const [network, setNetwork] = React.useState(false);
+  const networkExists = React.useCallback(async () => {
+  let res = await getNetworkExists(networkName);
+    if(res.data.network===undefined)
+    setNetwork(res.data);
+  }, [networkName]);
+  React.useEffect(() => {
+      networkExists();
+  }, [networkExists]); 
+
+  return(
+    <Routes>
+      <Route path='/' element={<EnhancedTable nav={nav} setNav={setNav} network={network} networkName={networkName}/>}/>
+      <Route path='/new' element={<FullScreenDialog />}/>
+    </Routes>
+  )
 }
