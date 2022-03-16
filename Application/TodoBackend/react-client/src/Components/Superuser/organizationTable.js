@@ -11,7 +11,6 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
@@ -25,7 +24,7 @@ import { deleteOrganization, getNetworkExists, startNetwork, stopNetwork } from 
 import { Alert, Avatar, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from '@mui/material';
 import { AddCircle } from '@mui/icons-material';
 import emptyTable from '../../static/images/emptyTable.png'
-import { Status } from '../StyledComponents';
+import { Status, TransitionsSnackbar } from '../StyledComponents';
 
 function createData(objID, name, id, admin, state, country, createAt) {
   return {
@@ -164,11 +163,15 @@ const EnhancedTableToolbar = (props) => {
   const [openDialog, setOpenDialog] = React.useState(false);
   const [completedDeletion, setCompletedDeletion] = React.useState(false);
   const [pending, setPending] = React.useState(network.Status || {code: 300, message: "Pending"});
+  const [alert, setAlert] = React.useState({open: false, Transition: Slide, message: ""});
 
   const handleClose = () => {
     if(pending.code !== 300){
       setCompletedDeletion(true);
       setOpenDialog(!openDialog);
+    }
+    else{
+      setAlert({...alert, open: true, message: "Process is already running..Please wait !"})
     }
   }
   const toggleNetwork = async () => {
@@ -180,6 +183,7 @@ const EnhancedTableToolbar = (props) => {
         case 500:
           await startNetwork(network.Name).then((res)=>{
             setPending(res.data.Status);
+            setAlert({...alert, open: true, message: res.data.message})
           })
           .catch((e)=> console.log(e));
           break;
@@ -187,6 +191,7 @@ const EnhancedTableToolbar = (props) => {
         case 400:
           await stopNetwork(network.Name).then((res)=>{
             setPending(res.data.Status);
+            setAlert({...alert, open: true, message: res.data.message})
           })
           .catch((e)=> console.log(e));
           break;
@@ -216,6 +221,7 @@ const EnhancedTableToolbar = (props) => {
     setSelected([]);
     console.log(temprows);
     setRows(temprows.map((x)=>x));
+    setAlert({...alert, open: true, message: "Successfully Deleted Hospital Organizations"})
     handleClose();
   }
 
@@ -257,7 +263,7 @@ const EnhancedTableToolbar = (props) => {
             </>}
         </DialogActions>
       </Dialog>
-
+      <TransitionsSnackbar state={alert} setState={setAlert}/>
       {numSelected > 0 ? (
         <Typography
           sx={{ flex: '1 1 100%' }}
@@ -280,12 +286,13 @@ const EnhancedTableToolbar = (props) => {
 
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton onClick={()=> handleClose()}>
+          <IconButton onClick={handleClose}>
             <DeleteIcon sx={{color: 'text.primary'}}/>
           </IconButton>
         </Tooltip>
       ) : (
         <>
+        <Typography sx={{minWidth: 'fit-content', mr: 2, fontWeight: 'bold' }}>Network Status : </Typography>
         <Tooltip title="Start/Stop Network">
           <span style={{minWidth: 'fit-content' }}>
           {pending.code === 300 && <Status state={setPending} />}
@@ -325,37 +332,34 @@ export default function EnhancedTable({nav, setNav}) {
   const {networkName} = useParams();
   const [network, setNetwork] = React.useState(false);
   const [rows, setrows] = React.useState([]);
-  let networkExists = async () => {
+  const networkExists = React.useCallback(async () => {
     let res = await getNetworkExists(networkName);
-    if(res.data.network==undefined)
+    if(res.data.network===undefined)
     {
         setNetwork(res.data);
         let columns = [];
-        res.data.Organizations.map((org) => {
-            let date = new Date(org.createdAt);
-            columns.push(createData(
-                org._id,
-                org.FullName,
-                org.Name,
-                org.AdminID,
-                org.State,
-                org.Country,
-                `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}`
-            ))
+        res.data.Organizations.forEach(org => {
+          let date = new Date(org.createdAt);
+          columns.push(createData(
+              org._id,
+              org.FullName,
+              org.Name,
+              org.AdminID,
+              org.State,
+              org.Country,
+              `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}`
+          ))
         })
         console.log(columns);
         setrows(columns);
     }
-}
+  }, [networkName]);
   React.useEffect(() => {
       networkExists();
-  }, []);
-  React.useEffect(()=>{
-      console.log(selected);
-  }, [selected]);
+  }, [networkExists]);
   React.useEffect(() => {
     setNav({...nav, networkName: networkName});
-}, [setNav]);  
+}, [networkName]);  
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');

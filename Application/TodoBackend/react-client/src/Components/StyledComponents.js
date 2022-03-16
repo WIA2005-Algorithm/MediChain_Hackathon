@@ -1,7 +1,7 @@
 import { Badge, CircularProgress, Slide, Snackbar, Typography } from '@mui/material';
 import { styled} from '@mui/system';
 import logo from "../static/images/Logo.png";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, forwardRef } from "react";
 import { getNetworkStatus } from '../APIs/Superuser/network.api.js';
 
 export const SectionContainer = styled('div')(({ theme }) => ({
@@ -50,29 +50,33 @@ export const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-export function TransitionsSnackbar(props) {
-  const [state, setState] = useState({
-    open: true,
-    Transition: Slide,
-  });
-
+export function TransitionsSnackbar({state, setState}) {
   const handleClose = () => {
     setState({
       ...state,
       open: false,
+      message: ""
     });
   };
 
   return (
-    <div>
       <Snackbar
         open={state.open}
         onClose={handleClose}
         TransitionComponent={state.Transition}
-        message={props.message}
+        message={state.message}
         key={state.Transition.name}
+        ContentProps={{
+          sx: {
+            bgcolor: 'primary.main',
+            color: 'text.reverse',
+            backgroundImage: 'none',
+            border: '1px solid',
+            borderColor: 'primary.main',
+            fontWeight: 'bold'
+          }
+        }}
       />
-    </div>
   );
 }
 
@@ -102,3 +106,7 @@ export function NetStatus(props){
     </Typography>
     )
 }
+
+export const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});

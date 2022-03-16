@@ -8,7 +8,7 @@ import { ExpandCircleDown} from '@mui/icons-material';
 import { NetStatus, SectionContainer } from '../StyledComponents';
 import NetworkImage from '../../static/images/NetworkImg.svg'
 import { Link, Route, Routes } from 'react-router-dom';
-import EnhancedTable from './organizationTable';
+import OrganizationTables from './organizationTable';
 
 function NothingYet(props) {
     return (
@@ -35,7 +35,7 @@ function NetworkAvailable() {
         console.log(res);
         setResponse({...res.data, createdAt: `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}, ${date.getFullYear()}`});
         setpending(res.data.Status)
-        setPromise(true);
+        setPromise(()=>true);
     }, []);
     useEffect(() => {
         fetchNetworkDetails();        
@@ -123,7 +123,7 @@ export default function NetworkPage(props){
     return (    
         <Box sx={{display: 'flex', flexDirection: 'column'}}>
             <Routes>
-            <Route path='/:networkName' element={<EnhancedTable nav={props.nav} setNav={props.setNav}/>}/>
+            <Route path='/:networkName/*' element={<OrganizationTables nav={props.nav} setNav={props.setNav}/>}></Route>
             <Route path='/' element={<Load openForm={enableForm} setOpenForm={setEnableForm}/>} />
             </Routes>
         </Box>

@@ -10,31 +10,30 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
-import Slide from '@mui/material/Slide';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Transition } from '../StyledComponents';
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
-export default function FullScreenDialog() {
-  const [open, setOpen] = React.useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
+export default function FullScreenDialog(props) {
+  const navigate = useNavigate();
+  const {networkName} = useParams();
   const handleClose = () => {
-    setOpen(false);
+    navigate(`/superuser/networks/${networkName}/`);
   };
 
   return (
       <Dialog
         fullScreen
-        open={open}
+        open={true}
         onClose={handleClose}
         TransitionComponent={Transition}
+        PaperProps={{
+          sx: {
+              bgcolor: 'background.default',
+              backgroundImage: 'none'
+          }
+        }}
       >
-        <AppBar sx={{ position: 'relative' }}>
+        <AppBar sx={{ position: 'relative', bgcolor: 'primary.sectionContainer', backgroundImage: 'none' }}>
           <Toolbar>
             <IconButton
               edge="start"
@@ -47,7 +46,7 @@ export default function FullScreenDialog() {
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
               Sound
             </Typography>
-            <Button autoFocus color="inherit" onClick={handleClose}>
+            <Button color="inherit" onClick={handleClose}>
               save
             </Button>
           </Toolbar>

@@ -60,7 +60,7 @@ const ColorModeContext = React.createContext();
 function App() {
   const [navigation, setNavigation] = React.useState({});
   const isNightMode = () => localStorage.getItem(btoa('NIGHT_MODE'));
-  const [colorMode, setColorMode] = React.useState(isNightMode()|| 'light')
+  const [colorMode, setColorMode] = React.useState(isNightMode()|| 'dark')
   const ChangeColorMode = () => {
     const newMode = colorMode=='light'? 'dark': 'light';
     localStorage.setItem(btoa('NIGHT_MODE'), newMode);
