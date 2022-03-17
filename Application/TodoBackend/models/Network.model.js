@@ -86,8 +86,13 @@ export const Organizations = mongoose.model(
             required: [true, "Admin username is required"], 
             trim: true
         },
+        // ^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8}$
         Password: {
             type: String,
+            validate: {
+                validator: (v)=> /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/.test(v),
+                message: props => `${props.value} is not a valid password!\nA valid username contains atleast 8 characters with 1 uppercase character, 1 lowercase character, 1 special character (except underscore) and 1 digit with no restrictions on dot character`
+            },
             required: [true, "Admin password is required"]
         },
         // Certificate Issuing Country
@@ -114,7 +119,7 @@ export const Organizations = mongoose.model(
             type: String, 
             validate: {
                 validator: (v)=> /^[a-zA-z ,.'-]+$/.test(v),
-                message: props => `${props.value} is not a valid city!\nA valid city name contains only alphabets and spaces`
+                message: props => `${props.value} is not a valid location!\nA valid location name (City) contains only alphabets and spaces`
             },
             trim: true
         },

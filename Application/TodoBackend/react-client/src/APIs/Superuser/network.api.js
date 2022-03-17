@@ -11,6 +11,17 @@ export const loginAuth = (username, password) => axios.post('/superuser/login', 
     address: networkAdd
   })
 
+  export const createOrganization = (networkName, fullName, id, adminID, password, country, state, location) => axios.post('/superuser/create/organization', {
+    networkName,
+    fullName,
+    id,
+    adminID,
+    password,
+    country,
+    state,
+    location
+  })
+
   export const startNetwork = (name) => axios.post('/superuser/network/start', {
     networkName: name
   });

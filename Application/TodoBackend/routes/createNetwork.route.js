@@ -22,12 +22,11 @@ router.post('/create/network', (req, res) => {
 router.post('/create/organization', (req, res) => {
     Block_Network.findOne({ Name: req.body.networkName }).exec(function(err, doc){
         if(!doc){
-            err = errors.network_not_found.withDetails("Did you create the blockchain network yet?");
+            err = errors.network_not_found.withDetails("Server couldn't recognize the blockchain network");
             res.status(err.status).json(new response.errorResponse(err));
         }
         else{
             const NetworkID = doc._id;
-            console.log(NetworkID);
             createOrganization(NetworkID, {
                 FullName: req.body.fullName,
                 Name: req.body.id,
@@ -107,7 +106,6 @@ router.get('/network/exists', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
-    console.log(req.body.username, req.body.password);
     Superuser.findOne({ username: req.body.username }, function(err, user) {
         if (!user){
             err = errors.invalid_auth.withDetails("Username/Password is incorrect");
