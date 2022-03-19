@@ -259,8 +259,8 @@ const EnhancedTableToolbar = (props) => {
         </DialogContent>
         <DialogActions>
         {!completedDeletion?<CircularProgress sx={{mr: 2, mb: 2}}/>: <>
-            <Button onClick={handleClose}>No</Button>
-          <Button onClick={deleteSelected}>Yes</Button>
+            <Button onClick={handleClose} sx={{fontWeight: 'bold'}}>No</Button>
+          <Button onClick={deleteSelected} sx={{fontWeight: 'bold'}}>Yes</Button>
             </>}
         </DialogActions>
       </Dialog>
@@ -302,7 +302,7 @@ const EnhancedTableToolbar = (props) => {
               color={pending.code===200?'success': pending.code===500 || pending.code===400? 'error': 'primary'}
               loading={pending.code===300}
               disabled={(pending.code!==500 && pending.code!==400) && (rows.length===0 || pending.code===300)}
-              sx={{fontWeight: 'bolder', ":hover": {bgcolor: 'primary.main', color: 'text.reverse'}}}
+              sx={{fontWeight: 'bolder'}}
               onClick={toggleNetwork}
             >
             {pending.message}
@@ -520,7 +520,7 @@ export default function OrganizationTables({nav, setNav}) {
   const [network, setNetwork] = React.useState(false);
   const networkExists = React.useCallback(async () => {
   let res = await getNetworkExists(networkName);
-    if(res.data.network===undefined)
+    if(!res.data.exists)
     setNetwork(res.data);
   }, [networkName]);
   React.useEffect(() => {
@@ -530,7 +530,7 @@ export default function OrganizationTables({nav, setNav}) {
   return(
     <Routes>
       <Route path='/' element={<EnhancedTable nav={nav} setNav={setNav} network={network} networkName={networkName}/>}/>
-      <Route path='/new' element={<FullScreenDialog />}/>
+      <Route path='/new' element={<FullScreenDialog callnetwork={networkExists} />}/>
     </Routes>
   )
 }

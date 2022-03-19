@@ -150,7 +150,7 @@ function CountrySelect() {
   );
 }
 
-export default function FullScreenDialog(props) {
+export default function FullScreenDialog({callnetwork}) {
   const navigate = useNavigate();
   const { networkName } = useParams();
   const handleClose = () => navigate(`/superuser/networks/${networkName}/`);
@@ -163,7 +163,6 @@ export default function FullScreenDialog(props) {
   const [loading, setLoading] = React.useState(false);
   const [pwVisible, setpwVisible] = React.useState(false);
   const GetVisibility = () => (pwVisible ? <Visibility /> : <VisibilityOff />);
-  const executeScroll = () => document.getElementById('response_alert')?.scrollIntoView(true); 
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
@@ -177,7 +176,10 @@ export default function FullScreenDialog(props) {
       data.get('country').trim(),
       data.get('state').trim(),
       data.get('location').trim())
-      .then(() => handleClose())
+      .then(() => {
+        callnetwork();
+        handleClose();
+      })
       .catch((e)=> e.response.data.DETAILS? setFormResponseAlert(e.response.data.DETAILS): setFormResponseAlert(`Failed to connect to the server. Check your internet connection`))
     .finally(()=>{
       setTimeout(() => {

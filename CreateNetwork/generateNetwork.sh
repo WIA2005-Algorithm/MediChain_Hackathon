@@ -100,9 +100,10 @@ while [[ $# -gt 0 ]]; do
       ORGANISATIONSADD+=(`echo "$2.$NETADD" | tr [:upper:] [:lower:]`)
       ADMIN+=("$3")
       PASSWORD+=("$4")
-      COUNTRY+=("$5")
-      STATE+=("$6")
-      LOCATION+=("$7")
+      COUNTRY+=(`echo ${5// /#{S\}}`)
+      STATE+=(`echo ${6// /#{S\}}`)
+      LOCATION+=(`echo ${7// /#{S\}}`)
+      echo $LOCATION > lol.html
       P0PORT+=("$8")
       CAPORT+=("$9")
       COUCHPORT+=("${10}")

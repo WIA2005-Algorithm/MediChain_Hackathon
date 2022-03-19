@@ -92,7 +92,7 @@ for i in "${!ORGANISATIONS[@]}"; do
             gsub(/\${country}/,country);
             gsub(/\${state}/,state);
             gsub(/\${location}/,location);
-         }2' $CURR/ca-server-template.yaml > $DIR/${SORG[$i]}/fabric-ca-server-config.yaml
+         }2' $CURR/ca-server-template.yaml | sed "s+#{S}+ +g" > $DIR/${SORG[$i]}/fabric-ca-server-config.yaml
   done
 
 total="#!/bin/bash \n"

@@ -101,7 +101,7 @@ router.get('/network/count', (_, res) => {
 
 router.get('/network/exists', (req, res) => {
     Block_Network.findOne({Name: req.query.networkName}).populate("Organizations").exec(function(_, network){
-        return res.status(200).json(network? network: {network: false});
+        return res.status(200).json(network? network: {exists: "Network Doesn't Exists"});
     })
 })
 
