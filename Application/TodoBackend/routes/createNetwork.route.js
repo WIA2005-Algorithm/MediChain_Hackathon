@@ -1,11 +1,11 @@
 'use-strict';
-import { query, Router } from 'express';
+import { Router } from 'express';
 import errors, { response, ApiError } from "../Utils/Errors.js";
 import { createNetwork, createOrganization } from '../controllers/CreateNetwork.controller.js';
 import { Block_Network, Organizations, Superuser } from '../models/Network.model.js';
 import { generateNetworkFiles, StopNetwork } from "../Utils/execute.js";
+import { getAccessToken } from '../server_config.js';
 const router = Router();
-
 router.post('/create/network', (req, res) => {
     createNetwork({
         Name: req.body.name,
@@ -81,7 +81,7 @@ router.post('/network/stop', (req, res) => {
     })
 })
 
-router.get('/network/status', (req, res) => {
+router.get('/network/status', (_, res) => {
     Block_Network.findOne({}, 'Status').exec(function(_, status){
         if(!status)
         res.status(400).json({code: 300, message: "Pending", description: "Pending status"})
@@ -116,7 +116,10 @@ router.post('/login', (req, res) => {
                 const err = errors.invalid_auth.withDetails("Username/Password is incorrect");
                 return res.status(err.status).json(new response.errorResponse(err));
             }
-            return res.status(200).json({message: "Authentication was successfull"});
+            const session = getAccessToken({username: user.username, role: "superadmin"});
+            Superuser.findByIdAndUpdate(user._id, {refreshToken: session.refreshToken})
+            .then(()=>res.status(200).json(session))
+            .catch(()=> res.status(500));
         });
     });
 })

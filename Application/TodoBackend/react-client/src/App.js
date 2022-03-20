@@ -6,8 +6,9 @@ import Header from './Components/Superuser/header';
 import { Container, CssBaseline } from '@mui/material';
 import NetworkPage from './Components/Superuser/networksPage';
 import Middle from './Components/Superuser/middle';
-import { BrowserRouter as Router, Routes, Route, useParams } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from './Components/Superuser/Login';
+import { AuthVerify, useAuth } from './Components/UserAuth';
 
 const getDesignTokens = (mode) => ({
   typography: {
@@ -60,6 +61,7 @@ const getDesignTokens = (mode) => ({
 
 const ColorModeContext = React.createContext();
 function App() {
+  const [isLogged, login, logout] = useAuth();
   const [navigation, setNavigation] = React.useState({});
   const isNightMode = () => localStorage.getItem(btoa('NIGHT_MODE'));
   const [colorMode, setColorMode] = React.useState(isNightMode()|| 'dark')
@@ -75,14 +77,14 @@ function App() {
     <CssBaseline />
     <Router>
       <Routes>
-        <Route path="/superuser/login" element={<Login/>} />
-        <Route path="/superuser/networks/*" element={<>
+        {!isLogged && (<Route path="/superuser/login" element={<Login setLogin={login}/>} />)}
+        {isLogged && <Route path="/superuser/networks/*" element={<>
         <Header newMode={ChangeColorMode} mode={colorMode}/>
         <Container>
           <Middle nav={navigation}/>
           <NetworkPage nav={navigation} setNav={setNavigation}/>
-        </Container>
-        </>} />
+        </Container></>} />}
+        <Route path="/superuser/*" element={<Navigate to={isLogged? "/superuser/networks" : "/superuser/login"} />}/>
       </Routes>
     </Router>
     </ThemeProvider>

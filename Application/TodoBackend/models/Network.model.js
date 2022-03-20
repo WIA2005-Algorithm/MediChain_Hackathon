@@ -163,7 +163,8 @@ export const Organizations = mongoose.model(
 
 const SuperUserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    refreshToken: {type: String}
 }, {timestamps: true});
 
 // function called before saving

@@ -1,5 +1,9 @@
 import axios from "axios";
 
+export const updateToken = (token) => axios.post('/update-token', {
+  refreshToken: token
+});
+
 export const loginAuth = (username, password) => axios.post('/superuser/login', {
     username: username,
     password: password
@@ -25,6 +29,7 @@ export const loginAuth = (username, password) => axios.post('/superuser/login', 
   export const startNetwork = (name) => axios.post('/superuser/network/start', {
     networkName: name
   });
+
   export const stopNetwork = (name) => axios.post('/superuser/network/stop', {
     networkName: name
   });

@@ -12,7 +12,8 @@ import { loginAuth } from "../../APIs/Superuser/network.api.js";
 import LoadingButton from '@mui/lab/LoadingButton'
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from "react-router-dom";
-export default function Login() {
+import { login } from '../UserAuth.js';
+export default function Login({setLogin}) {
   let navigate = useNavigate();
   const [pwVisible, setpwVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -23,7 +24,8 @@ export default function Login() {
     setLoading(true);
     const data = new FormData(event.currentTarget);
     loginAuth(data.get('username').trim(), data.get('password'))
-    .then(function (response) {
+    .then((r)=> {
+      setLogin(r.data);
       navigate(`/superuser/networks`);
     })
     .catch((e)=> e.response.data.DETAILS? setError(e.response.data.DETAILS): setError(`Failed to connect to the server. Check your internet connection`))
