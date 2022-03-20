@@ -18,3 +18,5 @@ node_modules/
 build
 package-lock.json
 /ApplicationNetwork
+/bin
+/config
