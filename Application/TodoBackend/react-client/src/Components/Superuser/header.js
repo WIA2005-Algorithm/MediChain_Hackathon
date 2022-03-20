@@ -1,15 +1,18 @@
 
-import { AppBar, Avatar, IconButton, Toolbar, Tooltip, Typography } from '@mui/material'
+import { AppBar, Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material'
 import {Logo, StyledBadge} from '../StyledComponents.js'
 import { Box } from '@mui/system';
-import { Shield, DarkMode, DarkModeOutlined, DoubleArrow} from '@mui/icons-material';
+import { Shield, DarkMode, DarkModeOutlined, DoubleArrow, Logout} from '@mui/icons-material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import profile from "../../static/images/profile.png";
+import { useState } from 'react';
 
-export default function Header(props) {
-    function GetMode() {
-        return props.mode==='dark'? <DarkMode/>:<DarkModeOutlined/>;
-    }
+export default function Header({mode, newMode, logout, user}) {
+    const GetMode = () => mode==='dark'? <DarkMode/>:<DarkModeOutlined/>;
+    const handleClick = (event) => setAnchorEl(event.currentTarget)
+    const [anchorEl, setAnchorEl] = useState(null);
+    const handleClose = () => setAnchorEl(null)
+    const open = Boolean(anchorEl);
     return(
         <AppBar position="static" sx={{bgcolor: 'primary.sectionContainer', backgroundImage: 'none', padding: '7px 0px', color: 'text.primary'}}>
         <Toolbar variant="dense">
@@ -36,12 +39,12 @@ export default function Header(props) {
             <Typography  component="small" fontWeight='bold' sx={{ml: 1}}>Root Admin</Typography>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{color: 'primary.main'}}>
-          <Tooltip title={`Change to ${props.mode==='light'?'Dark':'Light'} Mode`} >
+          <Tooltip title={`Change to ${mode==='light'?'Dark':'Light'} Mode`} >
           <IconButton 
           size="large" 
           color="inherit" 
           sx={{padding: 1, mr: 1}} 
-          onClick={()=> props.newMode()}>
+          onClick={()=> newMode()}>
              <GetMode/>
             </IconButton>
           </Tooltip>
@@ -67,14 +70,63 @@ export default function Header(props) {
            </Tooltip>
            <Tooltip title='User'>
            <IconButton
+              onClick={handleClick}
               size="large"
               edge="end"
               aria-label="User"
-              color="inherit">
+              color="inherit"
+              aria-controls={open ? 'account-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? 'true' : undefined}>
             <Avatar alt='Superuser' src={profile}/>
             </IconButton>
            </Tooltip>
           </Box>
+          <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            '& .MuiAvatar-root': {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            '&:before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={handleClose}>
+          <Avatar sx={{bgcolor: 'primary.main'}}>S</Avatar> {user && user.username}
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={()=> logout()}>
+          <ListItemIcon sx={{color: 'text.primary'}}>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
         </Toolbar>
       </AppBar>
     )

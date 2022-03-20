@@ -8,7 +8,7 @@ import NetworkPage from './Components/Superuser/networksPage';
 import Middle from './Components/Superuser/middle';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from './Components/Superuser/Login';
-import { AuthVerify, useAuth } from './Components/UserAuth';
+import { useAuth } from './Components/UserAuth';
 
 const getDesignTokens = (mode) => ({
   typography: {
@@ -61,12 +61,12 @@ const getDesignTokens = (mode) => ({
 
 const ColorModeContext = React.createContext();
 function App() {
-  const [isLogged, login, logout] = useAuth();
+  const [isLogged, login, logout, user] = useAuth();
   const [navigation, setNavigation] = React.useState({});
   const isNightMode = () => localStorage.getItem(btoa('NIGHT_MODE'));
   const [colorMode, setColorMode] = React.useState(isNightMode()|| 'dark')
   const ChangeColorMode = () => {
-    const newMode = colorMode=='light'? 'dark': 'light';
+    const newMode = colorMode==='light'? 'dark': 'light';
     localStorage.setItem(btoa('NIGHT_MODE'), newMode);
     setColorMode(newMode);
   };
@@ -79,7 +79,7 @@ function App() {
       <Routes>
         {!isLogged && (<Route path="/superuser/login" element={<Login setLogin={login}/>} />)}
         {isLogged && <Route path="/superuser/networks/*" element={<>
-        <Header newMode={ChangeColorMode} mode={colorMode}/>
+        <Header newMode={ChangeColorMode} mode={colorMode} logout={logout} user={user}/>
         <Container>
           <Middle nav={navigation}/>
           <NetworkPage nav={navigation} setNav={setNavigation}/>

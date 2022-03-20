@@ -21,7 +21,7 @@ const {
 } = process.env;
 
 export function getAccessToken(user, refresh=true) {
-    const token = jwt.sign(user, ACCESS_TOKEN, {expiresIn: '15s' });
+    const token = jwt.sign(user, ACCESS_TOKEN, {expiresIn: '10m' });
     if(refresh)
     return {accessToken: token, refreshToken: jwt.sign(user,REFRESH_ACCESS_TOKEN)};
     return token;

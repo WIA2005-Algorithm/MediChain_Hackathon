@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { updateToken } from '../APIs/Superuser/network.api';
-
+let _token = JSON.parse(localStorage.getItem('REACT_TOKEN_AUTH') || '{}') || null;
+const isToken = () => _token?.accessToken;
 /*
 ** @info: This utility function parses the jwt token extracting the exp, iat and user information
 ** @param: accessToken => Pass the access token inside this function
@@ -23,7 +24,7 @@ const isExpired = (jwtaccessToken) => {
   if (!jwtaccessToken) 
       return null
   const jwt = parseJwt(jwtaccessToken);
-  return jwt && jwt.exp && jwt.exp * 1000 < Date.now() || null;
+  return (jwt && jwt.exp && jwt.exp * 1000 < Date.now()) || null;
 };
 
 /*
@@ -34,6 +35,7 @@ const isExpired = (jwtaccessToken) => {
 const setToken = (token) => {
   if (token && token.accessToken) localStorage.setItem('REACT_TOKEN_AUTH', JSON.stringify(token)) 
   else localStorage.removeItem('REACT_TOKEN_AUTH');
+  _token = token;
   return isLoggedIn();
 };
 
@@ -43,20 +45,18 @@ const setToken = (token) => {
 ** @return: true or false
 */
 const getToken = async () => {
-  let _token = JSON.parse(localStorage.getItem('REACT_TOKEN_AUTH') || '{}') || null;
-  if (!_token || !_token.accessToken) 
+  if (!isToken()) 
       return null;
-  console.log(isExpired(_token.accessToken));
   if (isExpired(_token.accessToken)) {
       _token = await updateToken(_token.refreshToken)
       .then(r=>r.data).catch(e=>null)
   }
-  console.log(_token);
   return _token;
 };
 
 const isLoggedIn = () => {
-  const _token = JSON.parse(localStorage.getItem('REACT_TOKEN_AUTH') || '{}') || null;
+  if (!isToken()) 
+  return false;
   if(isExpired(_token.accessToken)){
     setToken(null);
     return false;
@@ -64,25 +64,29 @@ const isLoggedIn = () => {
   return !!_token && !!_token.accessToken;
 };
 
+const getUser = () => {
+  if (!isToken()) return null;
+  return parseJwt(_token.accessToken);
+}
 export const useAuth = () => {
   const [isLogged, setIsLogged] = useState(isLoggedIn());
+  const [user, setReactUser] = useState();
   const login = newToken => setIsLogged(setToken(newToken));
-  const logout = () => {
-    setIsLogged(setToken(null));
-  };
-  const getLoggedStatus = useCallback(async ()=>{
-    const token = await getToken();
-    setIsLogged(setToken(token));
-  }, []);
+  const logout = () => setIsLogged(setToken(null));
+  const getLoggedStatus = useCallback(async ()=>setIsLogged(setToken(await getToken())), []);
+  
+  useEffect(() => {
+    setReactUser(getUser());
+  }, [isLogged]);
 
   useEffect(() => {
     let intervalID = setInterval(() => {
       getLoggedStatus();
       if(!isLogged)
       clearInterval(intervalID);
-    }, 3000);
+    }, 120000);
     return () => clearInterval(intervalID)
   }, [getLoggedStatus, isLogged]);
 
-  return [isLogged, login, logout]
+  return [isLogged, login, logout, user]
 };
