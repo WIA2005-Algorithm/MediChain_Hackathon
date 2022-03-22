@@ -177,7 +177,6 @@ const EnhancedTableToolbar = (props) => {
   }
   const toggleNetwork = async () => {
       let status = pending;
-      console.log(pending);
       setPending({code: 300, message: "Pending"});
       switch (status.code) {
         case 0:
@@ -525,12 +524,12 @@ export default function OrganizationTables({nav, setNav}) {
   }, [networkName]);
   React.useEffect(() => {
       networkExists();
-  }, [networkExists]); 
+  }, [networkExists, window.location.pathname]); 
 
   return(
     <Routes>
       <Route path='/' element={<EnhancedTable nav={nav} setNav={setNav} network={network} networkName={networkName}/>}/>
-      <Route path='/new' element={<FullScreenDialog callnetwork={networkExists} />}/>
+      <Route path='/new' element={<FullScreenDialog />}/>
     </Routes>
   )
 }

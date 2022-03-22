@@ -150,7 +150,7 @@ function CountrySelect() {
   );
 }
 
-export default function FullScreenDialog({callnetwork}) {
+export default function FullScreenDialog() {
   const navigate = useNavigate();
   const { networkName } = useParams();
   const handleClose = () => navigate(`/superuser/networks/${networkName}/`);
@@ -163,6 +163,11 @@ export default function FullScreenDialog({callnetwork}) {
   const [loading, setLoading] = React.useState(false);
   const [pwVisible, setpwVisible] = React.useState(false);
   const GetVisibility = () => (pwVisible ? <Visibility /> : <VisibilityOff />);
+  const bottomRef = React.useRef(null);
+  const scrollToBottom = () => {
+    console.log(bottomRef);
+    bottomRef.current.scrollIntoView({ behavior: "smooth" });
+  }
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
@@ -177,16 +182,18 @@ export default function FullScreenDialog({callnetwork}) {
       data.get('state').trim(),
       data.get('location').trim())
       .then(() => {
-        callnetwork();
         handleClose();
       })
-      .catch((e)=> e.response.data.DETAILS? setFormResponseAlert(e.response.data.DETAILS): setFormResponseAlert(`Failed to connect to the server. Check your internet connection`))
-    .finally(()=>{
-      setTimeout(() => {
-        setLoading(false);
-        setOpen(true);
-      }, 500);
-    });
+      .catch((e)=> {
+        e.response.data.DETAILS? setFormResponseAlert(e.response.data.DETAILS): setFormResponseAlert(`Failed to connect to the server. Check your internet connection`);
+        setTimeout(() => {
+          setLoading(false);
+          setOpen(true);
+        }, 200);
+        setTimeout(() => {
+          scrollToBottom();
+        }, 600);
+      });
   };
   return (
     <Dialog
@@ -439,6 +446,7 @@ export default function FullScreenDialog({callnetwork}) {
                 >
                   <b>{formResponseAlert}</b>
                 </Alert>
+                <div style={{ float:"left", clear: "both" }} ref={bottomRef}/>
               </Collapse>
             )}
           </Box>
