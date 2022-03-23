@@ -1,5 +1,4 @@
 import "./App.css";
-import * as React from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { amber } from "@mui/material/colors";
 import Header from "./Components/Superuser/header";
@@ -18,6 +17,7 @@ import {
     AddNewNotification,
     getAlertValues,
 } from "./Components/StyledComponents";
+import { createContext, useState } from "react";
 
 const getDesignTokens = (mode) => ({
     typography: {
@@ -83,14 +83,15 @@ const getDesignTokens = (mode) => ({
     },
 });
 
-const ColorModeContext = React.createContext();
+const ColorModeContext = createContext();
 function App() {
-    const [notis, setNotis] = React.useState([]);
-    const handleRemove = (id) => setNotis(notis.filter((el) => el.id != id));
+    const [notis, setNotis] = useState([]);
+    // Solved my problem of re-rendering here
+    const handleRemove = (id) => setNotis((n) => n.filter((el) => el.id != id));
     const [isLogged, login, logout, user] = useAuth();
-    const [navigation, setNavigation] = React.useState({});
+    const [navigation, setNavigation] = useState({});
     const isNightMode = () => localStorage.getItem(btoa("NIGHT_MODE"));
-    const [colorMode, setColorMode] = React.useState(isNightMode() || "dark");
+    const [colorMode, setColorMode] = useState(isNightMode() || "dark");
     const ChangeColorMode = () => {
         const newMode = colorMode === "light" ? "dark" : "light";
         localStorage.setItem(btoa("NIGHT_MODE"), newMode);
@@ -147,49 +148,6 @@ function App() {
                     </Routes>
                     <AddNewNotification notis={notis} Onremove={handleRemove} />
                 </Router>
-                <Button
-                    onClick={() =>
-                        setNotis([
-                            ...notis,
-                            getAlertValues(
-                                "info",
-                                "Request to start the network succeeded successfully",
-                                ""
-                            ),
-                        ])
-                    }
-                >
-                    Info
-                </Button>
-                <Button
-                    onClick={() =>
-                        setNotis([
-                            ...notis,
-                            getAlertValues(
-                                "error",
-                                "There was an error in starting the network",
-                                "Please wait for a moment then try again later"
-                            ),
-                        ])
-                    }
-                >
-                    Error
-                </Button>
-                <Button
-                    onClick={() =>
-                        setNotis([
-                            ...notis,
-                            getAlertValues(
-                                "success",
-                                "The network has been started successfully",
-                                "Please check the network status for more information.",
-                                false
-                            ),
-                        ])
-                    }
-                >
-                    Success
-                </Button>
             </ThemeProvider>
         </ColorModeContext.Provider>
     );

@@ -487,7 +487,7 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
         setSelected([]);
     };
 
-    const handleClick = (event, objID) => {
+    const handleClick = (_, objID) => {
         const selectedIndex = selected.indexOf(objID);
         let newSelected = [];
 
@@ -533,7 +533,11 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
         );
     else
         return (
-            <Box sx={{ width: "100%" }}>
+            <Box
+                sx={{
+                    width: "100%",
+                }}
+            >
                 <Box
                     sx={{
                         width: "100%",
@@ -541,6 +545,8 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
                         p: 2.5,
                         borderRadius: "12px",
                         bgcolor: "primary.sectionContainer",
+                        boxShadow:
+                            "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)",
                     }}
                 >
                     <EnhancedTableToolbar

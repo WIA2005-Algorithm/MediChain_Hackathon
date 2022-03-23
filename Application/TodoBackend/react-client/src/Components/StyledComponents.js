@@ -72,17 +72,12 @@ export function Status({ state, notis }) {
         if (code !== 300) {
             notis((prev) => [
                 ...prev,
-                {
-                    type:
-                        code === 200
-                            ? "success"
-                            : code === 0
-                            ? "info"
-                            : "error",
-                    mTitle: "Network Status From Server",
-                    mSubComp: `${res.data.message} the network`,
-                    autoRemove: code === 0 && false,
-                },
+                getAlertValues(
+                    code === 200 ? "success" : code === 0 ? "info" : "error",
+                    "Network Status From Server",
+                    `${res.data.message} the network`,
+                    code === 200 ? false : undefined
+                ),
             ]);
         }
         state(res.data);
