@@ -123,7 +123,7 @@ export default function NetworkPage(props){
     return (    
         <Box sx={{display: 'flex', flexDirection: 'column'}}>
             <Routes>
-            <Route path='/:networkName/*' element={<OrganizationTables nav={props.nav} setNav={props.setNav}/>}></Route>
+            <Route path='/:networkName/*' element={<OrganizationTables nav={props.nav} setNav={props.setNav} notis={props.notis}/>}></Route>
             <Route path='/' element={<Load openForm={enableForm} setOpenForm={setEnableForm}/>} />
             </Routes>
         </Box>

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -13,10 +13,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from "react-router-dom";
 export default function Login({setLogin}) {
   let navigate = useNavigate();
-  const [pwVisible, setpwVisible] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(undefined);
-  const [open, setOpen] = React.useState(false);
+  const [pwVisible, setpwVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(undefined);
+  const [open, setOpen] = useState(false);
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);

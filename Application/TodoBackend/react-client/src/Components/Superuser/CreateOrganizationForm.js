@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useRef } from 'react';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import AppBar from '@mui/material/AppBar';
@@ -35,7 +35,7 @@ import CountryCity from 'countrycitystatejson';
 import { createOrganization } from '../../APIs/Superuser/network.api';
 
 function CountrySelect() {
-  const [country, setCountry] = React.useState(undefined);
+  const [country, setCountry] = useState(undefined);
   const onCountryChange = (_, values) => {
     if (values === null) {
       setCountry(undefined);
@@ -155,15 +155,15 @@ export default function FullScreenDialog() {
   const { networkName } = useParams();
   const handleClose = () => navigate(`/superuser/networks/${networkName}/`);
   // OPEN OR CLOSE THE ALERT
-  const [open, setOpen] = React.useState(false);
-  const [openOrgDetails, setOpenOrgDetails] = React.useState(false);
-  const [openAdminDetails, setOpenAdminDetails] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [openOrgDetails, setOpenOrgDetails] = useState(false);
+  const [openAdminDetails, setOpenAdminDetails] = useState(false);
   // SET THE ERROR IN ALERT
-  const [formResponseAlert, setFormResponseAlert] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [pwVisible, setpwVisible] = React.useState(false);
+  const [formResponseAlert, setFormResponseAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [pwVisible, setpwVisible] = useState(false);
   const GetVisibility = () => (pwVisible ? <Visibility /> : <VisibilityOff />);
-  const bottomRef = React.useRef(null);
+  const bottomRef = useRef(null);
   const scrollToBottom = () => {
     console.log(bottomRef);
     bottomRef.current.scrollIntoView({ behavior: "smooth" });
