@@ -47,20 +47,42 @@ app.post("/api/update-token", (req, res) => {
                         return res
                             .status(err.status)
                             .json(new response.errorResponse(err));
-                    return res
-                        .status(200)
-                        .json({
-                            accessToken: getAccessToken(
-                                { username: user.username, role: user.role },
-                                false
-                            ),
-                            refreshToken: req.body.refreshToken,
-                        });
+                    return res.status(200).json({
+                        accessToken: getAccessToken(
+                            { username: user.username, role: user.role },
+                            false
+                        ),
+                        refreshToken: req.body.refreshToken,
+                    });
                 }
             );
         }
     );
 });
+
+export function authenticateUser(req, res, next) {
+    const authToken = req.headers.authorization;
+    if (authToken == null)
+        return res
+            .status(401)
+            .json(
+                new response.errorResponse(
+                    errors.invalid_auth.withDetails("null")
+                )
+            );
+    jwt.verify(authToken, ACCESS_TOKEN, (_, user) => {
+        if (!user)
+            return res
+                .status(401)
+                .json(
+                    new response.errorResponse(
+                        errors.invalid_permission.withDetails("null")
+                    )
+                );
+        req.user = user;
+        next();
+    });
+}
 
 assert(PORT, "Port is required");
 assert(HOST, "Host is required");

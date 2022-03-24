@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { updateToken } from "../APIs/Superuser/network.api";
-let _token =
-    JSON.parse(localStorage.getItem("REACT_TOKEN_AUTH") || "{}") || null;
+export let _token = JSON.parse(localStorage.getItem("REACT_TOKEN_AUTH") || "{}") || null;
 const isToken = () => _token?.accessToken;
 /*
  ** @info: This utility function parses the jwt token extracting the exp, iat and user information
