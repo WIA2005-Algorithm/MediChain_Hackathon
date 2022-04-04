@@ -84,8 +84,8 @@ ldap:
 
 affiliations:
    ${admin}:
-      - Author
-      - Writer
+      - Doctor
+      - Patient
 
 signing:
     default:

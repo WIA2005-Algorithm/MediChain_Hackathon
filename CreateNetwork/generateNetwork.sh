@@ -103,7 +103,6 @@ while [[ $# -gt 0 ]]; do
       COUNTRY+=(`echo ${5// /#{S\}}`)
       STATE+=(`echo ${6// /#{S\}}`)
       LOCATION+=(`echo ${7// /#{S\}}`)
-      echo $LOCATION
       P0PORT+=("$8")
       CAPORT+=("$9")
       COUCHPORT+=("${10}")

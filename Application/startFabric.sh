@@ -17,14 +17,15 @@ fi
 
 # clean out any old identites in the wallets
 rm -rf TodoBackend/wallet/*
-
 # launch network; create channel and join peer to channel
 exec > >(tee -i $PWD/logfile.txt)
 exec 2>&1
 pushd ../ApplicationNetwork
 ./network.sh down
+docker volume prune -f
+docker container prune -f
 ./network.sh up createChannel -ca -s couchdb
-./network.sh deployCC -ccn fabcar -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
+./network.sh deployCC -ccn medichain -ccv 1 -cci initLedger -ccl ${CC_SRC_LANGUAGE} -ccp ${CC_SRC_PATH}
 popd
 cat <<EOF
 
