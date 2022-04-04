@@ -41,6 +41,8 @@ errors.maximum_organizations_reached = new ApiError(409, 'MAXIMUM LIMIT REACHED'
 errors.request_failed = new ApiError(500, 'FAILED TO FULFIL REQUEST', "There was an error while fulfilling the request. Try again later");
 errors.invalid_auth = new ApiError(401, 'INVALID_AUTH','Are you sure you are on the right path?');
 errors.invalid_permission = new ApiError(401, 'INVALID_PERMISSION','Permission denied. Current user does not has required permissions for this resource.');
+errors.not_reachable = new ApiError(500, 'Network Not Reachable', "Network timeout expired. Please try again later");
+errors.contract_error = new ApiError(401, 'Contract Error Occurred. Please see more details');
 
 errors.required_key = new ApiError(400, 'REQUIRED_KEY','Api key is required. Please provide a valid api key along with request.');
 errors.required_auth = new ApiError(400, 'REQUIRED_AUTH_TOKEN','Auth Token is required. Please provide a valid auth token along with request.');

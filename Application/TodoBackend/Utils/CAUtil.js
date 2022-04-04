@@ -1,5 +1,7 @@
 'use strict';
-import { green } from '../Utils/NetworkConstants.js'; 
+import { Gateway } from 'fabric-network';
+import { intialize } from '../controllers/register.js';
+import { chaincodeName, channelName, green } from '../Utils/NetworkConstants.js'; 
 import errors from './Errors.js';
 export const buildCAClient = (FabricCAServices, ccp, orgName) => { 
 	// Create a new CA client for interacting with the CA.
@@ -75,3 +77,19 @@ export const registerAndEnrollUser = async (caClient, wallet, orgName, userId, a
 		await wallet.put(userId, x509Identity);
 		console.log(`${green} Successfully registered and enrolled user ${userId} and imported it into the wallet`);
 };
+
+export async function getContract(orgName, userID) {
+	const { wallet, ccp } = await intialize(orgName);
+    try {
+        const gateway = new Gateway();
+        await gateway.connect(ccp, {
+            wallet,
+            identity: userID,
+            discovery: { enabled: true, asLocalhost: false },
+        });
+        const network = await gateway.getNetwork(channelName);
+        return network.getContract(chaincodeName);
+    } catch (e) {
+        throw errors.not_reachable.withDetails("null");
+    }
+}

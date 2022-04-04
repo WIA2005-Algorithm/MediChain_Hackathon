@@ -12,6 +12,7 @@ import {
 } from "../models/Network.model.js";
 import { generateNetworkFiles, StopNetwork } from "../Utils/execute.js";
 import { authenticateUser, getAccessToken } from "../server_config.js";
+import { EnrollAdmin } from "../controllers/register.js";
 const router = Router();
 router.post("/create/network", authenticateUser, (req, res) => {
     createNetwork({
@@ -57,11 +58,9 @@ router.post("/create/organization", authenticateUser, (req, res) => {
                 Location: req.body.location,
             })
                 .then(() =>
-                    res
-                        .status(200)
-                        .json({
-                            message: "Organization was successfully created",
-                        })
+                    res.status(200).json({
+                        message: "Organization was successfully created",
+                    })
                 )
                 .catch((err) => {
                     if (!(err instanceof ApiError))
@@ -89,19 +88,15 @@ router.post("/network/start", authenticateUser, (req, res) => {
                 res.status(err.status).json(new response.errorResponse(err));
             } else {
                 if (network.Status.code == 200 || network.Status.code == 300)
-                    return res
-                        .status(200)
-                        .json({
-                            Status: network.Status,
-                            message: network.Status.description,
-                        });
+                    return res.status(200).json({
+                        Status: network.Status,
+                        message: network.Status.description,
+                    });
                 else if (network.Organizations.length === 0)
-                    return res
-                        .status(200)
-                        .json({
-                            Status: network.Status,
-                            message: network.Status.description,
-                        });
+                    return res.status(200).json({
+                        Status: network.Status,
+                        message: network.Status.description,
+                    });
                 let execution = `-netName "${network.Name}" -netID ${network.NetID} -netAdd ${network.Address} `;
                 network.Organizations.forEach((hosp) => {
                     execution += `-org ${hosp.Name} ${hosp.AdminID} ${hosp.Password} "${hosp.Country}" "${hosp.State}" "${hosp.Location}" ${hosp.P0PORT} ${hosp.CAPORT} ${hosp.COUCHPORT} `;
@@ -127,12 +122,10 @@ router.post("/network/stop", authenticateUser, (req, res) => {
             res.status(err.status).json(new response.errorResponse(err));
         } else {
             if (network.Status.code == 0 || network.Status.code == 300)
-                return res
-                    .status(200)
-                    .json({
-                        Status: network.Status,
-                        message: network.Status.description,
-                    });
+                return res.status(200).json({
+                    Status: network.Status,
+                    message: network.Status.description,
+                });
             StopNetwork(req.body.networkName);
             res.status(200).json({
                 message: "Request to stop the network was successfull",
@@ -232,4 +225,26 @@ router.delete(
         });
     }
 );
+
+router.post("/organizations/:name/enroll", authenticateUser, (req, res) => {
+    console.log("Entered here...");
+    console.log(req.params.name);
+    EnrollAdmin(req.params.name)
+        .then(() => {
+            Organizations.findOneAndUpdate(
+                { Name: req.params.name },
+                { Enrolled: 1 }
+            ).exec((_, succ) => {
+                if (!succ) return res.sendStatus(500);
+                return res.sendStatus(200);
+            });
+        })
+        .catch((err) => {
+            if (!(err instanceof ApiError))
+                err = new ApiError(400, "Bad Request", err.message).withDetails(
+                    "Make sure the input is correct"
+                );
+            res.status(err.status).json(new response.errorResponse(err));
+        });
+});
 export default router;

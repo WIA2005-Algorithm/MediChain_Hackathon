@@ -3,7 +3,7 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const channelName = 'mychannel';
-export const chaincodeName = 'todo';
+export const chaincodeName = 'medichain';
 export const walletPath = path.join(__dirname,'..', 'wallet');
 export const organisationPath = (orgName) => path.resolve(__dirname, '..', '..', '..', 'ApplicationNetwork', 'organizations', 'peerOrganizations', `${orgName.toLowerCase()}.um.edu.my`, `connection-${orgName.toLowerCase()}.json`);
 

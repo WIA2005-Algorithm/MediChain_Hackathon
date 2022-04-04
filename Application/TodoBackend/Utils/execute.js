@@ -2,6 +2,7 @@
 import shell from "shelljs";
 import dotenv from "dotenv";
 import { setNetworkStatus } from "../controllers/CreateNetwork.controller.js";
+import { Organizations } from "../models/Network.model.js";
 dotenv.config();
 const {ROOT_APP_DIR, CREATE_NETWORK_TEMPLATE_FOLDER, PASSWORD} = process.env;
 
@@ -61,7 +62,11 @@ export function StopNetwork(NetworkName) {
         setNetworkStatus(NetworkName, {code: 400, message: "Failed to Stop", description: "Fabric Network has failed stopped successfully"});
         else
         setNetworkStatus(NetworkName, {code: 0, message: "Stopped", description: "Fabric Network is stopped successfully"})
-        .then(()=>console.log("Status changed"))
+        .then(()=>{
+            console.log("Status changed");
+            return Organizations.updateMany({}, {Enrolled: 0}).exec();
+        })
+        .then(()=> console.log("Status Updated with unrollling admins !!"))
         .catch((err)=> console.log(err.message));
         });
     trigger();

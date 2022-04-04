@@ -142,6 +142,11 @@ export const Organizations = mongoose.model(
         OrganizationType: {
             type: String,
             default: "Hospital"
+        },
+
+        Enrolled: {
+            type: Number,
+            default: 0
         }
     // Timestamp
     }, {timestamps: true})

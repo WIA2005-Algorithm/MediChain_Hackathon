@@ -26,7 +26,7 @@ export default function Login({setLogin}) {
       setLogin(r.data);
       navigate(`/superuser/networks`);
     })
-    .catch((e)=> e.response.data.DETAILS? setError(e.response.data.DETAILS): setError(`Failed to connect to the server. Check your internet connection`))
+    .catch((e)=> e.response?.data? setError(e.response.data.DETAILS): setError(`Failed to connect to the server. Check your internet connection`))
     .finally(()=>{
       setTimeout(() => {
         setLoading(false);

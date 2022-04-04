@@ -22,6 +22,7 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { Link, Route, Routes, useParams } from "react-router-dom";
 import {
     deleteOrganization,
+    enrollAdmin,
     getNetworkExists,
     startNetwork,
     stopNetwork,
@@ -37,12 +38,21 @@ import {
     DialogContentText,
     DialogTitle,
 } from "@mui/material";
-import { AddCircle } from "@mui/icons-material";
+import { AddCircle, Cancel, CheckCircle } from "@mui/icons-material";
 import emptyTable from "../../static/images/emptyTable.png";
 import { getAlertValues, Status, Transition } from "../StyledComponents";
 import FullScreenDialog from "./CreateOrganizationForm";
 
-function createData(objID, name, id, admin, state, country, createAt) {
+function createData(
+    objID,
+    name,
+    id,
+    admin,
+    state,
+    country,
+    createAt,
+    enrolled
+) {
     return {
         objID,
         name,
@@ -51,6 +61,7 @@ function createData(objID, name, id, admin, state, country, createAt) {
         state,
         country,
         createAt,
+        enrolled,
     };
 }
 
@@ -70,8 +81,6 @@ function getComparator(order, orderBy) {
         : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// This method is created for cross-browser compatibility, if you don't
-// need to support IE11, you can use Array.prototype.sort() directly
 function stableSort(array, comparator) {
     const stabilizedThis = array.map((el, index) => [el, index]);
     stabilizedThis.sort((a, b) => {
@@ -120,6 +129,12 @@ const headCells = [
         numeric: true,
         disablePadding: false,
         label: "Created On",
+    },
+    {
+        id: "enrolled",
+        numeric: true,
+        disablePadding: false,
+        label: "Admin Enrolled",
     },
 ];
 
@@ -192,22 +207,32 @@ const EnhancedTableToolbar = (props) => {
     } = props;
     const [openDialog, setOpenDialog] = React.useState(false);
     const [completedDeletion, setCompletedDeletion] = React.useState(false);
+    const [completedEnrollment, setCompletedEnrollment] = React.useState(true);
     const [pending, setPending] = React.useState(
-        network.Status || { code: 300, message: "Pending" }
+        () => network.Status || { code: 300, message: "Pending" }
     );
     const handleClose = () => {
-        if (pending.code !== 300) {
-            setCompletedDeletion(true);
-            setOpenDialog(!openDialog);
-        } else {
+        if (pending.code === 300) {
             notis((prev) => [
                 ...prev,
                 getAlertValues(
-                    "error",
+                    "info",
                     "Network Process In Progress",
                     "Please wait while the network starts/stops before attemping again."
                 ),
             ]);
+        } else if (!completedEnrollment) {
+            notis((prev) => [
+                ...prev,
+                getAlertValues(
+                    "info",
+                    "Enrollment In Progress",
+                    "Please wait while the network enrolls the selected admins"
+                ),
+            ]);
+        } else {
+            setCompletedDeletion(true);
+            setOpenDialog(!openDialog);
         }
     };
     const toggleNetwork = async () => {
@@ -250,6 +275,64 @@ const EnhancedTableToolbar = (props) => {
                 setPending(status);
                 break;
         }
+    };
+
+    const enrollSelected = async () => {
+        if (pending.code !== 200) {
+            notis((prev) => [
+                ...prev,
+                getAlertValues(
+                    "info",
+                    "Make sure the network is running first",
+                    "Incase, your network is running, please reload the page"
+                ),
+            ]);
+            return;
+        }
+        setCompletedEnrollment(false);
+        const temprows = rows;
+        let index;
+        for (let k = 0; k < selected.length; k++) {
+            for (let i = 0; i < temprows.length; i++)
+                if (temprows[i].objID === selected[k]) index = i;
+            if (temprows[index].enrolled === 1) continue;
+            let enrolled;
+            try {
+                enrolled = await enrollAdmin(temprows[index].id);
+                if (!enrolled) {
+                    notis((prev) => [
+                        ...prev,
+                        getAlertValues(
+                            "error",
+                            `Enrollment Failed For ${network.Name}`,
+                            "You may try again later..."
+                        ),
+                    ]);
+                    continue;
+                }
+                temprows[index].enrolled = enrolled ? 1 : 0;
+            } catch (e) {
+                notis((prev) => [
+                    ...prev,
+                    getAlertValues(
+                        "error",
+                        `Enrollment Failed: ${e.response?.data?.MESSAGE}`,
+                        `Reason: ${e.response?.data?.DESCRIPTION}`
+                    ),
+                ]);
+            }
+        }
+        notis((prev) => [
+            ...prev,
+            getAlertValues(
+                "success",
+                "Selected Admins were enrolled...",
+                "Incase, some organizations weren't. Please try again."
+            ),
+        ]);
+        setSelected([]);
+        setCompletedEnrollment(true);
+        setRows(temprows);
     };
     const deleteSelected = async () => {
         setCompletedDeletion(false);
@@ -320,7 +403,7 @@ const EnhancedTableToolbar = (props) => {
                 <DialogTitle>{`Do you really want to delete selected hospital(s)?`}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
-                        Please be aware than you can recover these deleted
+                        Please be aware than you cannot recover these deleted
                         hospital organizations. Fabric network will
                         automatically stop before deleting the hospital
                         organizations. Do you wish to go forward with this?
@@ -368,11 +451,27 @@ const EnhancedTableToolbar = (props) => {
             )}
 
             {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton onClick={handleClose}>
-                        <DeleteIcon sx={{ color: "text.primary" }} />
-                    </IconButton>
-                </Tooltip>
+                <>
+                    <Tooltip title="Enrolled Admins In Selected">
+                        <LoadingButton
+                            loading={!completedEnrollment}
+                            onClick={enrollSelected}
+                            variant="contained"
+                            sx={{
+                                fontSize: "12px",
+                                minWidth: "fit-content",
+                                fontWeight: "bold",
+                            }}
+                        >
+                            Enroll Admins
+                        </LoadingButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Selected">
+                        <IconButton onClick={handleClose}>
+                            <DeleteIcon sx={{ color: "text.primary" }} />
+                        </IconButton>
+                    </Tooltip>
+                </>
             ) : (
                 <>
                     <Typography
@@ -382,7 +481,7 @@ const EnhancedTableToolbar = (props) => {
                             fontWeight: "bold",
                         }}
                     >
-                        Network Status :{" "}
+                        Network Status :
                     </Typography>
                     <Tooltip title="Start/Stop Network">
                         <span style={{ minWidth: "fit-content" }}>
@@ -405,7 +504,7 @@ const EnhancedTableToolbar = (props) => {
                                     pending.code !== 400 &&
                                     (rows.length === 0 || pending.code === 300)
                                 }
-                                sx={{ fontWeight: "bolder" }}
+                                sx={{ fontWeight: "bolder", fontSize: "12px" }}
                                 onClick={toggleNetwork}
                             >
                                 {pending.message}
@@ -461,7 +560,8 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
                         org.Country,
                         `${date.toLocaleString("default", {
                             month: "long",
-                        })} ${date.getDate()}, ${date.getFullYear()}`
+                        })} ${date.getDate()}, ${date.getFullYear()}`,
+                        org.Enrolled
                     )
                 );
             });
@@ -573,8 +673,6 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
                                 rowCount={rows.length}
                             />
                             <TableBody>
-                                {/* if you don't need to support IE11, you can replace the `stableSort` call with:
-                 rows.slice().sort(getComparator(order, orderBy)) */}
                                 {stableSort(rows, getComparator(order, orderBy))
                                     .slice(
                                         page * rowsPerPage,
@@ -632,6 +730,28 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
                                                 </TableCell>
                                                 <TableCell align="right">
                                                     {row.createAt}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {row.enrolled === 1 && (
+                                                        <CheckCircle
+                                                            sx={{
+                                                                color: "text.primary",
+                                                                width: "25px",
+                                                                height: "25px",
+                                                                marginLeft: 3,
+                                                            }}
+                                                        />
+                                                    )}
+                                                    {row.enrolled === 0 && (
+                                                        <Cancel
+                                                            sx={{
+                                                                color: "text.primary",
+                                                                width: "25px",
+                                                                height: "25px",
+                                                                marginLeft: 3,
+                                                            }}
+                                                        />
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         );
