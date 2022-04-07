@@ -160,14 +160,14 @@ class FabCar extends Contract {
         const cid = new ClientIdentity(ctx.stub);
         console.log("Identity : ", cid)
         console.log("Attribute: ", cid.getAttributeValue("hf.Affiliation"));
-        console.log("OrgAdd : ", cid.getX509Certificate().issuer.organizationName);
-        return {
+        console.log("OrgAdd : ", ctx.stub.getCreator());
+        return ({
             role: cid.getAttributeValue("hf.Affiliation"),
             org: {
                 orgID: cid.getMSPID(),
                 orgAdd: cid.getX509Certificate().issuer.organizationName,
             },
-        };
+        });
     }
 
     async createOrgIndex(ctx, PID, orgDetails) {

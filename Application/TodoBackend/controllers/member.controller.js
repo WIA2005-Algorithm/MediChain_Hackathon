@@ -2,7 +2,7 @@ import { getContract } from "../Utils/CAUtil.js";
 import errors from "../Utils/Errors.js";
 
 export async function addMember(orgName, userID) {
-    const contract = await getContract(orgName, userID);
+    const {contract, gateway} = await getContract(orgName, userID);
     try {
         const result = await contract.submitTransaction(
             "addPatientEHR",
@@ -24,7 +24,8 @@ export async function addMember(orgName, userID) {
                 whatsapp: null,
             })
         );
-        console.log(result);
+        console.log(result.toString());
+        gateway.disconnect();
     } catch (e) {
         throw errors.contract_error.withDetails(e.toString());
     }

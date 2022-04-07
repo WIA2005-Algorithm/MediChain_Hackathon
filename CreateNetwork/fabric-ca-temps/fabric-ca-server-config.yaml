@@ -107,9 +107,9 @@ signing:
 csr:
    cn: ca.${ordererAdd}
    names:
-      - C: US
-        ST: "New York"
-        L: "New York"
+      - C: Malaysia
+        ST: "Selongor"
+        L: "Kuala Lumpur"
         O: ${ordererAdd}
         OU:
    hosts:

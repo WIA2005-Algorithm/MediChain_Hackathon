@@ -83,7 +83,7 @@ ldap:
               value:
 
 affiliations:
-   ${admin}:
+   ${org}:
       - Doctor
       - Patient
 

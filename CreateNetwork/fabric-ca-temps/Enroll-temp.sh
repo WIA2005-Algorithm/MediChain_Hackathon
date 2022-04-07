@@ -1,4 +1,3 @@
-#!/bin/bash
 function create#{org}() {
   infoln "Enrolling the CA admin"
   mkdir -p organizations/peerOrganizations/#{orgAdd}/

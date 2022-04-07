@@ -58,7 +58,7 @@ export const registerAndEnrollUser = async (caClient, wallet, orgName, userId, a
 		// Register the user, enroll the user, and import the new identity into the wallet.
 		// if affiliation is specified by client, the affiliation value must be configured in CA
 		const secret = await caClient.register({
-			affiliation: `${admin.toLowerCase()}.${affiliation}`,
+			affiliation: `${orgName.toLowerCase()}.${affiliation}`,
 			enrollmentID: userId,
 			role: 'client'
 		}, adminUser);
@@ -85,10 +85,10 @@ export async function getContract(orgName, userID) {
         await gateway.connect(ccp, {
             wallet,
             identity: userID,
-            discovery: { enabled: true, asLocalhost: false },
+            discovery: { enabled: true, asLocalhost: true },
         });
-        const network = await gateway.getNetwork(channelName);
-        return network.getContract(chaincodeName);
+        const contract = (await gateway.getNetwork(channelName)).getContract(chaincodeName);
+        return {contract, gateway};
     } catch (e) {
         throw errors.not_reachable.withDetails("null");
     }

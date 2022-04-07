@@ -66,6 +66,37 @@ console.log(
                     other: null,
                     whatsapp: null,
                 },
+                "Patient"
+            )
+        )
+    )
+);
+
+console.log(
+    prettyJSONString(
+        JSON.stringify(
+            getTypeEHROrDoctor(
+                {
+                    firstName: "Kamal",
+                    lastName: "Kumar Khatri",
+                    gender: "Male",
+                    DOB: "06/23/2001",
+                    street: null,
+                    zip: null,
+                    city: "Salalah",
+                    state: null,
+                    country: "Oman",
+                },
+                {
+                    orgID: "Org1MSP",
+                    orgName: "UMMC",
+                    orgAddress: "ummc.um.edu.my",
+                },
+                {
+                    mobile: "+96894637602",
+                    other: null,
+                    whatsapp: null,
+                },
                 "Doctor"
             )
         )

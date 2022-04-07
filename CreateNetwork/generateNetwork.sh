@@ -83,7 +83,7 @@ while [[ $# -gt 0 ]]; do
     NETWORKNAME="$2"
     shift 2
     ;;
-    -netAdd|-networkAddress)
+    -netAdd|--networkAddress)
     NETADD="$2"
     shift 2
     ;;
@@ -92,7 +92,7 @@ while [[ $# -gt 0 ]]; do
     shift 2
     ;;
     -org|--organisation)
-      if [ "$NETADD" == "um.edu.my" ]; then
+      if [ "$NETADD" == "" ]; then
       infoln "No network address provided...defaulting to $NETADD"
       fi
       while [[ "$1" == "-org" || "$1" == "--organisation" ]]; do
