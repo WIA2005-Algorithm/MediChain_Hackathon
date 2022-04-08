@@ -19,7 +19,7 @@ import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Link, Route, Routes, useParams } from "react-router-dom";
+import { useNavigate, Route, Routes, useParams } from "react-router-dom";
 import {
     deleteOrganization,
     enrollAdmin,
@@ -42,6 +42,7 @@ import { AddCircle, Cancel, CheckCircle } from "@mui/icons-material";
 import emptyTable from "../../static/images/emptyTable.png";
 import { getAlertValues, Status, Transition } from "../StyledComponents";
 import FullScreenDialog from "./CreateOrganizationForm";
+import ActivityLogs from "./activity_logs";
 
 function createData(
     objID,
@@ -204,6 +205,7 @@ const EnhancedTableToolbar = (props) => {
         setSelected,
         network,
         notis,
+        navigateTo,
     } = props;
     const [openDialog, setOpenDialog] = React.useState(false);
     const [completedDeletion, setCompletedDeletion] = React.useState(false);
@@ -211,13 +213,14 @@ const EnhancedTableToolbar = (props) => {
     const [pending, setPending] = React.useState(
         () => network.Status || { code: 300, message: "Pending" }
     );
-    const handleClose = () => {
+    const navigateToAdd = () => navigateTo("new");
+    const processRunningWarning = (next) => {
         if (pending.code === 300) {
             notis((prev) => [
                 ...prev,
                 getAlertValues(
                     "info",
-                    "Network Process In Progress",
+                    "Network Process Is In Progress",
                     "Please wait while the network starts/stops before attemping again."
                 ),
             ]);
@@ -226,14 +229,15 @@ const EnhancedTableToolbar = (props) => {
                 ...prev,
                 getAlertValues(
                     "info",
-                    "Enrollment In Progress",
-                    "Please wait while the network enrolls the selected admins"
+                    "Enrollment Process Is In Progress",
+                    "Please wait while the network starts/stops before attemping again."
                 ),
             ]);
-        } else {
-            setCompletedDeletion(true);
-            setOpenDialog(!openDialog);
-        }
+        } else next();
+    };
+    const toggleDialog = () => {
+        setCompletedDeletion(true);
+        setOpenDialog(!openDialog);
     };
     const toggleNetwork = async () => {
         let status = pending;
@@ -248,7 +252,9 @@ const EnhancedTableToolbar = (props) => {
                             ...prev,
                             getAlertValues(
                                 "info",
-                                "Network Request Status",
+                                `Network Request Status To ${
+                                    status.code === 0 ? "Start" : "Restart"
+                                } Network`,
                                 res.data.message
                             ),
                         ]);
@@ -264,7 +270,7 @@ const EnhancedTableToolbar = (props) => {
                             ...prev,
                             getAlertValues(
                                 "info",
-                                "Network Request Status",
+                                "Network Request Status To Stop Network",
                                 res.data.message
                             ),
                         ]);
@@ -344,7 +350,6 @@ const EnhancedTableToolbar = (props) => {
         for (let k = 0; k < selected.length; k++) {
             const org = selected[k];
             let deleted = await deleteOrganization(network.Name, org);
-            console.log(deleted);
             for (let i = 0; i < temprows.length; i++)
                 if (org === temprows[i].objID) {
                     temprows.splice(i, 1);
@@ -370,7 +375,7 @@ const EnhancedTableToolbar = (props) => {
                 "Please be aware the network will be stopped now soon"
             ),
         ]);
-        handleClose();
+        toggleDialog();
     };
 
     return (
@@ -392,7 +397,7 @@ const EnhancedTableToolbar = (props) => {
                 open={openDialog}
                 TransitionComponent={Transition}
                 keepMounted
-                onClose={handleClose}
+                onClose={toggleDialog}
                 aria-describedby="alert-dialog-slide-description"
                 PaperProps={{
                     sx: {
@@ -415,7 +420,7 @@ const EnhancedTableToolbar = (props) => {
                     ) : (
                         <>
                             <Button
-                                onClick={handleClose}
+                                onClick={toggleDialog}
                                 sx={{ fontWeight: "bold" }}
                             >
                                 No
@@ -452,10 +457,12 @@ const EnhancedTableToolbar = (props) => {
 
             {numSelected > 0 ? (
                 <>
-                    <Tooltip title="Enrolled Admins In Selected">
+                    <Tooltip title="Enroll Selected Hospitals">
                         <LoadingButton
                             loading={!completedEnrollment}
-                            onClick={enrollSelected}
+                            onClick={() =>
+                                processRunningWarning(enrollSelected)
+                            }
                             variant="contained"
                             sx={{
                                 fontSize: "12px",
@@ -467,7 +474,9 @@ const EnhancedTableToolbar = (props) => {
                         </LoadingButton>
                     </Tooltip>
                     <Tooltip title="Delete Selected">
-                        <IconButton onClick={handleClose}>
+                        <IconButton
+                            onClick={() => processRunningWarning(toggleDialog)}
+                        >
                             <DeleteIcon sx={{ color: "text.primary" }} />
                         </IconButton>
                     </Tooltip>
@@ -512,24 +521,23 @@ const EnhancedTableToolbar = (props) => {
                         </span>
                     </Tooltip>
                     <Tooltip title="Add Hospital">
-                        <Link to="new">
-                            <IconButton
-                                variant="contained"
+                        <IconButton
+                            variant="contained"
+                            sx={{
+                                fontWeight: "bolder",
+                                minWidth: "fit-content",
+                                ml: 1,
+                            }}
+                            onClick={() => processRunningWarning(navigateToAdd)}
+                        >
+                            <AddCircle
                                 sx={{
-                                    fontWeight: "bolder",
-                                    minWidth: "fit-content",
-                                    ml: 1,
+                                    color: "text.primary",
+                                    width: "30px",
+                                    height: "30px",
                                 }}
-                            >
-                                <AddCircle
-                                    sx={{
-                                        color: "text.primary",
-                                        width: "30px",
-                                        height: "30px",
-                                    }}
-                                />
-                            </IconButton>
-                        </Link>
+                            />
+                        </IconButton>
                     </Tooltip>
                 </>
             )}
@@ -537,7 +545,7 @@ const EnhancedTableToolbar = (props) => {
     );
 };
 
-function EnhancedTable({ nav, setNav, networkName, network, notis }) {
+function EnhancedTable({ networkName, network, notis, navigateTo }) {
     const [order, setOrder] = React.useState("asc");
     const [orderBy, setOrderBy] = React.useState("fullName");
     const [selected, setSelected] = React.useState([]);
@@ -546,7 +554,7 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [rows, setrows] = React.useState([]);
     React.useEffect(() => {
-        if (network !== false) {
+        if (network.Organizations) {
             let columns = [];
             network.Organizations.forEach((org) => {
                 let date = new Date(org.createdAt);
@@ -569,9 +577,6 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
             setrows(columns);
         }
     }, [network]);
-    React.useEffect(() => {
-        setNav({ ...nav, networkName: networkName });
-    }, [networkName]);
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === "asc";
         setOrder(isAsc ? "desc" : "asc");
@@ -657,6 +662,7 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
                         setSelected={setSelected}
                         network={network}
                         notis={notis}
+                        navigateTo={navigateTo}
                     />
                     <TableContainer>
                         <Table
@@ -821,6 +827,7 @@ function EnhancedTable({ nav, setNav, networkName, network, notis }) {
 }
 
 export default function OrganizationTables({ nav, setNav, notis }) {
+    const navigate = useNavigate();
     const { networkName } = useParams();
     const [network, setNetwork] = React.useState(false);
     const networkExists = React.useCallback(async () => {
@@ -830,7 +837,9 @@ export default function OrganizationTables({ nav, setNav, notis }) {
     React.useEffect(() => {
         networkExists();
     }, [networkExists, window.location.pathname]);
-
+    React.useEffect(() => {
+        setNav({ ...nav, networkName: networkName });
+    }, [networkName]);
     return (
         <Routes>
             <Route
@@ -842,10 +851,17 @@ export default function OrganizationTables({ nav, setNav, notis }) {
                         network={network}
                         networkName={networkName}
                         notis={notis}
+                        navigateTo={navigate}
                     />
                 }
             />
             <Route path="/new" element={<FullScreenDialog />} />
+            <Route
+                path="/activity_logs"
+                element={
+                    <ActivityLogs nav={nav} setNav={setNav} network={network} />
+                }
+            />
         </Routes>
     );
 }

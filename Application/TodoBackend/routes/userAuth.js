@@ -23,7 +23,8 @@ router.post("/client/new", (req, res) => {
     const org = req.body.organisation;
     const userid = req.body.user;
     const affiliation = req.body.affiliation;
-    addMember(org, userid)
+    RegisterUser(org, userid, affiliation)
+        .then(() => addMember(org, userid))
         .then(() => res.sendStatus(200))
         .catch((err) => {
             if (!(err instanceof ApiError))

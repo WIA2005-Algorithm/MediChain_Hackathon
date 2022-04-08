@@ -7,6 +7,7 @@ import express, { json } from "express";
 import cors from "cors";
 import { Superuser } from "./models/Network.model.js";
 import errors, { response } from "./Utils/Errors.js";
+import { System_logs } from "./models/Utilities.model.js";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -83,6 +84,15 @@ export function authenticateUser(req, res, next) {
         next();
     });
 }
+
+app.post("/api/systemLogs", authenticateUser, (req, res) => {
+    System_logs.find({ User: req.user.username })
+        .sort({ createdAt: -1 })
+        .exec((err, doc) => {
+            if (!doc) return res.sendStatus(500);
+            return res.status(200).json(doc);
+        });
+});
 
 assert(PORT, "Port is required");
 assert(HOST, "Host is required");

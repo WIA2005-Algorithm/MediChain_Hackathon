@@ -13,6 +13,7 @@ import {
 import { generateNetworkFiles, StopNetwork } from "../Utils/execute.js";
 import { authenticateUser, getAccessToken } from "../server_config.js";
 import { EnrollAdmin } from "../controllers/register.js";
+import { log } from "../models/Utilities.model.js";
 const router = Router();
 router.post("/create/network", authenticateUser, (req, res) => {
     createNetwork({
@@ -32,6 +33,12 @@ router.post("/create/network", authenticateUser, (req, res) => {
                     "Bad Input",
                     "There is an error in the input provided.."
                 ).withDetails(err.message);
+            log(
+                "SuperAdmin",
+                `Network Creation Failed for ID : [${req.body.name}]`,
+                "There was an error in the input provided. You may resubmit form later - 409",
+                "error"
+            );
             res.status(err.status).json(new response.errorResponse(err));
         });
 });
@@ -69,6 +76,12 @@ router.post("/create/organization", authenticateUser, (req, res) => {
                             "Bad Input",
                             "There is an error in the input provided.."
                         ).withDetails(err.message);
+                    log(
+                        "SuperAdmin",
+                        `Organization Creation Failed For [${req.body.id}]`,
+                        "There was an error in the input provided. You may resubmit form later - 409",
+                        "error"
+                    );
                     res.status(err.status).json(
                         new response.errorResponse(err)
                     );
@@ -149,7 +162,6 @@ router.get("/network/status", (_, res) => {
 
 router.get("/network/count", (_, res) => {
     Block_Network.countDocuments({}).exec(function (_, count) {
-        console.log(count);
         if (count == undefined) return res.sendStatus(500);
         else return res.status(200).json({ count: count });
     });
@@ -190,7 +202,15 @@ router.post("/login", (req, res) => {
                 refreshToken: session.refreshToken,
             })
                 .then(() => res.status(200).json(session))
-                .catch(() => res.status(500));
+                .catch(() => res.status(500))
+                .finally(() =>
+                    log(
+                        "SuperAdmin",
+                        `User Login`,
+                        "Successfully Logged In [SuperAdmin]",
+                        "success"
+                    )
+                );
         });
     });
 });
@@ -198,9 +218,7 @@ router.post("/login", (req, res) => {
 router.get("/network/all", authenticateUser, (_, res) => {
     Block_Network.findOne({}, function (_, network) {
         if (!network) {
-            err = errors.request_failed.withDetails(
-                "No more details available"
-            );
+            err = errors.request_failed.withDetails("null");
             return res.status(err.status).json(new response.errorResponse(err));
         }
         return res.status(200).json(network);
@@ -221,14 +239,18 @@ router.delete(
                 }
             ).exec();
             if (!del) res.sendStatus(400);
+            log(
+                "SuperAdmin",
+                `Hospital Deleted Inside Network [${req.params.networkName}]`,
+                "Successfully deleted the organization",
+                "clear"
+            );
             res.sendStatus(200);
         });
     }
 );
 
 router.post("/organizations/:name/enroll", authenticateUser, (req, res) => {
-    console.log("Entered here...");
-    console.log(req.params.name);
     EnrollAdmin(req.params.name)
         .then(() => {
             Organizations.findOneAndUpdate(

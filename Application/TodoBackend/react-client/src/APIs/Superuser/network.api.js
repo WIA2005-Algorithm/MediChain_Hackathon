@@ -70,3 +70,5 @@ export const deleteOrganization = (networkName, org) =>
     axios.delete(`/superuser/organizations/${networkName}/${org}`);
 
 export const enrollAdmin = (orgName) => axios.post(`/superuser/organizations/${orgName}/enroll`);
+
+export const getSystemLogs = () => axios.post('/systemLogs');

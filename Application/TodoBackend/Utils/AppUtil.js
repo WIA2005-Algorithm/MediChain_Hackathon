@@ -1,6 +1,7 @@
 'use strict';
 
 import { existsSync, readFileSync } from 'fs';
+import { log } from '../models/Utilities.model.js';
 import { organisationPath, green } from '../Utils/NetworkConstants.js';
 import errors from './Errors.js';
 const buildCCPOrg = (orgName) => { 
@@ -8,12 +9,11 @@ const buildCCPOrg = (orgName) => {
 	const ccpPath = organisationPath(orgName);
 	const fileExists = existsSync(ccpPath);
 	if (!fileExists) {
-		console.error("CCP configuration file not found");
+		log("SuperAdmin", "Connection Profile : [Not Found]", "Please make sure input is correct", "removecircle");
 		throw errors.invalid_host.withDetails('Make sure your organisation is enrolled and added into the network, then try again');
 	}
 	const contents = readFileSync(ccpPath, 'utf8');
 	const ccp = JSON.parse(contents);
-	console.log(`${green}Loaded the blockchain network configuration located at ${ccpPath}`);
 	return ccp;
 };
 

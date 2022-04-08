@@ -232,7 +232,7 @@ export default function NetworkPage(props) {
                             notis={props.notis}
                         />
                     }
-                ></Route>
+                />
                 <Route
                     path="/"
                     element={

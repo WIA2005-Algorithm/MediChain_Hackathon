@@ -120,6 +120,7 @@ function App() {
                                             mode={colorMode}
                                             logout={logout}
                                             user={user}
+                                            setNotis={setNotis}
                                         />
                                         <Container>
                                             <Middle nav={navigation} />
