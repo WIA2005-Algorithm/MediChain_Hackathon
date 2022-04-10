@@ -82,7 +82,7 @@ class FabCar extends Contract {
      * @param {JSON_String} orgDtails - orgID, orgName, orgAdd
      * @param {String} contact - mobile, other, whatsapp
      */
-    // This function adds a patient to the hospital.
+    // This function adds a patient to the hospital. - [INSERTION]
     async addPatientEHR(ctx, PID, ptDetails, contact) {
         console.log("Entered Add Patient EHR");
         const exists = await this.memberExists(ctx, PID);
@@ -108,6 +108,7 @@ class FabCar extends Contract {
         return JSON.stringify(content);
     }
 
+    // This function adds a new doctor to the organization - [INSERTION]
     async addDoctor(ctx, DID, docDetails, contact) {
         const exists = await this.memberExists(ctx, DID);
         if (exists && exists.length > 0) {
@@ -125,8 +126,16 @@ class FabCar extends Contract {
         );
     }
 
+    /**
+     * 
+     * @param {Context} ctx - Transaction
+     * @param {String} PID - PatientID
+     * @param {String} DID - DoctorID
+     */
+    // This function assigns patient to doctor... [UPDATE]
     async assignPatientToDoctor(ctx, PID, DID) {
         let patient = this.memberExists(PID);
+        const cid = new ClientIdentity(ctx.stub);
         // Check for existing and all neccessary errors
         if (!patient || patient.length === 0)
             throw new Error("Patient Identity does not exists...");
@@ -138,7 +147,7 @@ class FabCar extends Contract {
         console.log(patient, doctor);
         if (
             JSON.stringify(patient.orgDetails.org) ===
-            JSON.stringify(doctor.orgDetails.org)
+            cid.getMSPID().toString()
         )
             throw new Error(
                 "Patient can only be registered to in-hospital doctor."
@@ -155,21 +164,26 @@ class FabCar extends Contract {
         ctx.stub.putState(PID, Buffer.from(stringify(patient)));
     }
 
+    async getPatientDetails(ctx, PID){
+        const patient = this.memberExists(ctx, PID);
+        if (!patient || patient.length === 0)
+        throw new Error("Patient Identity does not exists...");
+        return patient.toString();
+    }
+    
     async getOrganizationDetails(ctx) {
         console.log("Entered...");
         const cid = new ClientIdentity(ctx.stub);
         console.log("Identity : ", cid)
-        console.log("Attribute: ", cid.getAttributeValue("hf.Affiliation"));
+        console.log("Role: ", cid.getAttributeValue("hf.Affiliation"));
         console.log("OrgAdd : ", ctx.stub.getCreator());
         return ({
             role: cid.getAttributeValue("hf.Affiliation"),
-            org: {
-                orgID: cid.getMSPID(),
-                orgAdd: cid.getX509Certificate().issuer.organizationName,
-            },
+            org: cid.getMSPID(),
         });
     }
 
+    
     async createOrgIndex(ctx, PID, orgDetails) {
         await ctx.stub.putState(
             await ctx.stub.createCompositeKey(indexedOrg, [orgDetails, PID]),
