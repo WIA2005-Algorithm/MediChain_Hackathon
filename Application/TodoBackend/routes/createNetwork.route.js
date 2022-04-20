@@ -149,8 +149,8 @@ router.post("/network/stop", authenticateUser, (req, res) => {
 });
 
 router.get("/network/status", (_, res) => {
-    Block_Network.findOne({}, "Status").exec(function (_, status) {
-        if (!status)
+    Block_Network.findOne({}, "Status").exec(function (err, status) {
+        if (!status || err)
             res.status(400).json({
                 code: 300,
                 message: "Pending",

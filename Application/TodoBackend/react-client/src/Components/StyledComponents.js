@@ -3,6 +3,7 @@ import {
     CircularProgress,
     IconButton,
     Slide,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import { v4 as ID } from "uuid";
@@ -13,17 +14,19 @@ import { getNetworkStatus } from "../APIs/Superuser/network.api.js";
 import {
     CheckCircle,
     Close,
+    DoubleArrow,
     Error,
     Info,
     Subtitles,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 export const SectionContainer = styled("div")(({ theme }) => ({
     color: theme.palette.text.primary,
     backgroundColor: theme.palette.primary.sectionContainer,
-    padding: theme.spacing(6, 3),
+    padding: theme.spacing(2, 2),
     fontSize: theme.typography.fontSize,
-    borderRadius: 12,
+    borderRadius: 8,
     boxShadow: theme.palette.shape.boxShadow,
     // border: `1px solid ${theme.palette.primary.sectionBorder}`
 }));
@@ -65,6 +68,44 @@ export const StyledBadge = styled(Badge)(({ theme }) => ({
     },
 }));
 
+export const AppIconHead = ({ homeLink, role }) => {
+    const nav = useNavigate();
+    return (
+        <>
+            <Tooltip title="Home">
+                <IconButton
+                    onClick={() => nav(homeLink)}
+                    size="small"
+                    edge="start"
+                    color="inherit"
+                    sx={{ mr: 0.5 }}
+                >
+                    <Logo />
+                </IconButton>
+            </Tooltip>
+            <Typography variant="h5" noWrap component="div" fontWeight="bold">
+                Medi
+                <Typography
+                    component="span"
+                    variant="h5"
+                    color="primary"
+                    fontWeight="bold"
+                >
+                    chain
+                </Typography>
+            </Typography>
+            <DoubleArrow
+                sx={{ color: "text.secondary", ml: 1 }}
+                fontSize="inherit"
+            />
+            <Typography component="small" fontWeight="bold" sx={{ ml: 1 }}>
+                {role}
+            </Typography>
+            <Box sx={{ flexGrow: 1 }} />
+        </>
+    );
+};
+
 export function Status({ state, notis }) {
     let checkStatus = useCallback(async () => {
         let res = await getNetworkStatus();
@@ -86,7 +127,7 @@ export function Status({ state, notis }) {
     useEffect(() => {
         const intervalID = setInterval(() => {
             checkStatus();
-        }, 2000);
+        }, 5000);
         return () => clearInterval(intervalID);
     }, [checkStatus]);
     return null;
@@ -96,7 +137,9 @@ export function NetStatus(props) {
     const { status, setStatus } = props;
     return (
         <Typography component="div" sx={props.sx}>
-            {status.code === 300 && <Status state={setStatus} />}
+            {status.code === 300 && (
+                <Status state={setStatus} notis={props.notis} />
+            )}
             {status.message === "Pending" && (
                 <CircularProgress sx={props.circlesx} />
             )}

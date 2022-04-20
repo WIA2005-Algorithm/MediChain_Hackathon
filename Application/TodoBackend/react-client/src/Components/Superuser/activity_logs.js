@@ -57,7 +57,6 @@ export default function ActivityLogs({ nav, setNav, network }) {
     const handleCollapse = (index) => {
         const current = collapse[index];
         setCollapse({ ...collapse, [index]: !current });
-        console.log(collapse);
     };
     const getLogByDate = (date) =>
         logs?.filter(
@@ -82,7 +81,7 @@ export default function ActivityLogs({ nav, setNav, network }) {
             res.forEach((ele) => {
                 const newDate = new Date(ele.createdAt).getDate();
                 if (newDate !== date) {
-                    statesCollapse[ele.createdAt] = true;
+                    statesCollapse[ele.createdAt] = false;
                     date = newDate;
                 }
             });
@@ -141,43 +140,37 @@ export default function ActivityLogs({ nav, setNav, network }) {
                     <Collapse in={collapse[key]} timeout="auto">
                         <Timeline align="left">
                             {getLogByDate(key).map((ele) => (
-                                <>
-                                    <TimelineItem key={ele._id}>
-                                        <TimelineOppositeContent
-                                            sx={{
-                                                m: "auto 0",
-                                                flex: "0.1",
-                                                minWidth: "fit-content",
-                                                paddingLeft: 0,
-                                                paddingRight: 1,
-                                            }}
-                                            align="right"
-                                            variant="body2"
-                                            color="text.secondary"
+                                <TimelineItem key={ele._id}>
+                                    <TimelineOppositeContent
+                                        sx={{
+                                            m: "auto 0",
+                                            flex: "0.1",
+                                            minWidth: "fit-content",
+                                            paddingLeft: 0,
+                                            paddingRight: 1,
+                                        }}
+                                        align="right"
+                                        variant="body2"
+                                        color="text.secondary"
+                                    >
+                                        {formatAMPM(new Date(ele.createdAt))}
+                                    </TimelineOppositeContent>
+                                    <TimelineSeparator>
+                                        <TimelineConnector />
+                                        <SetIcon icon={ele.Icon} />
+                                        <TimelineConnector />
+                                    </TimelineSeparator>
+                                    <TimelineContent sx={{ py: "12px", px: 2 }}>
+                                        <Typography component="span">
+                                            <b>{ele.Title}</b>
+                                        </Typography>
+                                        <Typography
+                                            sx={{ color: "text.secondary" }}
                                         >
-                                            {formatAMPM(
-                                                new Date(ele.createdAt)
-                                            )}
-                                        </TimelineOppositeContent>
-                                        <TimelineSeparator>
-                                            <TimelineConnector />
-                                            <SetIcon icon={ele.Icon} />
-                                            <TimelineConnector />
-                                        </TimelineSeparator>
-                                        <TimelineContent
-                                            sx={{ py: "12px", px: 2 }}
-                                        >
-                                            <Typography component="span">
-                                                <b>{ele.Title}</b>
-                                            </Typography>
-                                            <Typography
-                                                sx={{ color: "text.secondary" }}
-                                            >
-                                                {ele.Subtitle}
-                                            </Typography>
-                                        </TimelineContent>
-                                    </TimelineItem>
-                                </>
+                                            {ele.Subtitle}
+                                        </Typography>
+                                    </TimelineContent>
+                                </TimelineItem>
                             ))}
                         </Timeline>
                     </Collapse>

@@ -357,7 +357,7 @@ export default function FullScreenDialog() {
                     name="password"
                     autoComplete="new-password"
                     type={pwVisible ? 'text' : 'password'}
-                    placeholder="Adminpw"
+                    placeholder="Adminpw_12"
                     helperText="A valid username contains atleast 8 characters with 1 uppercase character, 1 lowercase character, 1 special character and 1 digit with no restrictions on dot character"
                     sx={{ ml: 1 }}
                     InputProps={{

@@ -1,57 +1,41 @@
 import {
+    DarkMode,
+    DarkModeOutlined,
+    KeyboardArrowDown,
+    Logout
+} from "@mui/icons-material";
+import {
+    Toolbar,
+    IconButton,
+    Tooltip,
     AppBar,
     Avatar,
+    Button,
     Divider,
-    IconButton,
     ListItemIcon,
     Menu,
     MenuItem,
-    Toolbar,
-    Tooltip,
 } from "@mui/material";
-import {
-    AppIconHead,
-    getAlertValues,
-    StyledBadge,
-} from "../StyledComponents.js";
+import { AppIconHead } from "../StyledComponents";
+import adminImg from "../../static/images/admin.png";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/system";
-import { DarkMode, DarkModeOutlined, Logout } from "@mui/icons-material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import profile from "../../static/images/profile.png";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAllNetworks } from "../../APIs/Superuser/network.api.js";
 
-export default function Header({ mode, newMode, logout, user, setNotis }) {
+export function AppContentBar({ mode, newMode, logout, user }) {
     const GetMode = () =>
         mode === "dark" ? <DarkMode /> : <DarkModeOutlined />;
     const handleClick = (event) => setAnchorEl(event.currentTarget);
     const [anchorEl, setAnchorEl] = useState(null);
     const handleClose = () => setAnchorEl(null);
-    const nav = useNavigate();
     const open = Boolean(anchorEl);
-    const openActivityLog = async () => {
-        if (window.location.pathname.split("/").pop() === "activity_logs")
-            return;
-        const res = await getAllNetworks();
-        if (res && res.data) {
-            nav(`/superuser/networks/${res.data.Name}/activity_logs`);
-        } else {
-            setNotis((prev) => [
-                ...prev,
-                getAlertValues(
-                    "info",
-                    "No Network is initialized yet",
-                    "Incase, if the network has been inilialized, please reload the page and try again..",
-                    false
-                ),
-            ]);
-        }
-    };
+    useEffect(() => {
+        console.log(user);
+    }, [user]);
     return (
         <AppBar
-            position="static"
+            position="fixed"
             sx={{
+                zIndex: (theme) => theme.zIndex.drawer + 1,
                 bgcolor: "primary.sectionContainer",
                 backgroundImage: "none",
                 padding: "7px 0px",
@@ -59,7 +43,11 @@ export default function Header({ mode, newMode, logout, user, setNotis }) {
             }}
         >
             <Toolbar variant="dense">
-                <AppIconHead homeLink="/superuser/networks" role="Root Admin" />
+                {/* TODO: CHANGE APP HOME LINK */}
+                <AppIconHead
+                    homeLink="/superuser/networks"
+                    role="Hospital Admin"
+                />
                 <Box sx={{ color: "primary.main" }}>
                     <Tooltip
                         title={`Change to ${
@@ -75,30 +63,10 @@ export default function Header({ mode, newMode, logout, user, setNotis }) {
                             <GetMode />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Notifications">
-                        <IconButton
-                            onClick={openActivityLog}
-                            size="large"
-                            aria-label="Notifications"
-                            color="inherit"
-                            sx={{ padding: 1 }}
-                        >
-                            <StyledBadge
-                                overlap="circular"
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "right",
-                                }}
-                                variant="dot"
-                            >
-                                <NotificationsIcon />
-                            </StyledBadge>
-                        </IconButton>
-                    </Tooltip>
                     <Tooltip title="User">
-                        <IconButton
+                        <Button
+                            sx={{ textTransform: "capitalize !important" }}
                             onClick={handleClick}
-                            size="large"
                             edge="end"
                             aria-label="User"
                             color="inherit"
@@ -106,8 +74,12 @@ export default function Header({ mode, newMode, logout, user, setNotis }) {
                             aria-haspopup="true"
                             aria-expanded={open ? "true" : undefined}
                         >
-                            <Avatar alt="Superuser" src={profile} />
-                        </IconButton>
+                            <Avatar
+                                atl={user && user.username}
+                                src={adminImg}
+                            />
+                            <KeyboardArrowDown sx={{ ml: 2 }} />
+                        </Button>
                     </Tooltip>
                 </Box>
                 <Menu
@@ -144,8 +116,10 @@ export default function Header({ mode, newMode, logout, user, setNotis }) {
                     transformOrigin={{ horizontal: "right", vertical: "top" }}
                     anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
+                    {/* TODO: ADD ANOTHER ITEM */}
                     <MenuItem onClick={handleClose}>
-                        <Avatar sx={{ bgcolor: "primary.main" }}>S</Avatar>{" "}
+                        <Avatar sx={{ bgcolor: "primary.main" }}>HA</Avatar>
+                        {"  "}
                         {user && user.username}
                     </MenuItem>
                     <Divider />

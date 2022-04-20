@@ -50,6 +50,7 @@ export const enrollAdmin = async (caClient, wallet, orgName, ccp) => {
     const enrollment = await caClient.enroll({
         enrollmentID: user,
         enrollmentSecret: pass,
+        attr_reqs: [{ name: "orgAdmin", optional: false }],
     });
     const x509Identity = {
         credentials: {
@@ -123,6 +124,12 @@ export const registerAndEnrollUser = async (
 
 export async function getContract(orgName, userID) {
     const { wallet, ccp } = await intialize(orgName);
+    const userIdentity = await wallet.get(userID);
+    if (!userIdentity)
+        throw errors.identity_not_found.withDetails(
+            "No more details available"
+        );
+
     try {
         const gateway = new Gateway();
         await gateway.connect(ccp, {

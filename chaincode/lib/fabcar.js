@@ -10,67 +10,6 @@ class FabCar extends Contract {
     async initLedger(ctx) {
         console.info("============= START : Initialize Ledger ===========");
         console.info("============= PROCESS : NOTHING TO DO ===========");
-        // await this.addPatientEHR(
-        //     ctx,
-        //     "12-34",
-        //     {
-        //         firstName: "Kamal",
-        //         lastName: "Kumar Khatri",
-        //         gender: "Male",
-        //         DOB: "06/23/2001",
-        //         street: null,
-        //         zip: null,
-        //         city: "Salalah",
-        //         state: null,
-        //         country: "Oman",
-        //     },
-        //     {
-        //         orgID: "Org1MSP",
-        //         orgName: "UMMC",
-        //         orgAddress: "ummc.um.edu.my",
-        //     },
-        //     {
-        //         mobile: "+96894637602",
-        //         other: null,
-        //         whatsapp: null,
-        //     }
-        // );
-
-        // await this.addDoctor(
-        //     ctx,
-        //     "132-234",
-        //     {
-        //         firstName: "Raja",
-        //         lastName: "Mal Khatri",
-        //         gender: "Male",
-        //         DOB: "12/20/1987",
-        //         street: null,
-        //         zip: null,
-        //         city: "Hyderabad",
-        //         state: "Sindh",
-        //         country: "Pakistan",
-        //     },
-        //     {
-        //         orgID: "Org1MSP",
-        //         orgName: "UMMC",
-        //         orgAddress: "ummc.um.edu.my",
-        //     },
-        //     {
-        //         mobile: "+96894637602",
-        //         other: null,
-        //         whatsapp: null,
-        //     }
-        // );
-        // await new Promise((r) => setTimeout(r, 10000));
-        // console.log("timer");
-        // await this.retriveCompositeUsingKey(
-        //     ctx,
-        //     JSON.stringify({
-        //         orgID: "Org1MSP",
-        //         orgName: "UMMC",
-        //         orgAddress: "ummc.um.edu.my",
-        //     })
-        // );
         console.info("============= END : Initialize Ledger ===========");
     }
 
@@ -78,112 +17,246 @@ class FabCar extends Contract {
      *
      * @param {TxContext} ctx
      * @param {String} PID - Patient ID
-     * @param {JSON_String} ptDetails - Patient Details
-     * @param {JSON_String} orgDtails - orgID, orgName, orgAdd
+     * @param {String} ptDetails - Patient Details
+     * @param {String} orgDtails - orgID, orgName, orgAdd
      * @param {String} contact - mobile, other, whatsapp
+     * This function adds a patient to the hospital. - [INSERTION]
+     * USE SubmitTransaction for this rather than evaluate
      */
-    // This function adds a patient to the hospital. - [INSERTION]
     async addPatientEHR(ctx, PID, ptDetails, contact) {
-        console.log("Entered Add Patient EHR");
-        const exists = await this.memberExists(ctx, PID);
-        console.log("Entering the getOrganizationDetails");
-        const orgDetails = this.getOrganizationDetails(ctx);
-        console.log("Returned");
-        if (exists && exists.length > 0) {
+        const member = await ctx.stub.getState(PID);
+        if (member && member.length !== 0)
             throw new Error(`The patient with ${PID} already exists`);
-        }
+
+        let orgDetails = this.getOrganizationDetails(ctx);
+        orgDetails = JSON.parse(orgDetails);
         const content = getTypeEHROrDoctor(
             JSON.parse(ptDetails),
             orgDetails,
             JSON.parse(contact),
             "Patient"
         );
-        console.log("Content is : \n", content);
         await ctx.stub.putState(
             PID,
-            Buffer.from(stringify(sortKeysRecursive(content)))
+            Buffer.from(
+                stringify(
+                    sortKeysRecursive({
+                        ...content,
+                        checkIn: [],
+                        checkOut: [],
+                        active: "Not Patients",
+                    })
+                )
+            )
         );
         console.log("Putstate Done...Now indexing");
-        await this.createOrgIndex(ctx, PID, JSON.stringify(orgDetails));
+        await this.createOrgIndex(ctx, PID, orgDetails.org.toString());
         return JSON.stringify(content);
     }
 
-    // This function adds a new doctor to the organization - [INSERTION]
-    async addDoctor(ctx, DID, docDetails, contact) {
-        const exists = await this.memberExists(ctx, DID);
-        if (exists && exists.length > 0) {
+    /**
+     *
+     * @param {TxContext} ctx
+     * @param {String} DID - Doctor ID
+     * @param {String} docDetails - Doctor Personal Details
+     * @param {String} contact - mobile, other, whatsapp
+     * This function adds a new doctor to the organization - [INSERTION]
+     * USE SubmitTransaction for this rather than evaluate
+     */
+    async addDoctor(ctx, DID, docDetails, contact, department) {
+        const member = await ctx.stub.getState(DID);
+        if (member && member.length !== 0)
             throw new Error(`The doctor with ${DID} already exists`);
-        }
+        console.log("DOC DETAILS IN addDoctor: ", JSON.parse(docDetails));
         const content = getTypeEHROrDoctor(
-            docDetails,
-            this.getOrganizationDetails(),
-            contact,
+            JSON.parse(docDetails),
+            JSON.parse(this.getOrganizationDetails(ctx)),
+            JSON.parse(contact),
             "Doctor"
         );
         await ctx.stub.putState(
             DID,
-            Buffer.from(stringify(sortKeysRecursive(content)))
+            Buffer.from(
+                stringify(sortKeysRecursive({ ...content, department }))
+            )
         );
     }
 
+    async checkInPatient(ctx, PID) {
+        let patient = await ctx.stub.getState(PID);
+        if (
+            !patient ||
+            patient.length === 0 ||
+            !JSON.parse(patient)
+                .orgDetails.role.toLowerCase()
+                .includes("patient")
+        )
+            throw new Error("The patient identity does not exist.");
+        patient = JSON.parse(patient);
+        if (patient.checkIn.length === patient.checkOut.length) {
+            patient.checkIn.push(this.toDate(ctx.stub.getTxTimestamp()));
+            patient.active = this.getStatus(
+                patient.checkIn,
+                patient.checkOut,
+                patient.associatedDoctors
+            );
+            await ctx.stub.putState(PID, Buffer.from(stringify(patient)));
+        } else
+            throw new Error(
+                "The patient is already checked in. Please checkout the patient and try again."
+            );
+    }
     /**
-     * 
+     *
      * @param {Context} ctx - Transaction
      * @param {String} PID - PatientID
      * @param {String} DID - DoctorID
+     * This function assigns patient to doctor... [UPDATE]
+     * USE SubmitTransaction for this rather than evaluate
      */
-    // This function assigns patient to doctor... [UPDATE]
     async assignPatientToDoctor(ctx, PID, DID) {
-        let patient = this.memberExists(PID);
-        const cid = new ClientIdentity(ctx.stub);
-        // Check for existing and all neccessary errors
-        if (!patient || patient.length === 0)
-            throw new Error("Patient Identity does not exists...");
-        let doctor = this.memberExists(DID);
-        if (!doctor || doctor.length === 0)
-            throw new Error("Doctor Identity does not exists...");
-        patient = JSON.parse(patient.toString());
-        doctor = JSON.parse(patient.toString());
-        console.log(patient, doctor);
+        let [doctype, doctor] = await this.getMemberType(ctx, DID);
         if (
-            JSON.stringify(patient.orgDetails.org) ===
-            cid.getMSPID().toString()
+            doctype !== "Doctor" ||
+            !JSON.parse(doctor.toString())
+                .orgDetails.role.toString()
+                .toLowerCase()
+                .includes("doctor")
         )
+            throw new Error(
+                "Patient can only be registered by an in-hospital doctor."
+            );
+        let [_, patient] = await this.getMemberType(ctx, PID);
+        patient = JSON.parse(patient.toString());
+        doctor = JSON.parse(doctor.toString());
+        if (doctor.orgDetails.org !== patient.orgDetails.org)
             throw new Error(
                 "Patient can only be registered to in-hospital doctor."
             );
-        if (doctor.associatedPatients.includes(PID))
+        if (doctor.associatedPatients[PID])
             throw new Error(
-                "Doctor is already assigned to this patient...Please remove first then assign again for new entry"
+                "Doctor is already assigned to this patient...Please dissolve them first then assign again for new entry or reset status altogether"
             );
-
+        if (patient.checkIn.length === patient.checkOut.length)
+            throw new Error(
+                "Patient hasnot yet checkedin themselves. Please checkin the patient first"
+            );
         // Update the details
-        doctor.associatedPatients.push(PID);
-        patient.associatedDoctors.DID = null;
-        ctx.stub.putState(DID, Buffer.from(stringify(doctor)));
-        ctx.stub.putState(PID, Buffer.from(stringify(patient)));
+        const ptObj = {
+            accepted: this.toDate(ctx.stub.getTxTimestamp()),
+            dischargeOk: null,
+        };
+        const docObj = {
+            assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
+            active: ["Pending"],
+            note: "Pending to be examined",
+            EMRID: -500,
+            dischargeOk: null,
+        };
+        doctor.associatedPatients[PID] = ptObj;
+        patient.associatedDoctors[DID] = docObj; // Tag to recognize no record has yet been registered in the name of this patient
+        patient.active = this.getStatus(
+            patient.checkIn,
+            patient.checkOut,
+            patient.associatedDoctors
+        );
+        await ctx.stub.putState(DID, Buffer.from(stringify(doctor)));
+        await ctx.stub.putState(PID, Buffer.from(stringify(patient)));
     }
 
-    async getPatientDetails(ctx, PID){
-        const patient = this.memberExists(ctx, PID);
-        if (!patient || patient.length === 0)
-        throw new Error("Patient Identity does not exists...");
+    /**
+     * @param {TxContext} ctx
+     * @param {String} PID - Patient ID
+     * @returns {Buffer} Patient Object
+     * Utitlity/Useful function to get Patient Details from patient ID
+     * USE EvaluateTransaction
+     */
+    async getPatientDetails(ctx, PID) {
+        const [_, patient] = await this.getMemberType(ctx, PID);
         return patient.toString();
     }
-    
-    async getOrganizationDetails(ctx) {
-        console.log("Entered...");
+
+    async getPatientRecords(ctx, PID) {
+        //PHR and EMR if neccessary
+        //FUNCTION ASSOCIATED TO ABOVE FUNCTION...
+    }
+
+    /**
+     *
+     * @param {TxContext} ctx
+     * @param {String} DID - Doctor ID
+     * @returns {Buffer} Doctor Object
+     * function to get Patient Details from doctor ID
+     * USE EvaluateTransaction
+     */
+    async getDoctorDetails(ctx, DID) {
+        const [doctype, doctor] = await this.getMemberType(ctx, DID);
+        if (doctype === "Doctor" || doctype === "Admin")
+            return doctor.toString();
+        throw new Error("Invalid Host Request...");
+    }
+
+    async getAllPatientsForDoctor(ctx, DID) {
+        const [doctype, doc] = await this.getMemberType(ctx, DID);
+        if (doctype !== "Doctor" && doctype !== "Admin")
+            throw new Error("Invalid Host Request...");
+        const ptIDs = JSON.parse(doc).associatedPatients;
+        const allPatients = [];
+        for (const id of ptIDs) {
+            // OMITTING OrgDetails, secretShaingPair
+            const { secretSharingPair, ...res } = await ctx.stub.getState(id);
+            allPatients.push(JSON.parse(res));
+        }
+        return JSON.stringify(allPatients);
+    }
+
+    async getAllDoctorsForPatient(ctx, PID) {
+        const [type, patient] = await this.getMemberType(ctx, PID);
+        if (
+            !JSON.parse(patient)
+                .orgDetails.role.toString()
+                .toLowerCase()
+                .includes("patient")
+        )
+            throw new Error("Patient Identity does not exists...");
+
+        const docIDs = JSON.parse(patient).associatedDoctors;
+        const allDoctors = [];
+        await Promise.all(
+            Object.keys(docIDs).map(async (key) => {
+                const object = await ctx.stub.getState(key);
+                // OMITTING OrgDetails, secretShaingPair Key, associatedPatients of Doctor for User other than Admin
+                const { secretSharingPair, ...objAdmin } = object;
+                const { associatedPatients, ...obj } = objAdmin;
+                allDoctors.push(JSON.parse(type === "Admin" ? objAdmin : obj));
+            })
+        );
+        return JSON.stringify(allDoctors);
+    }
+
+    getOrganizationDetails(ctx) {
         const cid = new ClientIdentity(ctx.stub);
-        console.log("Identity : ", cid)
-        console.log("Role: ", cid.getAttributeValue("hf.Affiliation"));
-        console.log("OrgAdd : ", ctx.stub.getCreator());
-        return ({
+        return stringify({
             role: cid.getAttributeValue("hf.Affiliation"),
             org: cid.getMSPID(),
         });
     }
 
-    
+    toDate(timestamp) {
+        const milliseconds =
+            (timestamp.seconds.low + timestamp.nanos / 1000000 / 1000) * 1000;
+        return milliseconds;
+    }
+
+    getStatus(checkIn, checkOut, docs) {
+        if (checkIn.length >= checkOut.length) {
+            if (Object.keys(docs).length === 0) return "Waiting";
+            for (const key of Object.keys(docs))
+                if (!docs[key].dischargeOk) return "Watched";
+            return "Waiting for discharge (checkOut)";
+        }
+        return "Not Patients";
+    }
     async createOrgIndex(ctx, PID, orgDetails) {
         await ctx.stub.putState(
             await ctx.stub.createCompositeKey(indexedOrg, [orgDetails, PID]),
@@ -191,60 +264,74 @@ class FabCar extends Contract {
         );
     }
 
-    async retriveCompositeUsingKey(ctx, orgDetails) {
+    /**
+     *
+     * @param {TxContext} - Context
+     * @param {String} - Doctor ID
+     * @returns
+     */
+    async getAllPatients(ctx) {
+        const [type, mspid] = await this.getMemberType(ctx, "0");
+        if (type !== "Admin")
+            throw new Error(
+                "You are unauthorized to access this part of the site..."
+            );
         let ResultsIterator = await ctx.stub.getStateByPartialCompositeKey(
             indexedOrg,
-            [orgDetails]
+            [mspid]
         );
-
         // Iterate through result set and for each asset found, transfer to newOwner
         let response = await ResultsIterator.next();
-        console.log(response);
+        let allPatients = [];
         while (!response.done) {
-            if (!response || !response.value || !response.value.key) {
-                console.log("2", response);
-                return;
-            }
-
-            let objectType, attributes;
-            ({ objectType, attributes } = await ctx.stub.splitCompositeKey(
+            if (!response || !response.value || !response.value.key) return;
+            let attributes, _;
+            ({ _, attributes } = await ctx.stub.splitCompositeKey(
                 response.value.key
             ));
-            console.log("3", objectType, "::", attributes);
             let returnedAssetName = attributes[1];
             const v = await ctx.stub.getState(returnedAssetName);
-            console.log(v);
+            allPatients.push(JSON.parse(v.toString()));
             response = await ResultsIterator.next();
         }
+        return JSON.stringify(allPatients);
     }
 
-    async memberExists(ctx, id) {
-        console.log("Returning exists or not");
-        return await ctx.stub.getState(id);
-    }
-
-    async queryCar(ctx, carNumber) {
-        const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
-        if (!carAsBytes || carAsBytes.length === 0) {
-            throw new Error(`${carNumber} does not exist`);
+    /**
+     * @param {TxContext} ctx
+     * @param {String} id - Member ID
+     * @returns {String} - [Admin, Patient, Doctor]
+     */
+    async getMemberType(ctx, id) {
+        let member = await ctx.stub.getState(id);
+        const cid = new ClientIdentity(ctx.stub);
+        if (cid.getAttributeValue("orgAdmin")) {
+            if (!member || member.length === 0)
+                return ["Admin", cid.getMSPID()];
+            else return ["Admin", member];
         }
-        console.log(carAsBytes.toString());
-        return carAsBytes.toString();
-    }
-
-    async createCar(ctx, carNumber, make, model, color, owner) {
-        console.info("============= START : Create Car ===========");
-
-        const car = {
-            color,
-            docType: "car",
-            make,
-            model,
-            owner,
-        };
-
-        await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-        console.info("============= END : Create Car ===========");
+        if (!member || member.length === 0)
+            throw new Error(
+                "Either the identity does not exists or you are entering an unauthorized zone."
+            );
+        else {
+            if (
+                cid
+                    .getAttributeValue("hf.Affiliation")
+                    .toLowerCase()
+                    .includes("patient")
+            )
+                if (
+                    cid.getAttributeValue("hf.Affiliation") ===
+                    JSON.parse(member).orgDetails.role
+                )
+                    return ["Patient", member];
+                else
+                    throw new Error(
+                        "Invalid Host Identity. You are unauthorized to access this part of the site"
+                    );
+            else return ["Doctor", member];
+        }
     }
 
     async queryAllCars(ctx) {

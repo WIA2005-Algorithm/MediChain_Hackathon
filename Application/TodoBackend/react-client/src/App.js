@@ -2,7 +2,7 @@ import "./App.css";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { amber } from "@mui/material/colors";
 import Header from "./Components/Superuser/header";
-import { Button, Container, CssBaseline } from "@mui/material";
+import { Container, CssBaseline } from "@mui/material";
 import NetworkPage from "./Components/Superuser/networksPage";
 import Middle from "./Components/Superuser/middle";
 import {
@@ -10,14 +10,13 @@ import {
     Routes,
     Route,
     Navigate,
+    useLocation,
 } from "react-router-dom";
 import Login from "./Components/Superuser/Login";
 import { useAuth } from "./Components/UserAuth";
-import {
-    AddNewNotification,
-    getAlertValues,
-} from "./Components/StyledComponents";
+import { AddNewNotification } from "./Components/StyledComponents";
 import { createContext, useState } from "react";
+import { HospitalAdminContent } from "./Components/Adminuser/AdminApp";
 
 const getDesignTokens = (mode) => ({
     typography: {
@@ -30,12 +29,14 @@ const getDesignTokens = (mode) => ({
                 ? {
                       main: "#0C3E8C",
                       sectionContainer: "#FFF",
-                      sectionBorder: "#d21ab5",
+                      sectionBorder: "rgba(0, 0, 0, 0.12)",
+                      background100: "rgba(12, 62, 140, 0.04)"
                   }
                 : {
                       main: amber[600],
                       sectionContainer: "#0A1929",
-                      sectionBorder: "#2F3D4C",
+                      sectionBorder: "rgba(255, 255, 255, 0.12)",
+                      background100: "rgba(255, 179, 0, 0.08)"
                   }),
         },
         ...(mode === "light"
@@ -83,11 +84,28 @@ const getDesignTokens = (mode) => ({
     },
 });
 
+const GoToLogin = ({ logged }) => {
+    console.log("helloTo");
+    const { pathname } = useLocation();
+    console.log(pathname);
+    if (!logged)
+        return <Navigate to="/superuser/login" state={{ pathname }} replace />;
+    return <Navigate to={pathname} replace />;
+};
+const GoFromLogin = ({ logged, setLogin }) => {
+    console.log("helloFrom");
+    const { state } = useLocation();
+    const pathname = state ? state.pathname : "/superuser/networks";
+    if (logged) return <Navigate to={pathname} replace />;
+    return <Login setLogin={setLogin} pathname={pathname} />;
+};
+
 const ColorModeContext = createContext();
 function App() {
     const [notis, setNotis] = useState([]);
     // Solved my problem of re-rendering here
-    const handleRemove = (id) => setNotis((n) => n.filter((el) => el.id != id));
+    const handleRemove = (id) =>
+        setNotis((n) => n.filter((el) => el.id !== id));
     const [isLogged, login, logout, user] = useAuth();
     const [navigation, setNavigation] = useState({});
     const isNightMode = () => localStorage.getItem(btoa("NIGHT_MODE"));
@@ -104,13 +122,7 @@ function App() {
                 <CssBaseline />
                 <Router>
                     <Routes>
-                        {!isLogged && (
-                            <Route
-                                path="/superuser/login"
-                                element={<Login setLogin={login} />}
-                            />
-                        )}
-                        {isLogged && (
+                        {isLogged && user && user.role === "superadmin" && (
                             <Route
                                 path="/superuser/networks/*"
                                 element={
@@ -135,16 +147,30 @@ function App() {
                             />
                         )}
                         <Route
-                            path="/superuser/*"
+                            exact
+                            path="/admin/lol"
                             element={
-                                <Navigate
-                                    to={
-                                        isLogged
-                                            ? "/superuser/networks"
-                                            : "/superuser/login"
-                                    }
+                                <HospitalAdminContent
+                                    mode={colorMode}
+                                    newMode={ChangeColorMode}
+                                    logout={logout}
+                                    user={user}
                                 />
                             }
+                        />
+                        <Route
+                            exact
+                            path="/superuser/login"
+                            element={
+                                <GoFromLogin
+                                    logged={isLogged}
+                                    setLogin={login}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/superuser/*"
+                            element={<GoToLogin logged={isLogged} />}
                         />
                     </Routes>
                     <AddNewNotification notis={notis} Onremove={handleRemove} />

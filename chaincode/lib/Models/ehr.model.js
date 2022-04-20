@@ -7,7 +7,7 @@ const getTypeEHROrDoctor = (details, orgDetails, contact, type) => {
     let extraAttr;
     if (type === "Doctor") {
         extraAttr = {
-            associatedPatients: [],
+            associatedPatients: {},
         };
     } else {
         extraAttr = {
@@ -29,9 +29,8 @@ const getTypeEHROrDoctor = (details, orgDetails, contact, type) => {
             details.city,
             details.state,
             details.country,
-            orgDetails.orgID,
-            orgDetails.orgName,
-            orgDetails.orgAddress,
+            orgDetails.org,
+            orgDetails.role,
             contact.mobile,
             contact.other,
             contact.whatsapp

@@ -11,12 +11,18 @@ import {
     Visibility,
     VisibilityOff,
 } from "@mui/icons-material";
-import { Alert, Collapse, IconButton, InputAdornment } from "@mui/material";
+import {
+    Alert,
+    Collapse,
+    IconButton,
+    InputAdornment,
+    Tooltip,
+} from "@mui/material";
 import { loginAuth } from "../../APIs/Superuser/network.api.js";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-export default function Login({ setLogin }) {
+export default function Login({ setLogin, pathname }) {
     let navigate = useNavigate();
     const [pwVisible, setpwVisible] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -29,16 +35,15 @@ export default function Login({ setLogin }) {
         loginAuth(data.get("username").trim(), data.get("password"))
             .then((r) => {
                 setLogin(r.data);
-                navigate(`/superuser/networks`);
+                navigate(pathname);
             })
-            .catch((e) =>
+            .catch((e) => {
+                console.log(e);
                 e.response?.data
                     ? setError(e.response.data.DETAILS)
                     : setError(
                           `Failed to connect to the server. Check your internet connection`
-                      )
-            )
-            .finally(() => {
+                      );
                 setTimeout(() => {
                     setLoading(false);
                     setOpen(true);
@@ -116,12 +121,22 @@ export default function Login({ setLogin }) {
                                 ),
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={() => changeVisibility()}
-                                            sx={{ color: "text.primary" }}
+                                        <Tooltip
+                                            title={
+                                                pwVisible
+                                                    ? "Hide Password"
+                                                    : "Show Password"
+                                            }
                                         >
-                                            <GetVisibility />
-                                        </IconButton>
+                                            <IconButton
+                                                onClick={() =>
+                                                    changeVisibility()
+                                                }
+                                                sx={{ color: "text.primary" }}
+                                            >
+                                                <GetVisibility />
+                                            </IconButton>
+                                        </Tooltip>
                                     </InputAdornment>
                                 ),
                             }}

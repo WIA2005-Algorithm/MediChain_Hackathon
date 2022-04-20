@@ -18,7 +18,7 @@ import { log } from "../models/Utilities.model.js";
 export const intialize = async (orgName) => {
     const ccp = buildCCPOrg(orgName);
     const caClient = buildCAClient(FabricCAServices, ccp, orgName);
-    const wallet = await buildWallet(Wallets, walletPath);
+    const wallet = await buildWallet(Wallets, walletPath(orgName));
     return { caClient, wallet, ccp };
 };
 

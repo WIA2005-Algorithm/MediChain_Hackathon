@@ -27,11 +27,6 @@ const PersonalDetails = (
     address,
     contact,
 });
-const organizationDetails = (orgID, orgName, orgAddress) => ({
-    orgID,
-    orgName,
-    orgAddress,
-});
 
 /**
  * @param {String} type MemberType [Doctor, Patient]
@@ -44,10 +39,9 @@ const organizationDetails = (orgID, orgName, orgAddress) => ({
  * @param {String} city
  * @param {String} state [Optional]
  * @param {String} country
- * @param {String} orgID
- * @param {String} orgName
+ * @param {String} org
+ * @param {String} role
  * @param {Number} mobile [required]
- * @param {String} orgAddress
  * @param {Number} Other [Optional]
  * @param {Number} Whatsapp [Optional]
  * @returns {JSON}
@@ -62,9 +56,8 @@ const obtainDetails = (
     city,
     state,
     country,
-    orgID,
-    orgName,
-    orgAddress,
+    org,
+    role,
     mobile,
     other = null,
     whatsapp = null
@@ -77,7 +70,7 @@ const obtainDetails = (
         Address(street, zip, city, state, country),
         Contact(mobile, other, whatsapp)
     ),
-    orgDetails: organizationDetails(orgID, orgName, orgAddress),
+    orgDetails: {org, role},
 });
 
 module.exports = { obtainDetails };

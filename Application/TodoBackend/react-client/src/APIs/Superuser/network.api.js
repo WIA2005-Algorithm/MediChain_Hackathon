@@ -2,8 +2,7 @@ import axios from "axios";
 import { _token } from "../../Components/UserAuth";
 
 axios.interceptors.request.use((config) => {
-    console.log(_token.accessToken);
-    config.headers.Authorization = _token.accessToken;
+    config.headers.Authorization = _token?.accessToken;
     return config;
 });
 

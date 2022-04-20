@@ -49,7 +49,7 @@ function NothingYet(props) {
     );
 }
 
-function NetworkAvailable() {
+function NetworkAvailable({ notis }) {
     const [promise, setPromise] = useState(false);
     const [response, setResponse] = useState(undefined);
     const [pending, setpending] = useState(undefined);
@@ -95,6 +95,7 @@ function NetworkAvailable() {
                 <NetStatus
                     status={pending}
                     setStatus={setpending}
+                    notis={notis}
                     circlesx={{ mt: 2, width: "25px", height: "25px" }}
                     sx={{
                         color: "primary.main",
@@ -214,7 +215,7 @@ function Load(props) {
                     fetch={fetchNetworkCount}
                 />
             );
-        return <NetworkAvailable />;
+        return <NetworkAvailable notis={props.notis} />;
     }
 }
 
@@ -239,6 +240,7 @@ export default function NetworkPage(props) {
                         <Load
                             openForm={enableForm}
                             setOpenForm={setEnableForm}
+                            notis={props.notis}
                         />
                     }
                 />
