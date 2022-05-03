@@ -1,10 +1,13 @@
 import {
     AddCircle,
+    AssignmentTurnedIn,
+    ExitToApp,
     History,
     MedicalServices,
     PeopleAlt,
     PermContactCalendar,
     QueryStats,
+    ReceiptLong,
 } from "@mui/icons-material";
 import {
     Toolbar,
@@ -30,7 +33,7 @@ export function AppNavSideBar() {
         setOptSelected(item.id);
         nav(item.url, { state: { extra } });
     };
-    const navItems = [
+    const adminItems = [
         //TODO: ADD URL INSIDE BELOW ICON ATTRIBUTE
         {
             id: 0,
@@ -54,6 +57,28 @@ export function AppNavSideBar() {
             id: 4,
             name: "Activity History",
             icon: <History />,
+            url: "/",
+        },
+    ];
+
+    const patientItems = [
+        //TODO: ADD URL INSIDE BELOW ICON ATTRIBUTE
+        {
+            id: 5,
+            name: "Enroll Patient",
+            icon: <ReceiptLong />,
+            url: "/",
+        },
+        {
+            id: 6,
+            name: "Assign Patient",
+            icon: <AssignmentTurnedIn />,
+            url: "/",
+        },
+        {
+            id: 7,
+            name: "Discharge Patients",
+            icon: <ExitToApp />,
             url: "/",
         },
     ];
@@ -101,7 +126,35 @@ export function AppNavSideBar() {
                         mt: 3,
                     }}
                 >
-                    {navItems.map((item) => (
+                    <ListItemText
+                        sx={{
+                            ml: 1,
+                            "& .MuiTypography-root": { fontWeight: "bold" },
+                        }}
+                    >
+                        Admin
+                    </ListItemText>
+                    {adminItems.map((item) => (
+                        <ListItemButton
+                            key={item.id}
+                            selected={optSelected === item.id}
+                            // TODO: Onclick item
+                            onClick={() => navigate(item)}
+                        >
+                            <ListItemIcon>{item.icon}</ListItemIcon>
+                            <ListItemText primary={item.name} />
+                        </ListItemButton>
+                    ))}
+                    <Divider />
+                    <ListItemText
+                        sx={{
+                            m: 1,
+                            "& .MuiTypography-root": { fontWeight: "bold" },
+                        }}
+                    >
+                        Patients
+                    </ListItemText>
+                    {patientItems.map((item) => (
                         <ListItemButton
                             key={item.id}
                             selected={optSelected === item.id}

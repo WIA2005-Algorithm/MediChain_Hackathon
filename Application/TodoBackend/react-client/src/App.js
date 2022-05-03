@@ -19,6 +19,18 @@ import { createContext, useState } from "react";
 import { HospitalAdminContent } from "./Components/Adminuser/AdminApp";
 
 const getDesignTokens = (mode) => ({
+    "@global": {
+        "*::-webkit-scrollbar": {
+            width: "0.4em",
+        },
+        "*::-webkit-scrollbar-track": {
+            "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.00)",
+        },
+        "*::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(0,0,0,.1)",
+            outline: "1px solid slategrey",
+        },
+    },
     typography: {
         fontSize: 13,
     },
@@ -30,13 +42,13 @@ const getDesignTokens = (mode) => ({
                       main: "#0C3E8C",
                       sectionContainer: "#FFF",
                       sectionBorder: "rgba(0, 0, 0, 0.12)",
-                      background100: "rgba(12, 62, 140, 0.04)"
+                      background100: "rgba(12, 62, 140, 0.04)",
                   }
                 : {
                       main: amber[600],
                       sectionContainer: "#0A1929",
                       sectionBorder: "rgba(255, 255, 255, 0.12)",
-                      background100: "rgba(255, 179, 0, 0.08)"
+                      background100: "rgba(255, 179, 0, 0.08)",
                   }),
         },
         ...(mode === "light"
@@ -119,7 +131,7 @@ function App() {
     return (
         <ColorModeContext.Provider value={{ colorMode, update: setColorMode }}>
             <ThemeProvider theme={theme}>
-                <CssBaseline />
+                <CssBaseline enableColorScheme />
                 <Router>
                     <Routes>
                         {isLogged && user && user.role === "superadmin" && (

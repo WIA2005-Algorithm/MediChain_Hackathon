@@ -2,6 +2,7 @@ import { Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { AppContentBar } from "./AppBar";
 import { OverViewTab } from "./Contents/OverView";
+import PatientData from "./Contents/Patients";
 import { AppNavSideBar } from "./SideBar";
 
 function Content() {
@@ -36,7 +37,8 @@ export function HospitalAdminContent({ mode, newMode, logout, user }) {
             <Box sx={{ flexGrow: 1, p: 3 }} component="main">
                 <Toolbar />
                 {/* TODO: ADD ROUTES BELOW DELETE CONTENT */}
-                <OverViewTab/>
+                {/* <OverViewTab/> */}
+                <PatientData />
             </Box>
         </Box>
     );
