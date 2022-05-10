@@ -118,6 +118,10 @@ export const Organizations = mongoose.model(
                         `${props.value} is not a valid username!\nA valid username contains atleast 5 characters with no spaces, no special characters in the beginning or end. \nAllowed special characters include 'underscore' and 'dot'`,
                 },
                 required: [true, "Admin username is required"],
+                unique: [
+                    true,
+                    "Make sure admin userID is different from existing admin userID(s).",
+                ],
                 trim: true,
             },
             // ^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8}$

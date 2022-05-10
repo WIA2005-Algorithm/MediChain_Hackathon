@@ -214,7 +214,7 @@ function DivisionStats() {
                                 <Tip title="Go to Patients Section">
                                     <IconButton
                                         //TODO: add a navlink
-                                        onClick={() => nav("/")}
+                                        onClick={() => nav("/patients")}
                                     >
                                         <Link />
                                     </IconButton>

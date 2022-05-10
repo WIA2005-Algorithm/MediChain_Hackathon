@@ -65,8 +65,8 @@ export const getNetworkExists = (name) =>
         },
     });
 
-export const deleteOrganization = (networkName, org) =>
-    axios.delete(`/superuser/organizations/${networkName}/${org}`);
+export const deleteOrganization = (networkName, org, admin) =>
+    axios.delete(`/superuser/organizations/${networkName}/${org}/${admin}`);
 
 export const enrollAdmin = (orgName) => axios.post(`/superuser/organizations/${orgName}/enroll`);
 

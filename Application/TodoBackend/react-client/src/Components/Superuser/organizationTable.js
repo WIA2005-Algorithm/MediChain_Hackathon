@@ -49,6 +49,7 @@ function createData(
     name,
     id,
     admin,
+    password,
     state,
     country,
     createAt,
@@ -59,6 +60,7 @@ function createData(
         name,
         id,
         admin,
+        password,
         state,
         country,
         createAt,
@@ -112,6 +114,12 @@ const headCells = [
         numeric: true,
         disablePadding: false,
         label: "Admin ID",
+    },
+    {
+        id: "password",
+        numeric: true,
+        disablePadding: false,
+        label: "Password",
     },
     {
         id: "state",
@@ -349,9 +357,13 @@ const EnhancedTableToolbar = (props) => {
         var temprows = rows.map((x) => x);
         for (let k = 0; k < selected.length; k++) {
             const org = selected[k];
-            let deleted = await deleteOrganization(network.Name, org);
             for (let i = 0; i < temprows.length; i++)
                 if (org === temprows[i].objID) {
+                    await deleteOrganization(
+                        network.Name,
+                        org,
+                        temprows[i].admin
+                    );
                     temprows.splice(i, 1);
                     break;
                 }
@@ -564,6 +576,7 @@ function EnhancedTable({ networkName, network, notis, navigateTo }) {
                         org.FullName,
                         org.Name,
                         org.AdminID,
+                        org.Password,
                         org.State,
                         org.Country,
                         `${date.toLocaleString("default", {
@@ -729,6 +742,9 @@ function EnhancedTable({ networkName, network, notis, navigateTo }) {
                                                     {row.admin}
                                                 </TableCell>
                                                 <TableCell align="right">
+                                                    {row.password}
+                                                </TableCell>
+                                                <TableCell align="right">
                                                     {row.state}
                                                 </TableCell>
                                                 <TableCell align="right">
@@ -855,7 +871,10 @@ export default function OrganizationTables({ nav, setNav, notis }) {
                     />
                 }
             />
-            <Route path="/new" element={<FullScreenDialog />} />
+            <Route
+                path="/new"
+                element={<FullScreenDialog broadcastAlert={notis} />}
+            />
             <Route
                 path="/activity_logs"
                 element={

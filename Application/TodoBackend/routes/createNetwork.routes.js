@@ -14,6 +14,8 @@ import { generateNetworkFiles, StopNetwork } from "../Utils/execute.js";
 import { authenticateUser, getAccessToken } from "../server_config.js";
 import { EnrollAdmin } from "../controllers/register.js";
 import { log } from "../models/Utilities.model.js";
+import { createAdminEntity } from "../controllers/Entity.controller.js";
+import { HospitalEntity } from "../models/Entity.model.js";
 const router = Router();
 router.post("/create/network", authenticateUser, (req, res) => {
     createNetwork({
@@ -42,20 +44,12 @@ router.post("/create/network", authenticateUser, (req, res) => {
             res.status(err.status).json(new response.errorResponse(err));
         });
 });
-
 router.post("/create/organization", authenticateUser, (req, res) => {
-    Block_Network.findOne({ Name: req.body.networkName }).exec(function (
-        err,
-        doc
-    ) {
-        if (!doc) {
-            err = errors.network_not_found.withDetails(
-                "Server couldn't recognize the blockchain network"
-            );
-            res.status(err.status).json(new response.errorResponse(err));
-        } else {
+    Block_Network.findOne({ Name: req.body.networkName })
+        .exec()
+        .then((doc) => {
             const NetworkID = doc._id;
-            createOrganization(NetworkID, {
+            return createOrganization(NetworkID, {
                 FullName: req.body.fullName,
                 Name: req.body.id,
                 AdminID: req.body.adminID,
@@ -63,31 +57,36 @@ router.post("/create/organization", authenticateUser, (req, res) => {
                 Country: req.body.country,
                 State: req.body.state,
                 Location: req.body.location,
+            });
+        })
+        .then(() =>
+            createAdminEntity({
+                userID: req.body.adminID,
+                password: req.body.password,
+                organization: req.body.id,
+                type: "admin",
             })
-                .then(() =>
-                    res.status(200).json({
-                        message: "Organization was successfully created",
-                    })
-                )
-                .catch((err) => {
-                    if (!(err instanceof ApiError))
-                        err = new ApiError(
-                            409,
-                            "Bad Input",
-                            "There is an error in the input provided.."
-                        ).withDetails(err.message);
-                    log(
-                        "SuperAdmin",
-                        `Organization Creation Failed For [${req.body.id}]`,
-                        "There was an error in the input provided. You may resubmit form later - 409",
-                        "error"
-                    );
-                    res.status(err.status).json(
-                        new response.errorResponse(err)
-                    );
-                });
-        }
-    });
+        )
+        .then(() =>
+            res
+                .status(200)
+                .json({ message: "Organization was successfully created" })
+        )
+        .catch((err) => {
+            if (!(err instanceof ApiError))
+                err = new ApiError(
+                    409,
+                    "Bad Input",
+                    "There is an error in the input provided.."
+                ).withDetails(err.message);
+            log(
+                "SuperAdmin",
+                `Organization Creation Failed For [${req.body.id}]`,
+                "There was an error in the input provided. You may resubmit form later - 409",
+                "error"
+            );
+            return res.status(err.status).json(new response.errorResponse(err));
+        });
 });
 
 router.post("/network/start", authenticateUser, (req, res) => {
@@ -201,16 +200,16 @@ router.post("/login", (req, res) => {
             Superuser.findByIdAndUpdate(user._id, {
                 refreshToken: session.refreshToken,
             })
-                .then(() => res.status(200).json(session))
-                .catch(() => res.status(500))
-                .finally(() =>
+                .then(() => {
                     log(
                         "SuperAdmin",
                         `User Login`,
                         "Successfully Logged In [SuperAdmin]",
                         "success"
-                    )
-                );
+                    );
+                    return res.status(200).json(session);
+                })
+                .catch(() => res.status(500));
         });
     });
 });
@@ -226,10 +225,14 @@ router.get("/network/all", authenticateUser, (_, res) => {
 });
 
 router.delete(
-    "/organizations/:networkName/:org",
+    "/organizations/:networkName/:org/:admin",
     authenticateUser,
     (req, res) => {
         Organizations.findByIdAndDelete(req.params.org, async () => {
+            let userAdmin = await HospitalEntity.findOneAndDelete({
+                userID: req.params.admin,
+            }).exec();
+            if (!userAdmin) res.sendStatus(400);
             let del = await Block_Network.updateOne(
                 { Name: req.params.networkName },
                 {

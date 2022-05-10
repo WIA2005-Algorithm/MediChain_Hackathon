@@ -1,10 +1,7 @@
 import "./App.css";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { amber } from "@mui/material/colors";
-import Header from "./Components/Superuser/header";
-import { Container, CssBaseline } from "@mui/material";
-import NetworkPage from "./Components/Superuser/networksPage";
-import Middle from "./Components/Superuser/middle";
+import { CircularProgress, CssBaseline } from "@mui/material";
 import {
     BrowserRouter as Router,
     Routes,
@@ -12,11 +9,13 @@ import {
     Navigate,
     useLocation,
 } from "react-router-dom";
-import Login from "./Components/Superuser/Login";
+import Login from "./Components/Superuser/SuperLogin";
 import { useAuth } from "./Components/UserAuth";
 import { AddNewNotification } from "./Components/StyledComponents";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { HospitalAdminContent } from "./Components/Adminuser/AdminApp";
+import SuperAdminContent from "./Components/Superuser/SuperUserAdmin";
+import { Box } from "@mui/system";
 
 const getDesignTokens = (mode) => ({
     "@global": {
@@ -96,20 +95,49 @@ const getDesignTokens = (mode) => ({
     },
 });
 
-const GoToLogin = ({ logged }) => {
-    console.log("helloTo");
+const GoToLogin = ({ logged, user, setLogin, type = "superuser" }) => {
     const { pathname } = useLocation();
-    console.log(pathname);
-    if (!logged)
-        return <Navigate to="/superuser/login" state={{ pathname }} replace />;
-    return <Navigate to={pathname} replace />;
+    const wasLogged = logged;
+    useEffect(() => {
+        if (user && user.role !== type) setLogin(null);
+    }, []);
+
+    if (user && user.role === type && pathname.includes(type))
+        return <Navigate to={pathname} replace />;
+    return (
+        <Navigate
+            to={type == "superuser" ? "/superuser/login" : "/admin/login"}
+            state={{
+                pathname,
+                message: wasLogged
+                    ? "You were not authorized to access this sector. Login to access"
+                    : "",
+            }}
+            replace
+        />
+    );
 };
-const GoFromLogin = ({ logged, setLogin }) => {
-    console.log("helloFrom");
+const GoFromLogin = ({ user, setLogin, type = "superuser" }) => {
+    console.log("helloFrom", user);
     const { state } = useLocation();
-    const pathname = state ? state.pathname : "/superuser/networks";
-    if (logged) return <Navigate to={pathname} replace />;
-    return <Login setLogin={setLogin} pathname={pathname} />;
+    useEffect(() => {
+        if (user && user.role !== type) setLogin(null);
+    }, []);
+    let pathname;
+    if (type === "superuser")
+        pathname = state ? state.pathname : "/superuser/networks";
+    else pathname = state ? state.pathname : `/admin/${state.org}`;
+    console.log(pathname);
+    if (user && user.role === type && pathname.includes(type))
+        return <Navigate to={pathname} replace />;
+    return (
+        <Login
+            setLogin={setLogin}
+            pathname={pathname}
+            message={state && state.message}
+            loginType={type}
+        />
+    );
 };
 
 const ColorModeContext = createContext();
@@ -127,66 +155,113 @@ function App() {
         localStorage.setItem(btoa("NIGHT_MODE"), newMode);
         setColorMode(newMode);
     };
+    // To load the user data initially...
+    const [userAvailable, setUserAvailable] = useState(false);
+
+    useEffect(() => {
+        if (user !== undefined) {
+            setUserAvailable(true);
+        }
+    }, [user]);
+
     const theme = createTheme(getDesignTokens(colorMode));
     return (
         <ColorModeContext.Provider value={{ colorMode, update: setColorMode }}>
             <ThemeProvider theme={theme}>
                 <CssBaseline enableColorScheme />
-                <Router>
-                    <Routes>
-                        {isLogged && user && user.role === "superadmin" && (
-                            <Route
-                                path="/superuser/networks/*"
-                                element={
-                                    <>
-                                        <Header
+                {!userAvailable && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            height: "100vh",
+                            width: "100vw",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
+                        <CircularProgress />
+                    </Box>
+                )}
+                {userAvailable && (
+                    <Router>
+                        <Routes>
+                            {isLogged && user && user.role === "superadmin" && (
+                                <Route
+                                    path="/superuser/networks/*"
+                                    element={
+                                        <SuperAdminContent
                                             newMode={ChangeColorMode}
                                             mode={colorMode}
                                             logout={logout}
                                             user={user}
                                             setNotis={setNotis}
+                                            nav={navigation}
+                                            setNav={setNavigation}
                                         />
-                                        <Container>
-                                            <Middle nav={navigation} />
-                                            <NetworkPage
-                                                nav={navigation}
-                                                setNav={setNavigation}
-                                                notis={setNotis}
-                                            />
-                                        </Container>
-                                    </>
+                                    }
+                                />
+                            )}
+                            {isLogged && user && user.role === "admin" && (
+                                <Route
+                                    exact
+                                    path={`/admin/${user.org}/*`}
+                                    element={
+                                        <HospitalAdminContent
+                                            mode={colorMode}
+                                            newMode={ChangeColorMode}
+                                            logout={logout}
+                                            user={user}
+                                        />
+                                    }
+                                />
+                            )}
+                            <Route
+                                exact
+                                path="/superuser/login"
+                                element={
+                                    <GoFromLogin user={user} setLogin={login} />
                                 }
                             />
-                        )}
-                        <Route
-                            exact
-                            path="/admin/lol"
-                            element={
-                                <HospitalAdminContent
-                                    mode={colorMode}
-                                    newMode={ChangeColorMode}
-                                    logout={logout}
-                                    user={user}
-                                />
-                            }
+                            <Route
+                                exact
+                                path="/admin/login"
+                                element={
+                                    <GoFromLogin
+                                        user={user}
+                                        setLogin={login}
+                                        type="admin"
+                                    />
+                                }
+                            />
+                            <Route
+                                exact
+                                path="/admin/*"
+                                element={
+                                    <GoToLogin
+                                        logged={isLogged}
+                                        user={user}
+                                        setLogin={login}
+                                        type="admin"
+                                    />
+                                }
+                            />
+                            <Route
+                                path="/superuser/*"
+                                element={
+                                    <GoToLogin
+                                        logged={isLogged}
+                                        user={user}
+                                        setLogin={login}
+                                    />
+                                }
+                            />
+                        </Routes>
+                        <AddNewNotification
+                            notis={notis}
+                            Onremove={handleRemove}
                         />
-                        <Route
-                            exact
-                            path="/superuser/login"
-                            element={
-                                <GoFromLogin
-                                    logged={isLogged}
-                                    setLogin={login}
-                                />
-                            }
-                        />
-                        <Route
-                            path="/superuser/*"
-                            element={<GoToLogin logged={isLogged} />}
-                        />
-                    </Routes>
-                    <AddNewNotification notis={notis} Onremove={handleRemove} />
-                </Router>
+                    </Router>
+                )}
             </ThemeProvider>
         </ColorModeContext.Provider>
     );

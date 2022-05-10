@@ -22,23 +22,30 @@ import { loginAuth } from "../../APIs/Superuser/network.api.js";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-export default function Login({ setLogin, pathname }) {
+import { adminLoginAuth } from "../../APIs/Admin/main.api.js";
+
+const login = async (user, pass, type) => {
+    if (type === "superuser") return loginAuth(user, pass);
+    return adminLoginAuth(user, pass);
+};
+export default function Login({ setLogin, pathname, message, loginType }) {
     let navigate = useNavigate();
     const [pwVisible, setpwVisible] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(undefined);
-    const [open, setOpen] = useState(false);
+    const [error, setError] = useState(message);
+    const [open, setOpen] = useState(message ? true : false);
     const handleSubmit = (event) => {
+        console.log(loginType);
         event.preventDefault();
         setLoading(true);
         const data = new FormData(event.currentTarget);
-        loginAuth(data.get("username").trim(), data.get("password"))
+        login(data.get("username").trim(), data.get("password"), loginType)
             .then((r) => {
                 setLogin(r.data);
-                navigate(pathname);
+                console.log("MYPATH", pathname);
+                navigate(pathname, {state: {org: r.data?.org}});
             })
             .catch((e) => {
-                console.log(e);
                 e.response?.data
                     ? setError(e.response.data.DETAILS)
                     : setError(
@@ -75,7 +82,10 @@ export default function Login({ setLogin, pathname }) {
                         fontWeight="bolder"
                         marginTop="10px"
                     >
-                        Superuser Login
+                        {loginType === "superuser"
+                            ? "Superuser "
+                            : "Hospital Admin "}
+                        Login
                     </Typography>
                     <Box
                         component="form"
@@ -181,8 +191,11 @@ export default function Login({ setLogin, pathname }) {
                             fontSize="13px"
                             color="text.secondary"
                         >
-                            Please contact the blockchain developer, if you have
-                            forgotten your superuser password
+                            Please contact the{" "}
+                            {loginType === "superuser"
+                                ? "blockchain developer"
+                                : "superuser head"}{" "}
+                            , if you have forgotten your password
                         </Grid>
                     </Box>
                 </Box>
