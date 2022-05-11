@@ -2,7 +2,7 @@ import {
     DarkMode,
     DarkModeOutlined,
     KeyboardArrowDown,
-    Logout
+    Logout,
 } from "@mui/icons-material";
 import {
     Toolbar,
@@ -74,10 +74,7 @@ export function AppContentBar({ mode, newMode, logout, user }) {
                             aria-haspopup="true"
                             aria-expanded={open ? "true" : undefined}
                         >
-                            <Avatar
-                                atl={user && user.username}
-                                src={adminImg}
-                            />
+                            <Avatar atl={user.org} src={adminImg} />
                             <KeyboardArrowDown sx={{ ml: 2 }} />
                         </Button>
                     </Tooltip>
@@ -118,9 +115,10 @@ export function AppContentBar({ mode, newMode, logout, user }) {
                 >
                     {/* TODO: ADD ANOTHER ITEM */}
                     <MenuItem onClick={handleClose}>
-                        <Avatar sx={{ bgcolor: "primary.main" }}>HA</Avatar>
-                        {"  "}
-                        {user && user.username}
+                        <Avatar sx={{ bgcolor: "primary.main" }}>
+                            {user.username[0]}
+                        </Avatar>
+                        {user.username}
                     </MenuItem>
                     <Divider />
                     <MenuItem onClick={() => logout()}>

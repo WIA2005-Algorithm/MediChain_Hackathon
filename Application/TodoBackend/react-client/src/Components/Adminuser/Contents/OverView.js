@@ -11,7 +11,6 @@ import {
     Divider,
     FormControl,
     InputLabel,
-    NativeSelect,
     MenuItem,
     Select,
 } from "@mui/material";
@@ -65,22 +64,22 @@ function createDivisionStatsData(icon, department, number) {
     return { icon, department, number };
 }
 
-function createNormalSectionBoxData(icon, num, title, link = null) {
-    return { icon, num, title, link };
+function createNormalSectionBoxData(icon, num, title, linkID = null) {
+    return { icon, num, title, linkID };
 }
-function NormalSectionBox() {
+function NormalSectionBox({ changeTabTo }) {
     const sectionBoxContent = [
         createNormalSectionBoxData(
             <KingBed color="inherit" />,
             234,
             "Total Patients",
-            "/"
+            1
         ),
         createNormalSectionBoxData(
             <People color="inherit" />,
             34,
             "Total Available Staff",
-            "/"
+            2
         ),
         createNormalSectionBoxData(
             <AccountBalanceWallet color="inherit" />,
@@ -88,8 +87,7 @@ function NormalSectionBox() {
             "Avg Treatment Cost"
         ),
     ];
-    const nav = useNavigate();
-    return sectionBoxContent.map(({ icon, num, title, link }) => (
+    return sectionBoxContent.map(({ icon, num, title, linkID }) => (
         <SectionContainer
             key={title}
             sx={{
@@ -123,10 +121,10 @@ function NormalSectionBox() {
                     {title}
                 </Typography>
             </Typography>
-            {link && (
+            {linkID && (
                 <Tip title={`Go to ${title} Section`}>
                     <IconButton
-                        onClick={() => nav(link)}
+                        onClick={() => changeTabTo(linkID)}
                         sx={{ position: "absolute", right: 2, top: 2 }}
                     >
                         <Link />
@@ -154,7 +152,7 @@ const columns = [
         format: (value) => value.toFixed(0),
     },
 ];
-function DivisionStats() {
+function DivisionStats({ changeTabTo }) {
     const rows = [
         createDivisionStatsData(<EscalatorWarning />, "General", 63),
         createDivisionStatsData(<LocalHospital />, "Medicine", 63),
@@ -167,7 +165,6 @@ function DivisionStats() {
         createDivisionStatsData(<Visibility />, "Ophthalmology", 63),
         createDivisionStatsData(<CheckBoxOutlineBlank />, "Other", 63),
     ];
-    const nav = useNavigate();
     return (
         <SectionContainer
             sx={{
@@ -189,7 +186,10 @@ function DivisionStats() {
                                     backgroundColor: "primary.sectionContainer",
                                 }}
                             >
-                                <Typography sx={{ whiteSpace: "nowrap" }}>
+                                <Typography
+                                    sx={{ whiteSpace: "nowrap" }}
+                                    component="div"
+                                >
                                     <span>
                                         <b>Admitted Patients By Department</b>
                                         <br></br>
@@ -214,7 +214,7 @@ function DivisionStats() {
                                 <Tip title="Go to Patients Section">
                                     <IconButton
                                         //TODO: add a navlink
-                                        onClick={() => nav("/patients")}
+                                        onClick={() => changeTabTo(1)}
                                     >
                                         <Link />
                                     </IconButton>
@@ -489,7 +489,7 @@ function TimeLineGraph() {
                     width: "100%",
                 }}
             >
-                <Typography sx={{ whiteSpace: "nowrap" }}>
+                <Typography sx={{ whiteSpace: "nowrap" }} component="div">
                     <span>
                         <b>Admitted Patients By Department</b>
                         <br></br>
@@ -549,9 +549,10 @@ function TimeLineGraph() {
         </SectionContainer>
     );
 }
-export function OverViewTab() {
+export function OverViewTab({ changeTabTo }) {
     return (
-        <Box component='div'
+        <Box
+            component="div"
             sx={{
                 width: "100%",
             }}
@@ -562,10 +563,10 @@ export function OverViewTab() {
                     width: "100%",
                 }}
             >
-                <NormalSectionBox />
+                <NormalSectionBox changeTabTo={changeTabTo} />
             </Box>
             <Box sx={{ display: "flex", width: "100%" }}>
-                <DivisionStats />
+                <DivisionStats changeTabTo={changeTabTo} />
                 <StatsSection />
             </Box>
             <Box sx={{ display: "flex", width: "100%", minHeight: " 550px" }}>

@@ -1,11 +1,77 @@
-import { Toolbar, Typography } from "@mui/material";
+import { Toolbar } from "@mui/material";
 import { Box } from "@mui/system";
+import { useEffect, useState } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { AppContentBar } from "./AppBar";
 import { OverViewTab } from "./Contents/OverView";
 import PatientData from "./Contents/Patients";
 import { AppNavSideBar } from "./SideBar";
+import {
+    AssignmentTurnedIn,
+    ExitToApp,
+    History,
+    MedicalServices,
+    PeopleAlt,
+    QueryStats,
+    ReceiptLong,
+} from "@mui/icons-material";
 
 export function HospitalAdminContent({ mode, newMode, logout, user }) {
+    const [optSelected, setOptSelected] = useState(0);
+    const nav = useNavigate();
+    const adminItems = [
+        //TODO: ADD URL INSIDE BELOW ICON ATTRIBUTE
+        {
+            id: 0,
+            name: "Overview",
+            icon: <QueryStats />,
+            url: `/admin/${user.org}/overview`,
+        },
+        {
+            id: 1,
+            name: "Patients",
+            icon: <PeopleAlt />,
+            url: `/admin/${user.org}/patients`,
+        },
+        {
+            id: 2,
+            name: "Doctors",
+            icon: <MedicalServices />,
+            url: `/admin/${user.org}/doctors`,
+        },
+        {
+            id: 3,
+            name: "Activity History",
+            icon: <History />,
+            url: `/admin/${user.org}/act_history`,
+        },
+        //TODO: ADD URL INSIDE BELOW ICON ATTRIBUTE
+        {
+            id: 4,
+            name: "Enroll Patient",
+            icon: <ReceiptLong />,
+            url: "/",
+        },
+        {
+            id: 5,
+            name: "Assign Patient",
+            icon: <AssignmentTurnedIn />,
+            url: "/",
+        },
+        {
+            id: 6,
+            name: "Discharge Patients",
+            icon: <ExitToApp />,
+            url: "/",
+        },
+    ];
+    //@INFO: JUST TO PASS DATA BETWEEN TABS
+    const navigate = (id, ...extra) => {
+        // 0: overview, 1: patients, 2: doctor, 3:activity history
+        console.log(`Called me - ID: ${id} to go to ${adminItems[id].url}`);
+        setOptSelected(parseInt(id));
+        nav(adminItems[parseInt(id)].url, { state: { extra } });
+    };
     return (
         <Box sx={{ display: "flex" }}>
             <AppContentBar
@@ -14,23 +80,24 @@ export function HospitalAdminContent({ mode, newMode, logout, user }) {
                 logout={logout}
                 user={user}
             />
-            <AppNavSideBar />
+            <AppNavSideBar
+                user={user}
+                optSelected={optSelected}
+                changeTabTo={navigate}
+                navItems={adminItems}
+            />
             <Box sx={{ flexGrow: 1, p: 3 }} component="main">
                 <Toolbar />
                 <Routes>
-                <Route path="/patients" element={<PatientData /> } />
-                <Route
-                    path="/overview"
-                    element={
-                        <OverViewTab />
-                    }
-                />  
-                <Route
-                    path="/"
-                    element={
-                        <OverViewTab />
-                    }
-                />
+                    <Route path="/patients" element={<PatientData />} />
+                    <Route
+                        path="/overview"
+                        element={<OverViewTab changeTabTo={navigate} />}
+                    />
+                    <Route
+                        path="/"
+                        element={<OverViewTab changeTabTo={navigate} />}
+                    />
                 </Routes>
             </Box>
         </Box>
