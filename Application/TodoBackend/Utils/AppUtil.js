@@ -32,7 +32,6 @@ const buildCCPOrg = (orgName) => {
             "Make sure your organisation is enrolled and added into the network, then try again"
         );
     }
-    console.log(ccp);
     return ccp;
 };
 

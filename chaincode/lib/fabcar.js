@@ -23,16 +23,17 @@ class FabCar extends Contract {
      * This function adds a patient to the hospital. - [INSERTION]
      * USE SubmitTransaction for this rather than evaluate
      */
-    async addPatientEHR(ctx, PID, ptDetails, contact) {
+    async addPatientEHR(ctx, PID, ptDetails, address, contact) {
         const member = await ctx.stub.getState(PID);
         if (member && member.length !== 0)
             throw new Error(`The patient with ${PID} already exists`);
 
-        let orgDetails = this.getOrganizationDetails(ctx);
-        orgDetails = JSON.parse(orgDetails);
+        let orgDetails = JSON.parse(this.getOrganizationDetails(ctx));
+        console.log(orgDetails);
         const content = getTypeEHROrDoctor(
             JSON.parse(ptDetails),
             orgDetails,
+            JSON.parse(address),
             JSON.parse(contact),
             "Patient"
         );
@@ -236,6 +237,7 @@ class FabCar extends Contract {
 
     getOrganizationDetails(ctx) {
         const cid = new ClientIdentity(ctx.stub);
+        console.log(cid);
         return stringify({
             role: cid.getAttributeValue("hf.Affiliation"),
             org: cid.getMSPID(),

@@ -12,3 +12,16 @@ export const adminLoginAuth = (username, password) =>
         password: password,
         type: "admin",
     });
+
+export const getHospitalsEnrolled = () =>
+    axios.get("/entity/getEnrolledHospitals");
+
+export const addNewPatientAPI = (
+    loginDetails,
+    personalDetails,
+    address,
+    contactDetails
+) =>
+    axios.post("/entity/addNewPatient/onBehalf", {
+        payloadData: { loginDetails, personalDetails, address, contactDetails },
+    });

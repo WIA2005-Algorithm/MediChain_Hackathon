@@ -95,11 +95,11 @@ const getDesignTokens = (mode) => ({
     },
 });
 
-const GoToLogin = ({ logged, user, setLogin, type = "superuser" }) => {
+const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
     const { pathname } = useLocation();
     const wasLogged = logged;
     useEffect(() => {
-        if (user && user.role !== type) setLogin(null);
+        if (user && user.role !== type) logout();
     }, []);
 
     if (user && user.role === type && pathname.includes(type))
@@ -117,11 +117,11 @@ const GoToLogin = ({ logged, user, setLogin, type = "superuser" }) => {
         />
     );
 };
-const GoFromLogin = ({ user, setLogin, type = "superuser" }) => {
+const GoFromLogin = ({ user, setLogin, logout, type = "superuser" }) => {
     console.log("helloFrom", user);
     const { state } = useLocation();
     useEffect(() => {
-        if (user && user.role !== type) setLogin(null);
+        if (user && user.role !== type) logout();
     }, []);
     let pathname;
     if (type === "superuser")
@@ -211,6 +211,7 @@ function App() {
                                             newMode={ChangeColorMode}
                                             logout={logout}
                                             user={user}
+                                            setNotis={setNotis}
                                         />
                                     }
                                 />
@@ -219,7 +220,11 @@ function App() {
                                 exact
                                 path="/superuser/login"
                                 element={
-                                    <GoFromLogin user={user} setLogin={login} />
+                                    <GoFromLogin
+                                        user={user}
+                                        setLogin={login}
+                                        logout={logout}
+                                    />
                                 }
                             />
                             <Route
@@ -229,6 +234,7 @@ function App() {
                                     <GoFromLogin
                                         user={user}
                                         setLogin={login}
+                                        logout={logout}
                                         type="admin"
                                     />
                                 }
@@ -240,7 +246,7 @@ function App() {
                                     <GoToLogin
                                         logged={isLogged}
                                         user={user}
-                                        setLogin={login}
+                                        logout={logout}
                                         type="admin"
                                     />
                                 }
@@ -251,7 +257,7 @@ function App() {
                                     <GoToLogin
                                         logged={isLogged}
                                         user={user}
-                                        setLogin={login}
+                                        logout={logout}
                                     />
                                 }
                             />

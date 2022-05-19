@@ -3,7 +3,7 @@ const { obtainDetails } = require("./utilities.model.js");
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
 }
-const getTypeEHROrDoctor = (details, orgDetails, contact, type) => {
+const getTypeEHROrDoctor = (details, orgDetails, address, contact, type) => {
     let extraAttr;
     if (type === "Doctor") {
         extraAttr = {
@@ -15,20 +15,24 @@ const getTypeEHROrDoctor = (details, orgDetails, contact, type) => {
             associatedDoctors: {},
         };
     }
-
+    console.log(" HEY ---> ", orgDetails);
     return {
         ...extraAttr,
         secretSharingPair: {},
         ...obtainDetails(
             details.firstName,
+            details.middleName,
             details.lastName,
-            details.gender,
+            details.email,
             details.DOB,
-            details.street,
-            details.zip,
-            details.city,
-            details.state,
-            details.country,
+            details.gender,
+            details.maritalStatus,
+            address.street1,
+            address.street2,
+            address.postcode,
+            address.country,
+            address.state,
+            address.city,
             orgDetails.org,
             orgDetails.role,
             contact.mobile,
@@ -46,19 +50,24 @@ console.log(
             getTypeEHROrDoctor(
                 {
                     firstName: "Kamal",
-                    lastName: "Kumar Khatri",
+                    middleName: " Kumar",
+                    lastName: "Khatri",
                     gender: "Male",
+                    email: "kamal20012011@hotmail.com",
+                    maritalStatus: "married",
                     DOB: "06/23/2001",
-                    street: null,
-                    zip: null,
+                },
+                {
+                    org: "UMMC",
+                    role: "Patient",
+                },
+                {
+                    street1: "sdf",
+                    street2: "wer",
+                    postcode: null,
                     city: "Salalah",
                     state: null,
                     country: "Oman",
-                },
-                {
-                    orgID: "Org1MSP",
-                    orgName: "UMMC",
-                    orgAddress: "ummc.um.edu.my",
                 },
                 {
                     mobile: "+96894637602",
@@ -66,37 +75,6 @@ console.log(
                     whatsapp: null,
                 },
                 "Patient"
-            )
-        )
-    )
-);
-
-console.log(
-    prettyJSONString(
-        JSON.stringify(
-            getTypeEHROrDoctor(
-                {
-                    firstName: "Kamal",
-                    lastName: "Kumar Khatri",
-                    gender: "Male",
-                    DOB: "06/23/2001",
-                    street: null,
-                    zip: null,
-                    city: "Salalah",
-                    state: null,
-                    country: "Oman",
-                },
-                {
-                    orgID: "Org1MSP",
-                    orgName: "UMMC",
-                    orgAddress: "ummc.um.edu.my",
-                },
-                {
-                    mobile: "+96894637602",
-                    other: null,
-                    whatsapp: null,
-                },
-                "Doctor"
             )
         )
     )

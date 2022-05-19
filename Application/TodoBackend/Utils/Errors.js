@@ -44,6 +44,7 @@ errors.invalid_permission = new ApiError(401, 'INVALID_PERMISSION','Permission d
 errors.not_reachable = new ApiError(500, 'Network Not Reachable', "Network timeout expired. Please try again later");
 errors.contract_error = new ApiError(401, 'Contract Error Occurred. Please see more details');
 errors.identity_not_found = new ApiError(401, "Unknown User", "Make sure to login/Signup before submitting requests");
+errors.signUpError = new ApiError(500, "Unknown Error", "Looks like there was an error in processing your request");
 
 errors.required_key = new ApiError(400, 'REQUIRED_KEY','Api key is required. Please provide a valid api key along with request.');
 errors.required_auth = new ApiError(400, 'REQUIRED_AUTH_TOKEN','Auth Token is required. Please provide a valid auth token along with request.');

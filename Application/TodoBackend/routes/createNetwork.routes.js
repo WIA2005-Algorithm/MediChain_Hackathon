@@ -59,14 +59,12 @@ router.post("/create/organization", authenticateUser, (req, res) => {
                 Location: req.body.location,
             });
         })
-        .then(() =>
-            createAdminEntity({
+        .then(() => createAdminEntity({
                 userID: req.body.adminID,
                 password: req.body.password,
                 organization: req.body.id,
                 type: "admin",
-            })
-        )
+            }))
         .then(() =>
             res
                 .status(200)

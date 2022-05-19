@@ -1,29 +1,37 @@
 "use strict";
-const Address = (street, zip, city, state, country) => ({
-    street: !street ? "N/A" : street,
-    zipCode: !zip ? "N/A" : zip,
-    city,
-    state: !state ? "N/A" : state,
+const Address = (street1, street2, zip, city, state, country) => ({
+    street1,
+    street2: !street2 ? "" : street2,
+    postcode: !zip ? "N/A" : zip,
     country,
+    state,
+    city
+
 });
 
 const Contact = (mobile, otherNo, whatsapp) => ({
     mobile,
-    otherNumber: !otherNo ? "N/A" : otherNo,
     whatsapp: !whatsapp ? "N/A" : whatsapp,
+    otherNumber: !otherNo ? "N/A" : otherNo,
 });
 const PersonalDetails = (
     firstName,
+    middleName,
     lastName,
-    gender,
+    email,
     DOB,
+    gender,
+    maritalStatus,
     address,
     contact
 ) => ({
     firstName,
+    middleName,
     lastName,
-    gender,
+    email,
     DOB,
+    gender,
+    maritalStatus,
     address,
     contact,
 });
@@ -48,14 +56,18 @@ const PersonalDetails = (
  */
 const obtainDetails = (
     firstName,
+    middleName,
     lastName,
-    gender,
+    email,
     DOB,
-    street,
-    zip,
-    city,
-    state,
+    gender,
+    maritalStatus,
+    street1,
+    street2,
+    postcode,
     country,
+    state,
+    city,
     org,
     role,
     mobile,
@@ -64,13 +76,16 @@ const obtainDetails = (
 ) => ({
     details: PersonalDetails(
         firstName,
+        middleName,
         lastName,
-        gender,
+        email,
         DOB,
-        Address(street, zip, city, state, country),
+        gender,
+        maritalStatus,
+        Address(street1, street2, postcode, city, state, country),
         Contact(mobile, other, whatsapp)
     ),
-    orgDetails: {org, role},
+    orgDetails: { org, role },
 });
 
 module.exports = { obtainDetails };

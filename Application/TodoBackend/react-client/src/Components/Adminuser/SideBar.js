@@ -103,8 +103,9 @@ export function AppNavSideBar({ optSelected, changeTabTo, navItems }) {
                             textTransform: "capitalize",
                             width: "100%",
                         }}
+                        onClick={() => changeTabTo('/registerPatient')}
                     >
-                        <b>Register Doctor</b>
+                        <b>Register Patient</b>
                     </Button>
                 </ListItem>
                 <ListItem>

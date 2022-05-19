@@ -14,7 +14,6 @@ export const buildCAClient = (FabricCAServices, ccp, orgName) => {
         ccp.certificateAuthorities[
             ccp.organizations[orgName].certificateAuthorities[0]
         ]; //lookup CA details from config
-    console.log(caInfo);
     if (!caInfo)
         throw errors.file_not_found.withDetails(
             "Configuration Files are missing"
@@ -73,6 +72,7 @@ export const registerAndEnrollUser = async (
     ccp
 ) => {
     // Check to see if we've already enrolled the user
+    console.log(affiliation, "IN REGISTERandEnroll");
     const userIdentity = await wallet.get(userId);
     const admin = ccp.organizations[orgName].adminUserId;
     const orgMspId = ccp.organizations[orgName].mspid;
@@ -125,6 +125,7 @@ export const registerAndEnrollUser = async (
 export async function getContract(orgName, userID) {
     const { wallet, ccp } = await intialize(orgName);
     const userIdentity = await wallet.get(userID);
+    console.log(userID);
     if (!userIdentity)
         throw errors.identity_not_found.withDetails(
             "No more details available"

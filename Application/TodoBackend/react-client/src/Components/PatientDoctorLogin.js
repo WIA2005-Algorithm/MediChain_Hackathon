@@ -28,7 +28,7 @@ const login = async (user, pass, type) => {
     if (type === "superuser") return loginAuth(user, pass);
     return adminLoginAuth(user, pass);
 };
-export default function Login({ setLogin, pathname, message, loginType }) {
+export default function PatientDoctorLogin({ setLogin, pathname, message, loginType }) {
     let navigate = useNavigate();
     const [pwVisible, setpwVisible] = useState(false);
     const [loading, setLoading] = useState(false);

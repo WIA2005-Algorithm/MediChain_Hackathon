@@ -3,11 +3,11 @@ import { Router } from "express";
 import { response, ApiError } from "../Utils/Errors.js";
 import { EnrollAdmin, RegisterUser } from "../controllers/register.js";
 import {
-    addMember,
     assign,
     checkIn,
     retriveAllPatients,
 } from "../controllers/member.controller.js";
+import { addMember } from "../controllers/Entity.controller.js";
 const router = Router();
 
 router.post("/admin/enroll", (req, res) => {

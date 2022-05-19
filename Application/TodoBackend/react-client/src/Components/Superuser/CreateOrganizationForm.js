@@ -44,7 +44,7 @@ function CountrySelect() {
         setCountry(values.shortName);
     };
     return (
-        <>
+        <Box sx={{ padding: "8px 16px" }}>
             <Box
                 component="div"
                 sx={{ display: "flex", alignItems: "flex-start", mt: 2 }}
@@ -79,7 +79,7 @@ function CountrySelect() {
                         <TextField
                             {...params}
                             label="Choose a country"
-                            helperText="A valid country contains only alphabets and spaces"
+                            helperText="Please select a valid country from the list"
                             required
                             name="country"
                             id="country"
@@ -119,7 +119,7 @@ function CountrySelect() {
                         <TextField
                             {...params}
                             label="Choose a State/Province"
-                            helperText="A valid state/province contains only alphabets and spaces"
+                            helperText="Please select a valid state/province from the list"
                             required
                             name="state"
                             id="state"
@@ -157,7 +157,7 @@ function CountrySelect() {
                     ),
                 }}
             />
-        </>
+        </Box>
     );
 }
 
@@ -487,9 +487,7 @@ export default function FullScreenDialog({ broadcastAlert }) {
                             />
                         </ListItemButton>
                         <Collapse in={openAdminDetails} timeout="auto">
-                            <Box sx={{ padding: "8px 16px" }}>
-                                <CountrySelect />
-                            </Box>
+                            <CountrySelect />
                         </Collapse>
                         <LoadingButton
                             type="submit"

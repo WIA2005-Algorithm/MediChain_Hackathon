@@ -15,6 +15,8 @@ import {
     ListItemIcon,
     Menu,
     MenuItem,
+    Chip,
+    Typography,
 } from "@mui/material";
 import { AppIconHead } from "../StyledComponents";
 import adminImg from "../../static/images/admin.png";
@@ -63,20 +65,27 @@ export function AppContentBar({ mode, newMode, logout, user }) {
                             <GetMode />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="User">
-                        <Button
-                            sx={{ textTransform: "capitalize !important" }}
+                    <Tooltip title="You">
+                        <Chip
+                            sx={{
+                                "& .MuiChip-label": {
+                                    textTransform: "capitalize",
+                                    fontSize: "14px",
+                                },
+                                "& .MuiChip-avatar": {
+                                    width: "35px",
+                                    height: "35px",
+                                    ml: -0.5,
+                                },
+                            }}
+                            label={user.username.split()[0]}
                             onClick={handleClick}
-                            edge="end"
-                            aria-label="User"
-                            color="inherit"
-                            aria-controls={open ? "account-menu" : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={open ? "true" : undefined}
-                        >
-                            <Avatar atl={user.org} src={adminImg} />
-                            <KeyboardArrowDown sx={{ ml: 2 }} />
-                        </Button>
+                            onDelete={handleClick}
+                            avatar={
+                                <Avatar atl={user.username[0]} src={adminImg} />
+                            }
+                            deleteIcon={<KeyboardArrowDown />}
+                        />
                     </Tooltip>
                 </Box>
                 <Menu
@@ -115,10 +124,14 @@ export function AppContentBar({ mode, newMode, logout, user }) {
                 >
                     {/* TODO: ADD ANOTHER ITEM */}
                     <MenuItem onClick={handleClose}>
-                        <Avatar sx={{ bgcolor: "primary.main" }}>
-                            {user.username[0]}
-                        </Avatar>
-                        {user.username}
+                        <Avatar sx={{ bgcolor: "primary.main" }}>H</Avatar>
+                        <Typography
+                            component="span"
+                            sx={{ fontSize: "13px", ml: 0.5 }}
+                        >
+                            <div>AdminID : {user.username}</div>
+                            <div>Organization : {user.org}</div>
+                        </Typography>
                     </MenuItem>
                     <Divider />
                     <MenuItem onClick={() => logout()}>

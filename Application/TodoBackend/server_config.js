@@ -8,6 +8,7 @@ import cors from "cors";
 import { Superuser } from "./models/Network.model.js";
 import errors, { response } from "./Utils/Errors.js";
 import { System_logs } from "./models/Utilities.model.js";
+import { HospitalEntity } from "./models/Entity.model.js";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ const {
     REFRESH_ACCESS_TOKEN,
 } = process.env;
 
+// Initially set the refresh token then afterwards don't update refresh token but only access token, thus refresh=false
 export function getAccessToken(user, refresh = true) {
     const token = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "10m" });
     if (refresh)
@@ -31,34 +33,56 @@ export function getAccessToken(user, refresh = true) {
     return token;
 }
 
+const roleBasedTokenVerify = (role, refreshToken) => {
+    switch (role) {
+        case "admin":
+            return HospitalEntity.findOne({ refreshToken }).exec();
+
+        default:
+            return Superuser.findOne({ refreshToken }).exec();
+    }
+};
+
+const getAccessTokenObj = (role, user) => {
+    switch (role) {
+        case "admin":
+            return {
+                username: user.username,
+                role: user.role,
+                org: user.org,
+                key: user.key,
+            };
+
+        default:
+            return {
+                username: user.username,
+                role: user.role,
+            };
+    }
+};
 app.post("/api/update-token", (req, res) => {
-    const err = errors.required_auth.withDetails("The token is not valid");
-    console.log("Called Me");
-    Superuser.findOne({ refreshToken: req.body.refreshToken }).exec(
-        (_, doc) => {
-            if (!doc)
-                return res
-                    .status(err.status)
-                    .json(new response.errorResponse(err));
-            jwt.verify(
-                req.body.refreshToken,
-                REFRESH_ACCESS_TOKEN,
-                (_, user) => {
-                    if (!user)
-                        return res
-                            .status(err.status)
-                            .json(new response.errorResponse(err));
-                    return res.status(200).json({
-                        accessToken: getAccessToken(
-                            { username: user.username, role: user.role },
-                            false
-                        ),
-                        refreshToken: req.body.refreshToken,
-                    });
-                }
-            );
-        }
-    );
+    const err = errors.required_auth.withDetails("The token is not valid"),
+        role = req.body.role,
+        refreshToken = req.body.refreshToken;
+    roleBasedTokenVerify(role, refreshToken)
+        .then(() => {
+            jwt.verify(refreshToken, REFRESH_ACCESS_TOKEN, (err, user) => {
+                if (!user)
+                    return res
+                        .status(err.status)
+                        .json(new response.errorResponse(err));
+                return res.status(200).json({
+                    accessToken: getAccessToken(
+                        getAccessTokenObj(role, user),
+                        false
+                    ),
+                    refreshToken: req.body.refreshToken,
+                });
+            });
+        })
+        .catch(() => {
+            return res.status(err.status).json(new response.errorResponse(err));
+        });
 });
 
 export function authenticateUser(req, res, next) {
