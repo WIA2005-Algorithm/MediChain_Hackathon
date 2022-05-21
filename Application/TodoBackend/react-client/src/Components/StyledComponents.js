@@ -191,6 +191,7 @@ function Notification({ item, Onremove, autoRemove = true }) {
             onMouseEnter={autoRemove === false ? handleMouseOver : undefined}
             onMouseLeave={autoRemove === false ? handleMouseOut : undefined}
             sx={{
+                zIndex: (theme) => theme.zIndex.drawer + 2,
                 boxShadow: "rgb(0 0 0 / 27%) 0px 2px 3px 2px",
                 borderRadius: "60px 0 0 60px",
                 borderBottom: "2px solid",

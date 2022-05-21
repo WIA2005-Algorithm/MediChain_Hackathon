@@ -45,8 +45,15 @@ router.post("/create/network", authenticateUser, (req, res) => {
         });
 });
 router.post("/create/organization", authenticateUser, (req, res) => {
-    Block_Network.findOne({ Name: req.body.networkName })
-        .exec()
+    createAdminEntity({
+        userID: req.body.adminID,
+        password: req.body.password,
+        organization: req.body.id,
+        type: "admin",
+    })
+        .then(() =>
+            Block_Network.findOne({ Name: req.body.networkName }).exec()
+        )
         .then((doc) => {
             const NetworkID = doc._id;
             return createOrganization(NetworkID, {
@@ -59,12 +66,6 @@ router.post("/create/organization", authenticateUser, (req, res) => {
                 Location: req.body.location,
             });
         })
-        .then(() => createAdminEntity({
-                userID: req.body.adminID,
-                password: req.body.password,
-                organization: req.body.id,
-                type: "admin",
-            }))
         .then(() =>
             res
                 .status(200)
@@ -253,15 +254,13 @@ router.delete(
 
 router.post("/organizations/:name/enroll", authenticateUser, (req, res) => {
     EnrollAdmin(req.params.name)
-        .then(() => {
+        .then(() =>
             Organizations.findOneAndUpdate(
                 { Name: req.params.name },
                 { Enrolled: 1 }
-            ).exec((_, succ) => {
-                if (!succ) return res.sendStatus(500);
-                return res.sendStatus(200);
-            });
-        })
+            ).exec()
+        )
+        .then(() => res.sendStatus(200))
         .catch((err) => {
             if (!(err instanceof ApiError))
                 err = new ApiError(400, "Bad Request", err.message).withDetails(

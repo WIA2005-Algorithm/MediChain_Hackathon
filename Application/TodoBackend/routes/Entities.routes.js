@@ -2,9 +2,10 @@ import { Router } from "express";
 import {
     addMember,
     createAdminEntity,
+    deleteAdminEntity,
 } from "../controllers/Entity.controller.js";
 import { RegisterUser } from "../controllers/register.js";
-import { HospitalEntity } from "../models/Entity.model.js";
+import { getHashedUserID, HospitalEntity } from "../models/Entity.model.js";
 import { Organizations } from "../models/Network.model.js";
 import { log } from "../models/Utilities.model.js";
 import { getAccessToken } from "../server_config.js";
@@ -99,29 +100,35 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
 router.post("/addNewPatient/onBehalf", (req, res) => {
     const { loginDetails, personalDetails, address, contactDetails } =
         req.body.payloadData;
-    const SignupDetails = JSON.parse(loginDetails);
+    let encryptedID;
     // TYPE IS capitalized after below statement
-    const type = `${String(SignupDetails.TYPE).charAt(0).toUpperCase()}${String(
-        SignupDetails.TYPE
+    const type = `${String(loginDetails.TYPE).charAt(0).toUpperCase()}${String(
+        loginDetails.TYPE
     ).slice(1)}`;
-    RegisterUser(SignupDetails.org, SignupDetails.ID, type)
+
+    getHashedUserID(loginDetails.ID)
+        .then((hash) => {
+            encryptedID = hash;
+            return RegisterUser(loginDetails.org, encryptedID, type);
+        })
         .then(() =>
             createAdminEntity({
-                userID: SignupDetails.ID,
-                alternateKey: SignupDetails.password,
-                organization: SignupDetails.org,
+                userID: loginDetails.ID,
+                alternateKey: loginDetails.password,
+                organization: loginDetails.org,
                 type: String(type.toLowerCase()),
             })
         )
         .then(() =>
-            addMember(SignupDetails.org, SignupDetails.ID, {
+            addMember(loginDetails.org, encryptedID, {
                 personalDetails,
                 address,
                 contactDetails,
             })
         )
         .then(() => res.sendStatus(200))
-        .catch((err) => {
+        .catch(async (err) => {
+            await deleteAdminEntity(loginDetails.ID);
             err = errors.signUpError.withDetails(`${err.message}`);
             return res.status(err.status).json(new response.errorResponse(err));
         });

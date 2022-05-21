@@ -5,6 +5,9 @@ function prettyJSONString(inputString) {
 }
 const getTypeEHROrDoctor = (details, orgDetails, address, contact, type) => {
     let extraAttr;
+    console.log("RECIEVEDINT", typeof details);
+    console.log("Weird: ", details["passport"], details["firstName"]);
+    console.log("Normal: ", details.passport, details.firstName);
     if (type === "Doctor") {
         extraAttr = {
             associatedPatients: {},
@@ -15,24 +18,24 @@ const getTypeEHROrDoctor = (details, orgDetails, address, contact, type) => {
             associatedDoctors: {},
         };
     }
-    console.log(" HEY ---> ", orgDetails);
     return {
         ...extraAttr,
         secretSharingPair: {},
         ...obtainDetails(
-            details.firstName,
-            details.middleName,
-            details.lastName,
-            details.email,
-            details.DOB,
-            details.gender,
-            details.maritalStatus,
-            address.street1,
-            address.street2,
-            address.postcode,
-            address.country,
-            address.state,
-            address.city,
+            details["passport"],
+            details["firstName"],
+            details["middleName"],
+            details["lastName"],
+            details["email"],
+            details["DOB"],
+            details["gender"],
+            details["maritalStatus"],
+            address["street1"],
+            address["street2"],
+            address["postcode"],
+            address["country"],
+            address["state"],
+            address["city"],
             orgDetails.org,
             orgDetails.role,
             contact.mobile,
@@ -49,6 +52,7 @@ console.log(
         JSON.stringify(
             getTypeEHROrDoctor(
                 {
+                    passport: "AH4227964",
                     firstName: "Kamal",
                     middleName: " Kumar",
                     lastName: "Khatri",

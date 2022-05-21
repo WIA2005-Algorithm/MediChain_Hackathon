@@ -5,8 +5,7 @@ const Address = (street1, street2, zip, city, state, country) => ({
     postcode: !zip ? "N/A" : zip,
     country,
     state,
-    city
-
+    city,
 });
 
 const Contact = (mobile, otherNo, whatsapp) => ({
@@ -15,6 +14,7 @@ const Contact = (mobile, otherNo, whatsapp) => ({
     otherNumber: !otherNo ? "N/A" : otherNo,
 });
 const PersonalDetails = (
+    passport,
     firstName,
     middleName,
     lastName,
@@ -24,17 +24,33 @@ const PersonalDetails = (
     maritalStatus,
     address,
     contact
-) => ({
-    firstName,
-    middleName,
-    lastName,
-    email,
-    DOB,
-    gender,
-    maritalStatus,
-    address,
-    contact,
-});
+) => {
+    console.log(
+        "RECIEVE3: ",
+        passport,
+        firstName,
+        middleName,
+        lastName,
+        email,
+        DOB,
+        gender,
+        maritalStatus,
+        address,
+        contact
+    );
+    return {
+        passport,
+        firstName,
+        middleName,
+        lastName,
+        email,
+        DOB,
+        gender,
+        maritalStatus,
+        address,
+        contact,
+    };
+};
 
 /**
  * @param {String} type MemberType [Doctor, Patient]
@@ -55,6 +71,7 @@ const PersonalDetails = (
  * @returns {JSON}
  */
 const obtainDetails = (
+    passport,
     firstName,
     middleName,
     lastName,
@@ -73,8 +90,10 @@ const obtainDetails = (
     mobile,
     other = null,
     whatsapp = null
-) => ({
-    details: PersonalDetails(
+) => {
+    console.log(
+        "RECIEVED2",
+        passport,
         firstName,
         middleName,
         lastName,
@@ -82,10 +101,31 @@ const obtainDetails = (
         DOB,
         gender,
         maritalStatus,
-        Address(street1, street2, postcode, city, state, country),
-        Contact(mobile, other, whatsapp)
-    ),
-    orgDetails: { org, role },
-});
+        street1,
+        street2,
+        postcode,
+        country,
+        state,
+        city,
+        org,
+        role,
+        mobile
+    );
+    return {
+        details: PersonalDetails(
+            passport,
+            firstName,
+            middleName,
+            lastName,
+            email,
+            DOB,
+            gender,
+            maritalStatus,
+            Address(street1, street2, postcode, city, state, country),
+            Contact(mobile, other, whatsapp)
+        ),
+        orgDetails: { org, role },
+    };
+};
 
 module.exports = { obtainDetails };

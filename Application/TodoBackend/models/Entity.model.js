@@ -18,22 +18,15 @@ const EntityType = new Schema(
 
 EntityType.pre("save", function (next) {
     var user = this;
+    console.log("USER OF THIS", user);
+    const pass = user.alternateKey[0] ? user.alternateKey[0] : user.password;
     // HASH TYPE FIRST
     if (!user.isModified("password") && !user.isModified("type")) return next();
     bcrypt
-        .hash(`${user.password}@${user.type}`, SALT_WORK_FACTOR)
+        .hash(`${pass}@${user.type}`, SALT_WORK_FACTOR)
         .then((hash) => {
             user.type = hash;
-            if (user.alternateKey[0])
-                return bcrypt.hash(
-                    `${user.alternateKey[0]}@${user.userID}`,
-                    SALT_WORK_FACTOR
-                );
-            else
-                return bcrypt.hash(
-                    `${user.password}@${user.userID}`,
-                    SALT_WORK_FACTOR
-                );
+            return bcrypt.hash(`${pass}@${user.userID}`, SALT_WORK_FACTOR);
         })
         .then((hash) => {
             if (user.alternateKey[0]) user.alternateKey = [hash, new Date()];
@@ -63,3 +56,5 @@ EntityType.methods.compareAlternate = function (EAlternate) {
 // });
 
 export const HospitalEntity = mongoose.model("HospitalEntity", EntityType);
+export const getHashedUserID = async (userID) =>
+    await bcrypt.hash(userID, SALT_WORK_FACTOR);

@@ -29,7 +29,7 @@ class FabCar extends Contract {
             throw new Error(`The patient with ${PID} already exists`);
 
         let orgDetails = JSON.parse(this.getOrganizationDetails(ctx));
-        console.log(orgDetails);
+        console.log("RECIEVED : ", ptDetails);
         const content = getTypeEHROrDoctor(
             JSON.parse(ptDetails),
             orgDetails,

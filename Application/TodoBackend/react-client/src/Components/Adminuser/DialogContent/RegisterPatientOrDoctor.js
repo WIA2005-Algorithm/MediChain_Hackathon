@@ -58,7 +58,7 @@ function AddressDetails({ address, setTheField, setRequiredError }) {
             setField("country", null);
             return;
         }
-        setField("country", values.shortName);
+        setField("country", `${values.name} (${values.shortName})`);
     };
     return (
         <Box sx={{ padding: "8px 16px" }}>
@@ -191,7 +191,9 @@ function AddressDetails({ address, setTheField, setRequiredError }) {
                     disabled={address.country ? false : true}
                     options={
                         address.country
-                            ? CountryCity.getStatesByShort(address.country)
+                            ? CountryCity.getStatesByShort(
+                                  address.country.split("(")[1].slice(0, -1)
+                              )
                             : []
                     }
                     autoHighlight
@@ -886,7 +888,7 @@ export default function RegisterPatient({ broadcastAlert, user }) {
                     `You may now ask the patient to login with the alternate key with - ${user.org}`
                 ),
             ]);
-        navigate(url);
+        navigate(url? url : -1);
     };
     // OPEN OR CLOSE THE ALERT
     const [open, setOpen] = useState(false);
@@ -994,16 +996,18 @@ export default function RegisterPatient({ broadcastAlert, user }) {
             );
             return;
         }
+        personalDetails.fields.passport = loginDetails.fields.ID;
         addNewPatientAPI(
-            JSON.stringify(loginDetails.fields),
-            JSON.stringify(personalDetails.fields),
-            JSON.stringify(address.fields),
-            JSON.stringify(contactDetails.fields)
+            loginDetails.fields,
+            personalDetails.fields,
+            address.fields,
+            contactDetails.fields
         )
             .then(() => {
                 handleClose("../overview");
             })
             .catch((e) => {
+                console.log(JSON.stringify(e));
                 closeForError(
                     e.response.data.DETAILS
                         ? e.response.data.DETAILS

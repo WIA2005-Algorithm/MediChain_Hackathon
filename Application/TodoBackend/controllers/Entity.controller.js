@@ -8,6 +8,9 @@ export const createAdminEntity = async (EntityObj) => {
     return EOBJ;
 };
 
+export const deleteAdminEntity = async (userID) =>
+    await HospitalEntity.findOneAndDelete({ userID });
+
 export async function addMember(
     orgName,
     userID,

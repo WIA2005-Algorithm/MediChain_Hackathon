@@ -14,19 +14,78 @@ import {
 import {
     Alert,
     Collapse,
+    FormHelperText,
     IconButton,
     InputAdornment,
+    InputLabel,
+    Link,
+    MenuItem,
+    Select,
     Tooltip,
 } from "@mui/material";
 import { loginAuth } from "../../APIs/Superuser/network.api.js";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import { adminLoginAuth } from "../../APIs/Admin/main.api.js";
+import {
+    adminLoginAuth,
+    getHospitalsEnrolled,
+} from "../../APIs/Admin/main.api.js";
 
 const login = async (user, pass, type) => {
-    if (type === "superuser") return loginAuth(user, pass);
-    return adminLoginAuth(user, pass);
+    switch (type) {
+        case "superuser":
+            return loginAuth(user, pass);
+            break;
+        case "admin":
+            return adminLoginAuth(user, pass);
+        default:
+            break;
+    }
+};
+const GetOrganizationField = () => {
+    const [promise, setPromise] = useState(false);
+    const [options, setOptions] = useState([]);
+    let fetchHospitalOptions = useCallback(async () => {
+        let res = await getHospitalsEnrolled();
+        if (res) setOptions(res.data);
+        setPromise(() => true);
+    }, []);
+
+    useEffect(() => {
+        fetchHospitalOptions();
+    }, [fetchHospitalOptions]);
+
+    return (
+        <FormControl>
+            <InputLabel id="hospital-select-helper">
+                Hospital Organization
+            </InputLabel>
+            <Select
+                labelId="hospital-select-helper"
+                id="org"
+                required
+                value=""
+                name="org"
+                disabled={!promise}
+                label="Hospital Organization"
+            >
+                <MenuItem value="">
+                    <em>Please Select</em>
+                </MenuItem>
+                {options.map((val) => (
+                    <MenuItem key={val} value={val}>
+                        {val}
+                    </MenuItem>
+                ))}
+            </Select>
+            <FormHelperText>
+                Please key in your the hospital you want to register for the
+                record. If you are unable to find your hospital, please contact
+                the hospital as soon as possible.
+            </FormHelperText>
+        </FormControl>
+    );
 };
 export default function Login({ setLogin, pathname, message, loginType }) {
     let navigate = useNavigate();
@@ -63,6 +122,44 @@ export default function Login({ setLogin, pathname, message, loginType }) {
 
     const changeVisibility = () => setpwVisible(!pwVisible);
 
+    const navigateToSignup = () =>
+        navigate(`/${loginType}/signup`, { state: { type: loginType } });
+    const getLabelForLogin = (label = true) => {
+        switch (loginType) {
+            case "superuser":
+                return label ? "Superuser " : "SuperAdminID";
+            case "admin":
+                return label ? "Admin " : "AdminID";
+            case "patient":
+                return label ? "Patient " : "PatientID";
+            case "doctor":
+                return label ? "Staff " : "StaffID";
+            default:
+                break;
+        }
+    };
+    const GetLabelForHelp = () => {
+        switch (loginType) {
+            case "superuser":
+                return "Please contact the blockchain developer if you have forgotten your password";
+            case "admin":
+                return "Please contact the superuser head of network if you have forgotten your password";
+            case "patient":
+                return (
+                    <Link onClick={navigateToSignup}>
+                        New to the site? Sign up Now!
+                    </Link>
+                );
+            case "doctor":
+                return (
+                    <Link onClick={navigateToSignup}>
+                        New to the site? Sign up Now!
+                    </Link>
+                );
+            default:
+                return "";
+        }
+    };
     return (
         <Container component="main" maxWidth="xs">
             <SectionContainer
@@ -81,9 +178,7 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                         fontWeight="bolder"
                         marginTop="10px"
                     >
-                        {loginType === "superuser"
-                            ? "Superuser "
-                            : "Hospital Admin "}
+                        {getLabelForLogin}
                         Login
                     </Typography>
                     <Box
@@ -98,11 +193,7 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                             id="email"
                             label="Username"
                             name="username"
-                            placeholder={
-                                loginType === "superuser"
-                                    ? "Superuser "
-                                    : "AdminUser"
-                            }
+                            placeholder={() => getLabelForLogin(false)}
                             autoComplete="username"
                             autoFocus
                             sx={{ borderRadius: 34 }}
@@ -154,6 +245,8 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                                 ),
                             }}
                         />
+                        {(loginType === "patient" ||
+                            loginType === "doctor") && <GetOrganizationField />}
                         <LoadingButton
                             type="submit"
                             fullWidth
@@ -194,11 +287,7 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                             fontSize="13px"
                             color="text.secondary"
                         >
-                            Please contact the{" "}
-                            {loginType === "superuser"
-                                ? "blockchain developer"
-                                : "superuser head"}{" "}
-                            , if you have forgotten your password
+                            <GetLabelForHelp />
                         </Grid>
                     </Box>
                 </Box>
