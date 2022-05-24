@@ -16,7 +16,7 @@ const EntityType = new Schema(
     { timestamps: true }
 );
 const runOnEntityLogin = (user, next) => {
-    console.log("USER OF THIS", user);
+    console.log("lol", user.alternateKey, user.password);
     const pass = user.alternateKey[0] ? user.alternateKey[0] : user.password;
     // HASH TYPE FIRST
     bcrypt

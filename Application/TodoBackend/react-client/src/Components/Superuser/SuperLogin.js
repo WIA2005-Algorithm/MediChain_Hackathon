@@ -113,8 +113,10 @@ export default function Login({ setLogin, pathname, message, loginType }) {
 
     const handleResetPassword = () => {
         if (newPassword.trim() === "") return;
+        console.log("submitted the new pass - 1");
         loginOnBehalfOF(extraDataAfterNewPass.user, newPassword.trim())
             .then((r) => {
+                console.log("recieved response the new pass - 1");
                 setLogin(r.data);
                 navigate(pathname, { state: { org: r.data.org } });
             })
@@ -171,16 +173,16 @@ export default function Login({ setLogin, pathname, message, loginType }) {
 
     const navigateToSignup = () =>
         navigate(`/${loginType}/signup`, { state: { type: loginType } });
-    const getLabelForLogin = (label = true) => {
+    const getLabelForLogin = (label = false) => {
         switch (loginType) {
             case "superuser":
-                return label ? "Superuser " : "SuperAdminID";
+                return label ? "Superuser " : { placeholder: "SuperAdminID" };
             case "admin":
-                return label ? "Admin " : "AdminID";
+                return label ? "Admin " : { placeholder: "AdminID" };
             case "patient":
-                return label ? "Patient " : "PatientID";
+                return label ? "Patient " : { placeholder: "PatientID" };
             case "doctor":
-                return label ? "Staff " : "StaffID";
+                return label ? "Staff " : { placeholder: "StaffID" };
             default:
                 break;
         }
@@ -192,15 +194,17 @@ export default function Login({ setLogin, pathname, message, loginType }) {
             case "admin":
                 return "Please contact the superuser head of network if you have forgotten your password";
             case "patient":
-                return (
-                    <Link onClick={navigateToSignup}>
-                        New to the site? Sign up Now!
-                    </Link>
-                );
             case "doctor":
                 return (
-                    <Link onClick={navigateToSignup}>
-                        New to the site? Sign up Now!
+                    <Link
+                        onClick={navigateToSignup}
+                        sx={{
+                            width: "100%",
+                            textAlign: "center",
+                            cursor: "pointer",
+                        }}
+                    >
+                        <b>New to the site? Sign up Now!</b>
                     </Link>
                 );
             default:
@@ -212,7 +216,6 @@ export default function Login({ setLogin, pathname, message, loginType }) {
             <Dialog
                 open={openDialog}
                 TransitionComponent={Transition}
-                keepMounted
                 onClose={toggleDialog}
                 aria-describedby="alert-dialog-slide-description"
                 PaperProps={{
@@ -239,9 +242,13 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={toggleDialog}>Go Back</Button>
+                    <Button onClick={toggleDialog}>
+                        <b>Go Back</b>
+                    </Button>
                     {/* // TODO: ADD A HANDLER HERE */}
-                    <Button onClick={handleResetPassword}>Continue</Button>
+                    <Button onClick={handleResetPassword}>
+                        <b>Continue</b>
+                    </Button>
                 </DialogActions>
             </Dialog>
             <SectionContainer
@@ -260,7 +267,7 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                         fontWeight="bolder"
                         marginTop="10px"
                     >
-                        {getLabelForLogin}
+                        {getLabelForLogin(true)}
                         Login
                     </Typography>
                     <Box
@@ -275,7 +282,7 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                             id="email"
                             label="Username"
                             name="username"
-                            placeholder={() => getLabelForLogin(false)}
+                            {...getLabelForLogin()}
                             autoComplete="username"
                             autoFocus
                             sx={{ borderRadius: 34 }}

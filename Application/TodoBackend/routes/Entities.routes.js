@@ -13,16 +13,19 @@ import errors, { response } from "../Utils/Errors.js";
 const router = Router();
 
 const loginHelper = (data) => {
+    const newSession = getAccessToken(data);
     return {
-        session: data,
-        next: HospitalEntity.findByIdAndUpdate(data._id, {
-            //TODO: Add remove alternate and add new password key
-            refreshToken: session.refreshToken,
-        }),
+        session: newSession,
+        next: () =>
+            HospitalEntity.findByIdAndUpdate(data._id, {
+                //TODO: Add remove alternate and add new password key
+                refreshToken: newSession.refreshToken,
+            }),
     };
 };
 // CREATION OF ADMIN ENTITY INSIDE CREATE ORGANISATION START NETWORK
 router.post("/login", (req, res) => {
+    console.log("hello...I am here");
     let user = null,
         session = null;
     const userID = req.body.userID,
@@ -63,15 +66,21 @@ router.post("/login", (req, res) => {
                 org: user.organization,
                 key: password,
             });
+            console.log(LoginHelp);
             session = LoginHelp.session;
-
-            return LoginHelp.next();
+            console.log(session);
+            LoginHelp.next()
+                .then(() =>
+                    res.status(200).json({
+                        ...session,
+                        org: user.organization,
+                        isOnBehalf: -1,
+                    })
+                )
+                .catch((err) => {
+                    throw new Error(err);
+                });
         })
-        .then(() =>
-            res
-                .status(200)
-                .json({ ...session, org: user.organization, isOnBehalf: -1 })
-        )
         .catch((err) => {
             err = errors.invalid_auth.withDetails(
                 `Either you are not a verified user or your username/password is incorrect : ${err.message}`
@@ -99,6 +108,7 @@ router.get("/getEnrolledHospitals", (_, res) => {
 });
 
 router.post("/addNewPatient/onBehalf/Change", (req, res) => {
+    console.log("I am in change");
     const userID = req.body.userID,
         password = req.body.password;
     var user, session;
@@ -107,9 +117,9 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
         .then((u) => {
             user = u;
             if (u.password) return res.status(200).json({ isOnBehalf: -1 });
-            HospitalEntity.findOneAndUpdate(
+            HospitalEntity.updateOne(
                 { userID },
-                { password, alternateKey: null }
+                { password, alternateKey: [] }
             ).exec();
         })
         .then(() => {
@@ -123,16 +133,17 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
             session = LoginHelp.session;
 
             return LoginHelp.next();
+        })
+        .then(() => {
+            res.status(200).json({
+                ...session,
+                org: user.organization,
+            });
+        })
+        .catch((err) => {
+            err = errors.signUpError.withDetails(`${err.message}`);
+            return res.status(err.status).json(new response.errorResponse(err));
         });
-    then(() => {
-        res.status(200).json({
-            ...session,
-            org: user.organization,
-        });
-    }).catch((err) => {
-        err = errors.signUpError.withDetails(`${err.message}`);
-        return res.status(err.status).json(new response.errorResponse(err));
-    });
 });
 router.post("/addNewPatient/onBehalf", (req, res) => {
     const { loginDetails, personalDetails, address, contactDetails } =
