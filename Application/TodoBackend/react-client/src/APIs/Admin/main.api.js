@@ -25,3 +25,16 @@ export const addNewPatientAPI = (
     axios.post("/entity/addNewPatient/onBehalf", {
         payloadData: { loginDetails, personalDetails, address, contactDetails },
     });
+
+export const loginOnBehalfOF = (username, password) =>
+    axios.post("/entity/addNewPatient/onBehalf/Change", {
+        userID: username,
+        password,
+    });
+
+export const patientLoginAuth = (username, password) =>
+    axios.post("/entity/login", {
+        userID: username,
+        password: password,
+        type: "patient",
+    });

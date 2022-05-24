@@ -15,7 +15,7 @@ import {
     QueryStats,
     ReceiptLong,
 } from "@mui/icons-material";
-import RegisterPatient from "./DialogContent/RegisterPatient";
+import RegisterPatient from "./DialogContent/RegisterPatientOrDoctor";
 
 export function HospitalAdminContent({
     mode,
@@ -114,7 +114,12 @@ export function HospitalAdminContent({
                 <Routes>
                     <Route
                         path="/registerPatient"
-                        element={<RegisterPatient broadcastAlert={setNotis} user={user}/>}
+                        element={
+                            <RegisterPatient
+                                broadcastAlert={setNotis}
+                                user={user}
+                            />
+                        }
                     />
                     <Route path="/patients" element={<PatientData />} />
                     <Route

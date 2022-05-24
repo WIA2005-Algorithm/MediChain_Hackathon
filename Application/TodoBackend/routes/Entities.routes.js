@@ -11,6 +11,16 @@ import { log } from "../models/Utilities.model.js";
 import { getAccessToken } from "../server_config.js";
 import errors, { response } from "../Utils/Errors.js";
 const router = Router();
+
+const loginHelper = (data) => {
+    return {
+        session: data,
+        next: HospitalEntity.findByIdAndUpdate(data._id, {
+            //TODO: Add remove alternate and add new password key
+            refreshToken: session.refreshToken,
+        }),
+    };
+};
 // CREATION OF ADMIN ENTITY INSIDE CREATE ORGANISATION START NETWORK
 router.post("/login", (req, res) => {
     let user = null,
@@ -37,22 +47,30 @@ router.post("/login", (req, res) => {
                 throw new Error();
             }
             //TODO : LINE 41 in notebook
-            if (!user.password) return res.status(200).json({ OnBehalf: true });
+            if (!user.password)
+                return res.status(200).json({
+                    isOnBehalf: 1,
+                    org: user.organization,
+                    loginDetails: {
+                        user: userID,
+                    },
+                });
 
-            session = getAccessToken({
+            const LoginHelp = loginHelper({
+                _id: user._id,
                 username: userID,
                 role: type,
                 org: user.organization,
                 key: password,
             });
+            session = LoginHelp.session;
 
-            return HospitalEntity.findByIdAndUpdate(user._id, {
-                //TODO: Add remove alternate and add new password key
-                refreshToken: session.refreshToken,
-            });
+            return LoginHelp.next();
         })
         .then(() =>
-            res.status(200).json({ ...session, org: user.organization })
+            res
+                .status(200)
+                .json({ ...session, org: user.organization, isOnBehalf: -1 })
         )
         .catch((err) => {
             err = errors.invalid_auth.withDetails(
@@ -83,19 +101,38 @@ router.get("/getEnrolledHospitals", (_, res) => {
 router.post("/addNewPatient/onBehalf/Change", (req, res) => {
     const userID = req.body.userID,
         password = req.body.password;
+    var user, session;
     HospitalEntity.findOne({ userID })
         .exec()
-        .then(() =>
+        .then((u) => {
+            user = u;
+            if (u.password) return res.status(200).json({ isOnBehalf: -1 });
             HospitalEntity.findOneAndUpdate(
                 { userID },
                 { password, alternateKey: null }
-            ).exec()
-        )
-        .then(() => res.sendStatus(200))
-        .catch((err) => {
-            err = errors.signUpError.withDetails(`${err.message}`);
-            return res.status(err.status).json(new response.errorResponse(err));
+            ).exec();
+        })
+        .then(() => {
+            const LoginHelp = loginHelper({
+                _id: user._id,
+                username: userID,
+                role: user.type,
+                org: user.organization,
+                key: password,
+            });
+            session = LoginHelp.session;
+
+            return LoginHelp.next();
         });
+    then(() => {
+        res.status(200).json({
+            ...session,
+            org: user.organization,
+        });
+    }).catch((err) => {
+        err = errors.signUpError.withDetails(`${err.message}`);
+        return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 router.post("/addNewPatient/onBehalf", (req, res) => {
     const { loginDetails, personalDetails, address, contactDetails } =

@@ -15,13 +15,10 @@ const EntityType = new Schema(
     },
     { timestamps: true }
 );
-
-EntityType.pre("save", function (next) {
-    var user = this;
+const runOnEntityLogin = (user, next) => {
     console.log("USER OF THIS", user);
     const pass = user.alternateKey[0] ? user.alternateKey[0] : user.password;
     // HASH TYPE FIRST
-    if (!user.isModified("password") && !user.isModified("type")) return next();
     bcrypt
         .hash(`${pass}@${user.type}`, SALT_WORK_FACTOR)
         .then((hash) => {
@@ -34,6 +31,13 @@ EntityType.pre("save", function (next) {
             next();
         })
         .catch((err) => next(err));
+};
+EntityType.pre("updateOne", function (next) {
+    runOnEntityLogin(this, next);
+});
+
+EntityType.pre("save", function (next) {
+    runOnEntityLogin(this, next);
 });
 
 EntityType.methods.comparePassword = function (EPassword) {
@@ -42,18 +46,9 @@ EntityType.methods.comparePassword = function (EPassword) {
 EntityType.methods.compareType = function (EType) {
     return bcrypt.compare(EType, this.type);
 };
-// bcrypt.compare(EType, this.type, function (err, isMatch) {
-//     if (err) return cb(err);
-//     cb(null, isMatch);
-// });
-
 EntityType.methods.compareAlternate = function (EAlternate) {
     return bcrypt.compare(EAlternate, this.alternateKey[0]);
 };
-// bcrypt.compare(EAlternate, this.alternateKey[0], function (err, isMatch) {
-//     if (err) return cb(err);
-//     cb(null, isMatch);
-// });
 
 export const HospitalEntity = mongoose.model("HospitalEntity", EntityType);
 export const getHashedUserID = async (userID) =>
