@@ -19,7 +19,7 @@ import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { useNavigate, Route, Routes, useParams } from "react-router-dom";
+import { useNavigate, Route, Routes, useParams, useLocation } from "react-router-dom";
 import {
     deleteOrganization,
     enrollAdmin,
@@ -849,6 +849,7 @@ function EnhancedTable({ networkName, network, notis, navigateTo }) {
 
 export default function OrganizationTables({ nav, setNav, notis }) {
     const navigate = useNavigate();
+    const loc = useLocation();
     const { networkName } = useParams();
     const [network, setNetwork] = React.useState(false);
     const networkExists = React.useCallback(async () => {
@@ -857,7 +858,7 @@ export default function OrganizationTables({ nav, setNav, notis }) {
     }, [networkName]);
     React.useEffect(() => {
         networkExists();
-    }, [networkExists, window.location.pathname]);
+    }, [networkExists, loc.pathname]);
     React.useEffect(() => {
         setNav({ ...nav, networkName: networkName });
     }, [networkName]);

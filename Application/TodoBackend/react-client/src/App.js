@@ -106,7 +106,7 @@ const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
         return <Navigate to={pathname} replace />;
     return (
         <Navigate
-            to={type == "superuser" ? "/superuser/login" : "/admin/login"}
+            to={type === "superuser" ? "/superuser/login" : "/admin/login"}
             state={{
                 pathname,
                 message: wasLogged

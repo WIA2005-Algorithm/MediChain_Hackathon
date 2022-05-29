@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { SALT_WORK_FACTOR } from "../Utils/NetworkConstants.js";
 const { Schema } = mongoose;
 
+export const GetHashOf = async (value) => await bcrypt.hash(value, SALT_WORK_FACTOR);
+
 const EntityType = new Schema(
     {
         userID: { type: String, required: true, index: { unique: true } },
@@ -15,15 +17,15 @@ const EntityType = new Schema(
     },
     { timestamps: true }
 );
-const runOnEntityLogin = (user, next) => {
-    console.log("lol", user.alternateKey, user.password);
+
+EntityType.pre("save", function (next) {
+    const user = this;
     const pass = user.alternateKey[0] ? user.alternateKey[0] : user.password;
-    // HASH TYPE FIRST
-    bcrypt
-        .hash(`${pass}@${user.type}`, SALT_WORK_FACTOR)
+    // HASH TYPE FIRST 
+    GetHashOf(`${pass}@${user.type}`)
         .then((hash) => {
             user.type = hash;
-            return bcrypt.hash(`${pass}@${user.userID}`, SALT_WORK_FACTOR);
+            return GetHashOf(`${pass}@${user.userID}`);
         })
         .then((hash) => {
             if (user.alternateKey[0]) user.alternateKey = [hash, new Date()];
@@ -31,13 +33,6 @@ const runOnEntityLogin = (user, next) => {
             next();
         })
         .catch((err) => next(err));
-};
-EntityType.pre("updateOne", function (next) {
-    runOnEntityLogin(this, next);
-});
-
-EntityType.pre("save", function (next) {
-    runOnEntityLogin(this, next);
 });
 
 EntityType.methods.comparePassword = function (EPassword) {

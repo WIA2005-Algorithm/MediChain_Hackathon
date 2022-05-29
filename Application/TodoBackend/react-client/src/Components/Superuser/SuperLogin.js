@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -14,20 +14,16 @@ import {
 import {
     Alert,
     Button,
+    CircularProgress,
     Collapse,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    FormControl,
-    FormHelperText,
     IconButton,
     InputAdornment,
-    InputLabel,
     Link,
-    MenuItem,
-    Select,
     Tooltip,
 } from "@mui/material";
 import { loginAuth } from "../../APIs/Superuser/network.api.js";
@@ -36,16 +32,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import {
     adminLoginAuth,
-    getHospitalsEnrolled,
     loginOnBehalfOF,
     patientLoginAuth,
 } from "../../APIs/Admin/main.api.js";
-
 const login = async (user, pass, type) => {
     switch (type) {
         case "superuser":
             return loginAuth(user, pass);
-            break;
         case "admin":
             return adminLoginAuth(user, pass);
         case "patient":
@@ -54,50 +47,19 @@ const login = async (user, pass, type) => {
             break;
     }
 };
-// const GetOrganizationField = () => {
-//     const [promise, setPromise] = useState(false);
-//     const [options, setOptions] = useState([]);
-//     let fetchHospitalOptions = useCallback(async () => {
-//         let res = await getHospitalsEnrolled();
-//         if (res) setOptions(res.data);
-//         setPromise(() => true);
-//     }, []);
-
-//     useEffect(() => {
-//         fetchHospitalOptions();
-//     }, [fetchHospitalOptions]);
-
-//     return (
-//         <FormControl>
-//             <InputLabel id="hospital-select-helper">
-//                 Hospital Organization
-//             </InputLabel>
-//             <Select
-//                 labelId="hospital-select-helper"
-//                 id="org"
-//                 required
-//                 value=""
-//                 name="org"
-//                 disabled={!promise}
-//                 label="Hospital Organization"
-//             >
-//                 <MenuItem value="">
-//                     <em>Please Select</em>
-//                 </MenuItem>
-//                 {options.map((val) => (
-//                     <MenuItem key={val} value={val}>
-//                         {val}
-//                     </MenuItem>
-//                 ))}
-//             </Select>
-//             <FormHelperText>
-//                 Please key in your the hospital you want to register for the
-//                 record. If you are unable to find your hospital, please contact
-//                 the hospital as soon as possible.
-//             </FormHelperText>
-//         </FormControl>
-//     );
-// };
+const ButtonMailto = ({ mailto, label }) => {
+    return (
+        <Link
+            to='#'
+            onClick={(e) => {
+                window.location.href = `mailto:${mailto}`;
+                e.preventDefault();
+            }}
+        >
+            {label}
+        </Link>
+    );
+};
 export default function Login({ setLogin, pathname, message, loginType }) {
     let navigate = useNavigate();
     const [pwVisible, setpwVisible] = useState(false);
@@ -107,28 +69,37 @@ export default function Login({ setLogin, pathname, message, loginType }) {
     const [openDialog, setOpenDialog] = useState(false);
     const [newPassword, setNewPassword] = useState("");
     const [extraDataAfterNewPass, setExtraDataAfterNewPass] = useState({});
+    const [loadingForDialog, setLoadingForDialog] = useState(false);
+    const [dialogError, setDialogError] = useState("");
+    const [dialogPassVisible, setDialogPassVisible] = useState(false);
     const toggleDialog = () => {
         setOpenDialog(!openDialog);
     };
 
     const handleResetPassword = () => {
-        if (newPassword.trim() === "") return;
+        setDialogError("");
+        if (newPassword.trim() === extraDataAfterNewPass.password){
+            setDialogError("Password should not be same as previously defined by hospital organization");
+            return;
+        }
         console.log("submitted the new pass - 1");
+        setLoadingForDialog(true);
         loginOnBehalfOF(extraDataAfterNewPass.user, newPassword.trim())
             .then((r) => {
                 console.log("recieved response the new pass - 1");
+                console.log(r.data)
                 setLogin(r.data);
+                setLoadingForDialog(false);
                 navigate(pathname, { state: { org: r.data.org } });
             })
             .catch((e) => {
                 e.response?.data
-                    ? setError(e.response.data.DETAILS)
-                    : setError(
+                    ? setDialogError(e.response.data.DETAILS)
+                    : setDialogError(
                           `Failed to connect to the server. Check your internet connection`
                       );
                 setTimeout(() => {
-                    setLoading(false);
-                    setOpen(true);
+                    setLoadingForDialog(false)
                 }, 500);
             });
     };
@@ -148,7 +119,8 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                         navigate(pathname, { state: { org: r.data.org } });
                     } else {
                         setOpenDialog(true);
-                        setExtraDataAfterNewPass(r.data.loginDetails);
+                        r.data.password = data.get("password").trim();
+                        setExtraDataAfterNewPass(r.data);
                     }
                 }
             })
@@ -165,8 +137,8 @@ export default function Login({ setLogin, pathname, message, loginType }) {
             });
     };
 
-    function GetVisibility() {
-        return pwVisible ? <Visibility /> : <VisibilityOff />;
+    function GetVisibility({type=pwVisible}) {
+        return type ? <Visibility /> : <VisibilityOff />;
     }
 
     const changeVisibility = () => setpwVisible(!pwVisible);
@@ -224,31 +196,62 @@ export default function Login({ setLogin, pathname, message, loginType }) {
                     },
                 }}
             >
-                <DialogTitle>Set Your Password</DialogTitle>
+                <DialogTitle>Set New Password</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        The Signup was attempted on behalf of the hospital -
-                        Please set up a new password to continue.
+                    <DialogContentText sx={{mb: 2}}>
+                        The account signup was done by the hospital staff. To maintain the anonymity and secure data within the registering hospital {`[${extraDataAfterNewPass.org || "" }]`}, we require you to set a new password known to you alone.
+                        For more details, please contact the hospital Admin or <b><ButtonMailto label="email us your problem" mailto="kamal20012011@hotmail.com"/></b>
                     </DialogContentText>
                     <TextField
                         autoFocus
                         margin="dense"
                         id="passwordReset"
                         label="Set Password"
-                        type="password"
+                        type={dialogPassVisible ? "text" : "password"}
                         fullWidth
                         variant="standard"
                         onChange={(e) => setNewPassword(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Lock sx={{ color: "text.primary" }} />
+                                </InputAdornment>
+                            ),
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <Tooltip
+                                        title={
+                                            dialogPassVisible
+                                                ? "Hide Password"
+                                                : "Show Password"
+                                        }
+                                    >
+                                        <IconButton
+                                            onClick={() =>
+                                                setDialogPassVisible(!dialogPassVisible)
+                                            }
+                                            sx={{ color: "text.primary" }}
+                                        >
+                                            <GetVisibility type={dialogPassVisible}/>
+                                        </IconButton>
+                                    </Tooltip>
+                                </InputAdornment>
+                            ),
+                        }}
+                        error={dialogError!==""? true : false}
+                        helperText={dialogError}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={toggleDialog}>
+                    {loadingForDialog? <CircularProgress sx={{ mr: 2, mb: 2 }} /> :  
+                    <>
+                        <Button onClick={toggleDialog}>
                         <b>Go Back</b>
                     </Button>
-                    {/* // TODO: ADD A HANDLER HERE */}
                     <Button onClick={handleResetPassword}>
                         <b>Continue</b>
                     </Button>
+                    </>}
                 </DialogActions>
             </Dialog>
             <SectionContainer

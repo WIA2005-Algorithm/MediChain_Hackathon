@@ -5,7 +5,7 @@ import {
     deleteAdminEntity,
 } from "../controllers/Entity.controller.js";
 import { RegisterUser } from "../controllers/register.js";
-import { getHashedUserID, HospitalEntity } from "../models/Entity.model.js";
+import { getHashedUserID, GetHashOf, HospitalEntity } from "../models/Entity.model.js";
 import { Organizations } from "../models/Network.model.js";
 import { log } from "../models/Utilities.model.js";
 import { getAccessToken } from "../server_config.js";
@@ -54,9 +54,7 @@ router.post("/login", (req, res) => {
                 return res.status(200).json({
                     isOnBehalf: 1,
                     org: user.organization,
-                    loginDetails: {
-                        user: userID,
-                    },
+                    user: userID
                 });
 
             const LoginHelp = loginHelper({
@@ -64,7 +62,6 @@ router.post("/login", (req, res) => {
                 username: userID,
                 role: type,
                 org: user.organization,
-                key: password,
             });
             console.log(LoginHelp);
             session = LoginHelp.session;
@@ -89,7 +86,7 @@ router.post("/login", (req, res) => {
         });
 });
 
-/**
+/** 
  * Get all the enrolled hospitals
  */
 router.get("/getEnrolledHospitals", (_, res) => {
@@ -111,30 +108,42 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
     console.log("I am in change");
     const userID = req.body.userID,
         password = req.body.password;
-    var user, session;
+    var user, session, newType, newPassword;
     HospitalEntity.findOne({ userID })
         .exec()
-        .then((u) => {
+        .then(async (u) => {
             user = u;
+            console.log(" check 1");
             if (u.password) return res.status(200).json({ isOnBehalf: -1 });
-            HospitalEntity.updateOne(
-                { userID },
-                { password, alternateKey: [] }
-            ).exec();
+            // If not then update alternate to null and add new real password
+            var results = await GetHashOf(`${password}@${u.type}`)
+            .then((hash) => {
+                console.log(" check 2");
+                newType = hash;
+                return GetHashOf(`${password}@${userID}`);
+            })
+            .then((hash) => {
+                console.log(" check 3");
+                newPassword = hash;
+                return HospitalEntity.updateOne({userID}, {password: newPassword, type: newType, alternateKey: []}).exec();
+            });
+
+            if(results) return results;
+            throw new Error();
         })
         .then(() => {
+            console.log(" check 4");
             const LoginHelp = loginHelper({
                 _id: user._id,
                 username: userID,
                 role: user.type,
                 org: user.organization,
-                key: password,
             });
             session = LoginHelp.session;
-
             return LoginHelp.next();
         })
         .then(() => {
+            console.log(" Success full ")
             res.status(200).json({
                 ...session,
                 org: user.organization,
