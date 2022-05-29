@@ -879,7 +879,7 @@ export default function RegisterPatient({ broadcastAlert, user }) {
     };
     const navigate = useNavigate();
     const handleClose = (url) => {
-        if (user.org)
+        if (url && user.org)
             broadcastAlert((prev) => [
                 ...prev,
                 getAlertValues(

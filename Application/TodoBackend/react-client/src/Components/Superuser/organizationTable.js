@@ -282,6 +282,11 @@ const EnhancedTableToolbar = (props) => {
                                 res.data.message
                             ),
                         ]);
+                        const temprows = rows;
+                        temprows.forEach(ele => {
+                            ele.enrolled = 0;
+                        });
+                        setRows(temprows);
                     })
                     .catch((e) => console.log(e));
                 break;
