@@ -1,193 +1,205 @@
 import { Router } from "express";
 import {
-    addMember,
-    createAdminEntity,
-    deleteAdminEntity,
+  addMember,
+  createAdminEntity,
+  deleteAdminEntity,
+  retriveAllPatients
 } from "../controllers/Entity.controller.js";
 import { RegisterUser } from "../controllers/register.js";
 import { getHashedUserID, GetHashOf, HospitalEntity } from "../models/Entity.model.js";
 import { Organizations } from "../models/Network.model.js";
 import { log } from "../models/Utilities.model.js";
-import { getAccessToken } from "../server_config.js";
+import { authenticateUser, getAccessToken } from "../server_config.js";
 import errors, { response } from "../Utils/Errors.js";
 const router = Router();
 
 const loginHelper = (data) => {
-    const newSession = getAccessToken(data);
-    return {
-        session: newSession,
-        next: () =>
-            HospitalEntity.findByIdAndUpdate(data._id, {
-                //TODO: Add remove alternate and add new password key
-                refreshToken: newSession.refreshToken,
-            }),
-    };
+  const newSession = getAccessToken(data);
+  return {
+    session: newSession,
+    next: () =>
+      HospitalEntity.findByIdAndUpdate(data._id, {
+        //TODO: Add remove alternate and add new password key
+        refreshToken: newSession.refreshToken
+      })
+  };
 };
 // CREATION OF ADMIN ENTITY INSIDE CREATE ORGANISATION START NETWORK
 router.post("/login", (req, res) => {
-    console.log("hello...I am here");
-    let user = null,
-        session = null;
-    const userID = req.body.userID,
-        password = req.body.password,
-        type = req.body.type;
-    HospitalEntity.findOne({ userID })
-        .exec()
-        .then((u) => {
-            user = u;
-            if (user.password)
-                return user.comparePassword(`${password}@${userID}`);
-            return user.compareAlternate(`${password}@${userID}`);
-        })
-        .then((isMatch) => {
-            if (!isMatch) {
-                throw new Error();
-            }
-            return user.compareType(`${password}@${type}`);
-        })
-        .then((isMatch) => {
-            if (!isMatch) {
-                throw new Error();
-            }
-            //TODO : LINE 41 in notebook
-            if (!user.password)
-                return res.status(200).json({
-                    isOnBehalf: 1,
-                    org: user.organization,
-                    user: userID
-                });
-
-            const LoginHelp = loginHelper({
-                _id: user._id,
-                username: userID,
-                role: type,
-                org: user.organization,
-            });
-            console.log(LoginHelp);
-            session = LoginHelp.session;
-            console.log(session);
-            LoginHelp.next()
-                .then(() =>
-                    res.status(200).json({
-                        ...session,
-                        org: user.organization,
-                        isOnBehalf: -1,
-                    })
-                )
-                .catch((err) => {
-                    throw new Error(err);
-                });
-        })
-        .catch((err) => {
-            err = errors.invalid_auth.withDetails(
-                `Either you are not a verified user or your username/password is incorrect : ${err.message}`
-            );
-            return res.status(err.status).json(new response.errorResponse(err));
+  console.log("hello...I am here");
+  let user = null,
+    session = null;
+  const userID = req.body.userID,
+    password = req.body.password,
+    type = req.body.type;
+  HospitalEntity.findOne({ userID })
+    .exec()
+    .then((u) => {
+      user = u;
+      if (user.password) return user.comparePassword(`${password}@${userID}`);
+      return user.compareAlternate(`${password}@${userID}`);
+    })
+    .then((isMatch) => {
+      if (!isMatch) {
+        throw new Error();
+      }
+      return user.compareType(`${password}@${type}`);
+    })
+    .then((isMatch) => {
+      if (!isMatch) {
+        throw new Error();
+      }
+      //TODO : LINE 41 in notebook
+      if (!user.password)
+        return res.status(200).json({
+          isOnBehalf: 1,
+          org: user.organization,
+          user: userID
         });
+
+      const LoginHelp = loginHelper({
+        _id: user._id,
+        username: userID,
+        role: type,
+        org: user.organization
+      });
+      console.log(LoginHelp);
+      session = LoginHelp.session;
+      console.log(session);
+      LoginHelp.next()
+        .then(() =>
+          res.status(200).json({
+            ...session,
+            org: user.organization,
+            isOnBehalf: -1
+          })
+        )
+        .catch((err) => {
+          throw new Error(err);
+        });
+    })
+    .catch((err) => {
+      err = errors.invalid_auth.withDetails(
+        `Either you are not a verified user or your username/password is incorrect : ${err.message}`
+      );
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 
-/** 
+/**
  * Get all the enrolled hospitals
  */
 router.get("/getEnrolledHospitals", (_, res) => {
-    Organizations.find({ Enrolled: 1 })
-        .exec()
-        .then((data) => {
-            const array = [];
-            data.forEach((ele) => array.push(`${ele.FullName} - ${ele.Name}`));
-            res.status(200).json(array);
-        })
-        .catch((e) => {
-            return res
-                .status(500)
-                .json({ message: "Unexpected Error Occured" });
-        });
+  Organizations.find({ Enrolled: 1 })
+    .exec()
+    .then((data) => {
+      const array = [];
+      data.forEach((ele) => array.push(`${ele.FullName} - ${ele.Name}`));
+      res.status(200).json(array);
+    })
+    .catch((e) => {
+      return res.status(500).json({ message: "Unexpected Error Occured" });
+    });
 });
 
 router.post("/addNewPatient/onBehalf/Change", (req, res) => {
-    console.log("I am in change");
-    const userID = req.body.userID,
-        password = req.body.password;
-    var user, session, newType, newPassword;
-    HospitalEntity.findOne({ userID })
-        .exec()
-        .then(async (u) => {
-            user = u;
-            console.log(" check 1");
-            if (u.password) return res.status(200).json({ isOnBehalf: -1 });
-            // If not then update alternate to null and add new real password
-            var results = await GetHashOf(`${password}@${u.type}`)
-            .then((hash) => {
-                console.log(" check 2");
-                newType = hash;
-                return GetHashOf(`${password}@${userID}`);
-            })
-            .then((hash) => {
-                console.log(" check 3");
-                newPassword = hash;
-                return HospitalEntity.updateOne({userID}, {password: newPassword, type: newType, alternateKey: []}).exec();
-            });
-
-            if(results) return results;
-            throw new Error();
+  const userID = req.body.userID,
+    password = req.body.password;
+  var user, session, newType, newPassword;
+  HospitalEntity.findOne({ userID })
+    .exec()
+    .then(async (u) => {
+      user = u;
+      console.log(" check 1");
+      if (u.password) return res.status(200).json({ isOnBehalf: -1 });
+      // If not then update alternate to null and add new real password
+      var results = await GetHashOf(`${password}@${u.type}`)
+        .then((hash) => {
+          console.log(" check 2");
+          newType = hash;
+          return GetHashOf(`${password}@${userID}`);
         })
-        .then(() => {
-            console.log(" check 4");
-            const LoginHelp = loginHelper({
-                _id: user._id,
-                username: userID,
-                role: user.type,
-                org: user.organization,
-            });
-            session = LoginHelp.session;
-            return LoginHelp.next();
-        })
-        .then(() => {
-            console.log(" Success full ")
-            res.status(200).json({
-                ...session,
-                org: user.organization,
-            });
-        })
-        .catch((err) => {
-            err = errors.signUpError.withDetails(`${err.message}`);
-            return res.status(err.status).json(new response.errorResponse(err));
+        .then((hash) => {
+          console.log(" check 3");
+          newPassword = hash;
+          return HospitalEntity.updateOne(
+            { userID },
+            { password: newPassword, type: newType, alternateKey: [] }
+          ).exec();
         });
+
+      if (results) return results;
+      throw new Error();
+    })
+    .then(() => {
+      console.log(" check 4");
+      const LoginHelp = loginHelper({
+        _id: user._id,
+        username: userID,
+        role: user.type,
+        org: user.organization
+      });
+      session = LoginHelp.session;
+      return LoginHelp.next();
+    })
+    .then(() => {
+      console.log(" Success full ");
+      res.status(200).json({
+        ...session,
+        org: user.organization
+      });
+    })
+    .catch((err) => {
+      err = errors.signUpError.withDetails(`${err.message}`);
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 router.post("/addNewPatient/onBehalf", (req, res) => {
-    const { loginDetails, personalDetails, address, contactDetails } =
-        req.body.payloadData;
-    let encryptedID;
-    // TYPE IS capitalized after below statement
-    const type = `${String(loginDetails.TYPE).charAt(0).toUpperCase()}${String(
-        loginDetails.TYPE
-    ).slice(1)}`;
+  const { loginDetails, personalDetails, address, contactDetails } = req.body.payloadData;
+  let encryptedID;
+  // TYPE IS capitalized after below statement
+  const type = `${String(loginDetails.TYPE).charAt(0).toUpperCase()}${String(
+    loginDetails.TYPE
+  ).slice(1)}`;
 
-    getHashedUserID(loginDetails.ID)
-        .then((hash) => {
-            encryptedID = hash;
-            return RegisterUser(loginDetails.org, encryptedID, type);
-        })
-        .then(() =>
-            createAdminEntity({
-                userID: loginDetails.ID,
-                alternateKey: loginDetails.password,
-                organization: loginDetails.org,
-                type: String(type.toLowerCase()),
-            })
-        )
-        .then(() =>
-            addMember(loginDetails.org, encryptedID, {
-                personalDetails,
-                address,
-                contactDetails,
-            })
-        )
-        .then(() => res.sendStatus(200))
-        .catch(async (err) => {
-            await deleteAdminEntity(loginDetails.ID);
-            err = errors.signUpError.withDetails(`${err.message}`);
-            return res.status(err.status).json(new response.errorResponse(err));
-        });
+  getHashedUserID(loginDetails.ID)
+    .then((hash) => {
+      encryptedID = hash;
+      return RegisterUser(loginDetails.org, loginDetails.ID, type);
+    })
+    .then(() =>
+      createAdminEntity({
+        userID: loginDetails.ID,
+        organization: loginDetails.org,
+        type: String(type.toLowerCase()),
+        alternateKey: req.body.onBehalf ? loginDetails.password : [],
+        password: req.body.onBehalf ? null : loginDetails.password
+      })
+    )
+    .then(() =>
+      addMember(loginDetails.org, loginDetails.ID, {
+        personalDetails,
+        address,
+        contactDetails
+      })
+    )
+    .then(() => res.sendStatus(200))
+    .catch(async (err) => {
+      await deleteAdminEntity(loginDetails.ID);
+      err = errors.signUpError.withDetails(`${err.message}`);
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
+});
+
+router.get("/getAllPatients", authenticateUser, (req, res) => {
+  console.log("CREDENTIALS -->>>>", req.user.org, req.user.username);
+  retriveAllPatients(req.user.org, req.user.username)
+    .then((patients) => res.status(200).json(patients))
+    .catch((err) => {
+      err = errors.contract_error.withDetails(
+        `Either it's an internet issue or you do not have the access rights to  this feature`
+      );
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 export default router;

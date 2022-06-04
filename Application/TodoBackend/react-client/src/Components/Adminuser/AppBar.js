@@ -10,7 +10,6 @@ import {
     Tooltip,
     AppBar,
     Avatar,
-    Button,
     Divider,
     ListItemIcon,
     Menu,
@@ -20,8 +19,8 @@ import {
 } from "@mui/material";
 import { AppIconHead } from "../StyledComponents";
 import adminImg from "../../static/images/admin.png";
-import { useEffect, useState } from "react";
 import { Box } from "@mui/system";
+import { useState } from "react";
 
 export function AppContentBar({ mode, newMode, logout, user }) {
     const GetMode = () =>
@@ -30,9 +29,6 @@ export function AppContentBar({ mode, newMode, logout, user }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const handleClose = () => setAnchorEl(null);
     const open = Boolean(anchorEl);
-    useEffect(() => {
-        console.log(user);
-    }, [user]);
     return (
         <AppBar
             position="fixed"

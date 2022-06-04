@@ -1,10 +1,6 @@
 "use-strict";
 import { buildCCPOrg, buildWallet } from "../Utils/AppUtil.js";
-import {
-    buildCAClient,
-    enrollAdmin,
-    registerAndEnrollUser,
-} from "../Utils/CAUtil.js";
+import { buildCAClient, enrollAdmin, registerAndEnrollUser } from "../Utils/CAUtil.js";
 import { green, walletPath } from "../Utils/NetworkConstants.js";
 import { Wallets } from "fabric-network";
 import FabricCAServices from "fabric-ca-client";
@@ -16,10 +12,14 @@ import { log } from "../models/Utilities.model.js";
  * @returns {JSON_OBJECT - caClient, wallet, ccp}
  */
 export const intialize = async (orgName) => {
-    const ccp = buildCCPOrg(orgName);
-    const caClient = buildCAClient(FabricCAServices, ccp, orgName);
-    const wallet = await buildWallet(Wallets, walletPath(orgName));
-    return { caClient, wallet, ccp };
+  console.log(" INSIDE INILIALIZE - 3");
+  const ccp = buildCCPOrg(orgName);
+  console.log(" INSIDE INILIALIZE - 4");
+  const caClient = buildCAClient(FabricCAServices, ccp, orgName);
+  console.log(" INSIDE INILIALIZE - 5");
+  const wallet = await buildWallet(Wallets, walletPath(orgName));
+  console.log(" INSIDE INILIALIZE - 6");
+  return { caClient, wallet, ccp };
 };
 
 /**
@@ -27,15 +27,15 @@ export const intialize = async (orgName) => {
  * @param {String} orgName - Example: UMMC
  */
 export async function EnrollAdmin(orgName) {
-    const { caClient, wallet, ccp } = await intialize(orgName);
-    const UserId = await enrollAdmin(caClient, wallet, orgName, ccp);
-    log(
-        "SuperAdmin",
-        `Enrolling Admin  : [${orgName}]`,
-        "Admin was successfully enrolled into the network",
-        "success"
-    );
-    console.log(`${green} Successfully enrolled admin ${UserId}`);
+  const { caClient, wallet, ccp } = await intialize(orgName);
+  const UserId = await enrollAdmin(caClient, wallet, orgName, ccp);
+  log(
+    "SuperAdmin",
+    `Enrolling Admin  : [${orgName}]`,
+    "Admin was successfully enrolled into the network",
+    "success"
+  );
+  console.log(`${green} Successfully enrolled admin ${UserId}`);
 }
 
 /**
@@ -45,15 +45,8 @@ export async function EnrollAdmin(orgName) {
  * @param {String} affiliation - "doctor" or "patient"
  */
 export async function RegisterUser(orgName, userId, affiliation) {
-    const { caClient, wallet, ccp } = await intialize(orgName);
-    console.log(affiliation, "IN REGISTERuser");
-    await registerAndEnrollUser(
-        caClient,
-        wallet,
-        orgName,
-        userId,
-        affiliation,
-        ccp
-    );
-    console.log(`${green} Successfully registered user ${userId}`);
+  const { caClient, wallet, ccp } = await intialize(orgName);
+  console.log(affiliation, "IN REGISTERuser");
+  await registerAndEnrollUser(caClient, wallet, orgName, userId, affiliation, ccp);
+  console.log(`${green} Successfully registered user ${userId}`);
 }
