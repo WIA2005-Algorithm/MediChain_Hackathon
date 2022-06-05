@@ -95,7 +95,6 @@ export default function Login({ setLogin, pathname, message, loginType }) {
   const toggleDialog = () => {
     setOpenDialog(!openDialog);
   };
-
   const handleResetPassword = () => {
     setDialogError("");
     if (newPassword.trim() === extraDataAfterNewPass.password) {

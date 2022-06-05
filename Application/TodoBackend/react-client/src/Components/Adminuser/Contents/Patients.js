@@ -22,6 +22,7 @@ import {
 } from "@mui/icons-material";
 import {
   AppBar,
+  Button,
   Chip,
   CircularProgress,
   Collapse,
@@ -100,19 +101,31 @@ export function ItemForTab({ item, collapse, setCollapse }) {
             The doctors have yet not been assigned to this patient
           </Typography>
         </Typography>
-        <Chip
-          label={item.active === "Not Patients" ? "Check In" : "Assign"}
-          onClick={handleCollapseInnerClick}
-          onDelete={handleCollapseInnerClick}
+        <Button
           variant="outlined"
-          size="small"
-          deleteIcon={
+          endIcon={
             item.active === "Not Patients" ? (
               <AddTask sx={{ color: "primary.main" }} />
             ) : (
               <Add sx={{ color: "primary.main" }} />
             )
           }
+          sx={{
+            textTransform: "capitalize",
+            width: "100%",
+            position: "absolute",
+            top: 10,
+            right: 10,
+            "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
+              color: "primary.main"
+            }
+          }}>
+          <b>{item.active === "Not Patients" ? "Check In" : "Assign"}</b>
+        </Button>
+        {/* <Chip
+          label={item.active === "Not Patients" ? "Check In" : "Assign"}
+          onClick={handleCollapseInnerClick}
+          onDelete={handleCollapseInnerClick}
           sx={{
             position: "absolute",
             top: 10,
@@ -124,9 +137,21 @@ export function ItemForTab({ item, collapse, setCollapse }) {
               color: "primary.main"
             }
           }}
-        />
+        /> */}
       </>
     );
+  };
+
+  const getDoctorDeparmentString = () => {
+    let departmentStr = "";
+    for (let i = 0; i < item.associatedDoctors.length; i++) {
+      const doc = item.associatedDoctors[i];
+      if (i === item.associatedDoctors.length - 1) departmentStr += " and ";
+      departmentStr +=
+        doc.department + i === item.associatedDoctors.length - 1 ? "" : ", ";
+    }
+
+    return departmentStr;
   };
   return (
     <SectionContainer
@@ -175,7 +200,7 @@ export function ItemForTab({ item, collapse, setCollapse }) {
         <Typography sx={{ flexGrow: "1" }} component="div">
           Status - {item.active}
           <Typography className="secondary">
-            Associated with Neural, Cardio and Other Unknown department doctors
+            Associated with {getDoctorDeparmentString()}department doctors
           </Typography>
         </Typography>
       </Box>

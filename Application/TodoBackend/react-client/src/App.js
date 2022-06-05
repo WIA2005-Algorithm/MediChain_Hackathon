@@ -97,10 +97,15 @@ const getDesignTokens = (mode) => ({
 });
 
 const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
+  console.log(1, user);
   const { pathname } = useLocation();
+  console.log(2, pathname);
   const wasLogged = logged;
   useEffect(() => {
-    if (user && user.role !== type) logout();
+    if (user && user.role !== type) {
+      console.log(3, user && user.role !== type);
+      logout();
+    }
   }, []);
 
   if (user && user.role === type && pathname.includes(type))
@@ -120,10 +125,13 @@ const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
   );
 };
 const GoFromLogin = ({ user, setLogin, logout, type = "superuser" }) => {
-  console.log("helloFrom", user);
+  console.log(4, user);
   const { state } = useLocation();
   useEffect(() => {
-    if (user && user.role !== type) logout();
+    if (user && user.role !== type) {
+      console.log(5);
+      logout();
+    }
   }, []);
   let pathname;
   if (type === "superuser") pathname = state ? state.pathname : "/superuser/networks";
