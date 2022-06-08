@@ -123,14 +123,17 @@ export async function getContract(orgName, userID) {
   console.log(" INSIDE GET CONTRACT - 5");
   try {
     const gateway = new Gateway();
+    console.log(" INSIDE GET CONTRACT - 6");
     await gateway.connect(ccp, {
       wallet,
       identity: userID,
       discovery: { enabled: true, asLocalhost: true }
     });
+    console.log(" INSIDE GET CONTRACT - 7");
     const contract = (await gateway.getNetwork(channelName)).getContract(chaincodeName);
+    console.log(" INSIDE GET CONTRACT - 8");
     return { contract, gateway };
   } catch (e) {
-    throw errors.not_reachable.withDetails("null");
+    throw errors.not_reachable.withDetails(e.message);
   }
 }

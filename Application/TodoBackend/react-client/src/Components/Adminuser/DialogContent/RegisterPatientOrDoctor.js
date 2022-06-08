@@ -51,7 +51,10 @@ import CountryCity from "countrycitystatejson";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import frLocale from "date-fns/locale/en-IN";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { addNewPatientAPI, getHospitalsEnrolled } from "../../../APIs/Admin/main.api";
+import {
+  addNewPatientOrDoctorAPI,
+  getHospitalsEnrolled
+} from "../../../APIs/Admin/main.api";
 
 function AddressDetails({ address, setTheField, setRequiredError }) {
   const setField = (id, value) => setTheField(id, value, "address");
@@ -817,7 +820,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
   };
   const navigate = useNavigate();
   const handleClose = (url) => {
-    if (url && user.org)
+    if (url && user?.org)
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
@@ -830,7 +833,18 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
             : `Now you may login with yoour credentials to continue. Thank you`
         )
       ]);
-    navigate(url ? url : -1);
+    if (!user)
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "info",
+          `New ${String(loginDetails.fields.TYPE).charAt(0).toUpperCase()}${String(
+            loginDetails.fields.TYPE
+          ).slice(1)} was enrolled successfully`,
+          `You may now login to enter the application.`
+        )
+      ]);
+    navigate(url && user ? url : -1);
   };
   // OPEN OR CLOSE THE ALERT
   const [open, setOpen] = useState(false);
@@ -911,7 +925,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
       return;
     }
     personalDetails.fields.passport = loginDetails.fields.ID;
-    addNewPatientAPI(
+    addNewPatientOrDoctorAPI(
       loginDetails.fields,
       personalDetails.fields,
       address.fields,
@@ -922,9 +936,8 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
         handleClose(!user ? "../overview" : -1);
       })
       .catch((e) => {
-        console.log(JSON.stringify(e));
         closeForError(
-          e.response.data.DETAILS
+          e.response?.data?.DETAILS
             ? e.response.data.DETAILS
             : `Failed to connect to the server. Check your internet connection`
         );

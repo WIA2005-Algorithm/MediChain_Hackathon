@@ -296,6 +296,7 @@ export const departmentOptions = [
   "Neurology",
   "Cardiology",
   "Psychology",
+  "Dermotology",
   "ENT",
   "Ophthalmology",
   "Other"

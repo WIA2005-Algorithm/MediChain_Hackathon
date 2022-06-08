@@ -1,8 +1,12 @@
 import { Router } from "express";
 import {
   addMember,
-  createAdminEntity,
+  assign,
+  checkIn,
+  createEntity,
   deleteAdminEntity,
+  dischargeORCheckOutPatient,
+  retriveAllDoctors,
   retriveAllPatients
 } from "../controllers/Entity.controller.js";
 import { RegisterUser } from "../controllers/register.js";
@@ -156,6 +160,10 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
 });
 router.post("/addNewPatient/onBehalf", (req, res) => {
   const { loginDetails, personalDetails, address, contactDetails } = req.body.payloadData;
+  // As In doctor's signup --> Organization is in the format of "NAME - SHORTFORMID"
+  if (!req.body.onBehalf)
+    loginDetails.org = String(loginDetails.org.split("-")[1]).trim();
+  console.log(" REACHED HERE...");
   let encryptedID;
   // TYPE IS capitalized after below statement
   const type = `${String(loginDetails.TYPE).charAt(0).toUpperCase()}${String(
@@ -164,11 +172,12 @@ router.post("/addNewPatient/onBehalf", (req, res) => {
 
   getHashedUserID(loginDetails.ID)
     .then((hash) => {
+      console.log(" HERE 2;", loginDetails.org);
       encryptedID = hash;
       return RegisterUser(loginDetails.org, loginDetails.ID, type);
     })
     .then(() =>
-      createAdminEntity({
+      createEntity({
         userID: loginDetails.ID,
         organization: loginDetails.org,
         type: String(type.toLowerCase()),
@@ -176,17 +185,26 @@ router.post("/addNewPatient/onBehalf", (req, res) => {
         password: req.body.onBehalf ? null : loginDetails.password
       })
     )
-    .then(() =>
-      addMember(loginDetails.org, loginDetails.ID, {
-        personalDetails,
-        address,
-        contactDetails
-      })
-    )
-    .then(() => res.sendStatus(200))
+    .then(() => {
+      console.log(personalDetails);
+      addMember(
+        loginDetails.org,
+        loginDetails.ID,
+        {
+          personalDetails,
+          address,
+          contactDetails
+        },
+        type === "Patient" ? "addPatientEHR" : "addDoctor"
+      );
+    })
+    .then(() => {
+      console.log("Successfulllyyyy DOneeeeee.....");
+      res.sendStatus(200);
+    })
     .catch(async (err) => {
       await deleteAdminEntity(loginDetails.ID);
-      err = errors.signUpError.withDetails(`${err.message}`);
+      err = errors.signUpError.withDetails(err);
       return res.status(err.status).json(new response.errorResponse(err));
     });
 });
@@ -201,5 +219,35 @@ router.get("/getAllPatients", authenticateUser, (req, res) => {
       );
       return res.status(err.status).json(new response.errorResponse(err));
     });
+});
+
+router.get("/getAllDoctors", authenticateUser, (req, res) => {
+  retriveAllDoctors(req.user.org, req.user.username)
+    .then((docs) => res.status(200).json(docs))
+    .catch((err) => {
+      err = errors.contract_error.withDetails(
+        `Either it's an internet issue or you do not have the access rights to  this feature`
+      );
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
+});
+
+router.post("/checkInPatient", authenticateUser, (req, res) => {
+  console.log(" Recieved the request to checkin");
+  checkIn(req.user.org, req.user.username, req.body.patientID)
+    .then(() => res.sendStatus(200))
+    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
+});
+
+router.post("/assignPatient", authenticateUser, (req, res) => {
+  assign(req.user.org, req.user.username, req.body.patientID, req.body.doctorID)
+    .then(() => res.sendStatus(200))
+    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
+});
+
+router.post("/discharge", authenticateUser, (req, res) => {
+  dischargeORCheckOutPatient(req.user.org, req.user.username, req.body.patientID)
+    .then(() => res.sendStatus(200))
+    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
 });
 export default router;

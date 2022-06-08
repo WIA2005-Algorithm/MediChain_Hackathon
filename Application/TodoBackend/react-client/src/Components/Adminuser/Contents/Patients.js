@@ -1,8 +1,10 @@
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import { LoadingButton } from "@mui/lab";
 import { useCallback, useEffect, useState } from "react";
 import {
   Add,
+  AddCircle,
   AddTask,
   CallMissedOutgoing,
   CheckCircle,
@@ -17,24 +19,41 @@ import {
   Loop,
   Male,
   Person,
+  Refresh,
   Search,
   Visibility
 } from "@mui/icons-material";
 import {
   AppBar,
+  Autocomplete,
+  Avatar,
   Button,
   Chip,
   CircularProgress,
   Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   InputBase,
   Paper,
+  TextField,
+  Tooltip,
   Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { getAlertValues, SectionContainer } from "../../StyledComponents";
-import { getAllPatientData } from "../../../APIs/Admin/main.api";
+import { getAlertValues, SectionContainer, Transition } from "../../StyledComponents";
+import {
+  AssignDoctor,
+  CheckInPatient,
+  Discharge,
+  getAllDoctorData,
+  getAllPatientData
+} from "../../../APIs/Admin/main.api";
+import no_patient from "../../../static/images/no_patient.jpg";
 const getFormattedDate = (d) => {
   const date = new Date(d);
   return `${date.toLocaleString("default", {
@@ -44,41 +63,50 @@ const getFormattedDate = (d) => {
 function DoctorItem({ data }) {
   return (
     <Box component="div" sx={{ display: "flex", width: "100%", mb: 1 }}>
-      <CallMissedOutgoing sx={{ transform: "rotate(45deg)" }} />
-      <Box
-        component="div"
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          mt: 0.7
-        }}>
+      <Box component="div" sx={{ flexGrow: 1, display: "flex", alignItems: "top" }}>
+        <CallMissedOutgoing sx={{ transform: "rotate(45deg)" }} />
         <Typography sx={{ flexGrow: 1 }} component="div">
           Dr. {data.name}
           <Typography className="secondary">
             Assigned to patient on {getFormattedDate(data.assignedOn)}
           </Typography>
-          <Typography className="secondary">Department - data.department</Typography>
+          <Typography className="secondary">Department - {data.department}</Typography>
         </Typography>
-        <Divider orientation="vertical" sx={{ height: "40px", mr: 1, ml: 1 }} />
+      </Box>
+      <Box component="div" sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
+        <Divider orientation="vertical" sx={{ height: "40px", mr: 2, ml: 1 }} />
         <Typography sx={{ flexGrow: 1 }} component="div">
-          Status - {data.active[0]} and {data.active[1]}
-          {data.active[1] === "In-progress" ? (
-            <Loop sx={{ color: "error.main" }} />
-          ) : (
-            <CheckCircle sx={{ color: "success.main" }} />
-          )}
+          <Box component="div" sx={{ display: "flex" }}>
+            <span style={{ marginRight: "4px" }}>
+              Status - {data.active[0]} and {data.active[1]}
+            </span>
+            {data.active[1] === "In-progress" ? (
+              <Loop sx={{ color: "error.main" }} />
+            ) : (
+              <CheckCircle sx={{ color: "success.main" }} />
+            )}
+          </Box>
           <Typography className="secondary">{data.note}</Typography>
         </Typography>
       </Box>
     </Box>
   );
 }
-export function ItemForTab({ item, collapse, setCollapse }) {
+export function ItemForTab({
+  item,
+  collapse,
+  setCollapse,
+  setPatient,
+  setDialogOpen,
+  checkIN,
+  onClickEventDischarge
+}) {
   const handleCollapseOuterClick = () => setCollapse.outer(item.ID);
   const handleCollapseInnerClick = () => setCollapse.inner(item.ID);
   const isPatient =
     item.active === "Actively Watched" || item.active === "Waiting For Discharge";
+  const doctors = Object.keys(item.associatedDoctors).length;
+
   const getAgeString = () => {
     let string = "";
     var ageDifMs = Date.now() - new Date(item.details.DOB).getTime();
@@ -93,6 +121,15 @@ export function ItemForTab({ item, collapse, setCollapse }) {
   };
 
   const DoctorData = () => {
+    const [loading, setLoading] = useState(false);
+    const performClick = async () => {
+      setPatient({ id: item.details.passport });
+      if (item.active === "Not Patients") {
+        setLoading(true);
+        await checkIN();
+        setLoading(false);
+      } else setDialogOpen(true);
+    };
     return (
       <>
         <Typography sx={{ mt: 1, mb: 2 }} component="div">
@@ -101,18 +138,19 @@ export function ItemForTab({ item, collapse, setCollapse }) {
             The doctors have yet not been assigned to this patient
           </Typography>
         </Typography>
-        <Button
+        <LoadingButton
+          loading={loading}
+          onClick={performClick}
           variant="outlined"
           endIcon={
             item.active === "Not Patients" ? (
-              <AddTask sx={{ color: "primary.main" }} />
+              <AddCircle sx={{ color: "primary.main" }} />
             ) : (
-              <Add sx={{ color: "primary.main" }} />
+              <AddTask sx={{ color: "primary.main" }} />
             )
           }
           sx={{
             textTransform: "capitalize",
-            width: "100%",
             position: "absolute",
             top: 10,
             right: 10,
@@ -121,37 +159,93 @@ export function ItemForTab({ item, collapse, setCollapse }) {
             }
           }}>
           <b>{item.active === "Not Patients" ? "Check In" : "Assign"}</b>
-        </Button>
-        {/* <Chip
-          label={item.active === "Not Patients" ? "Check In" : "Assign"}
-          onClick={handleCollapseInnerClick}
-          onDelete={handleCollapseInnerClick}
-          sx={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            color: "primary.main",
-            borderColor: "primary.main",
-            fontWeight: "bold",
-            "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
-              color: "primary.main"
-            }
-          }}
-        /> */}
+        </LoadingButton>
       </>
     );
   };
 
   const getDoctorDeparmentString = () => {
     let departmentStr = "";
-    for (let i = 0; i < item.associatedDoctors.length; i++) {
-      const doc = item.associatedDoctors[i];
-      if (i === item.associatedDoctors.length - 1) departmentStr += " and ";
-      departmentStr +=
-        doc.department + i === item.associatedDoctors.length - 1 ? "" : ", ";
-    }
+    const array = Object.keys(item.associatedDoctors);
+    array.forEach((itm, i) => {
+      const doc = item.associatedDoctors[itm];
+      console.log(doc.department);
+      if (array.length > 1 && i === doctors - 1) departmentStr += " and ";
+      departmentStr += doc.department + (i === doctors - 1 ? "" : ", ");
+    });
 
     return departmentStr;
+  };
+
+  const DischargePatient = () => {
+    const [promiseForDischarge, setPromiseForDischarge] = useState(false);
+    if (item.active !== "Waiting For Discharge" && item.active !== "Actively Watched")
+      return "";
+    if (item.active === "Actively Watched")
+      return (
+        <Button
+          fullWidth
+          onClick={() => {
+            setPatient({ id: item.details.passport });
+            setDialogOpen(true);
+          }}
+          sx={{
+            textTransform: "capitalize",
+            m: 1,
+            mt: 2,
+            mb: 2,
+            border: "1px solid",
+            borderColor: "primary.main",
+            "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
+              color: "primary.main"
+            }
+          }}>
+          <b>Assign More Doctors</b>
+        </Button>
+      );
+
+    let dischargeTrue = true;
+    Object.keys(item.associatedDoctors).every((ele) => {
+      if (ele.active[1] === "In-progress") {
+        dischargeTrue = false;
+        return false;
+      }
+
+      return true;
+    });
+
+    return (
+      <>
+        <LoadingButton
+          fullWidth
+          onClick={async () => {
+            setPromiseForDischarge(true);
+            await onClickEventDischarge();
+            setPromiseForDischarge(false);
+          }}
+          loading={promiseForDischarge}
+          disabled={!dischargeTrue}
+          sx={{
+            m: 1,
+            mt: 2,
+            mb: 2,
+            border: "1px solid",
+            borderColor: "primary.main",
+            textTransform: "capitalize",
+            "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
+              color: "primary.main"
+            }
+          }}>
+          <b>Discharge Patient</b>
+        </LoadingButton>
+        {!dischargeTrue && (
+          <Typography fontSize="small">
+            Patient is still in observation by some of the doctors associated with them.
+            Please check the doctor notes for more information.
+          </Typography>
+        )}
+      </>
+    );
   };
   return (
     <SectionContainer
@@ -176,33 +270,43 @@ export function ItemForTab({ item, collapse, setCollapse }) {
           mr: 1
         }
       }}>
-      <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
-        <Box sx={{ flexGrow: "1" }} component="div">
-          <Box component="div" sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Person />
-            <Typography component="div">
-              {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}
+      <Box component="div" sx={{ width: "100%" }}>
+        <Box
+          component="div"
+          sx={{ display: "flex", alignItems: "center", width: "100%", mb: 1 }}>
+          <Box sx={{ flexGrow: "1.5" }} component="div">
+            <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
+              <Person />
+              <Typography component="div">
+                {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}
+                <Typography className="secondary">
+                  {item.checkIn.length === 0
+                    ? "This patient has never been admitted to this hospital before"
+                    : `Last admitted as patient on ${getFormattedDate(
+                        item.checkIn[item.checkIn.length - 1]
+                      )}`}
+                </Typography>
+              </Typography>
+            </Box>
+            <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
+              <Male />
+              <Typography>{getAgeString()}</Typography>
+            </Box>
+          </Box>
+          <Box sx={{ flexGrow: "1", display: "flex" }} component="div">
+            <Divider orientation="vertical" sx={{ height: "40px", mr: 2, ml: 1 }} />
+            <Typography sx={{ flexGrow: "1" }} component="div">
+              Status - {item.active}
               <Typography className="secondary">
-                {item.checkIn.length === 0
-                  ? "This patient has never been admitted to this hospital before"
-                  : `Last admitted as patient on ${getFormattedDate(
-                      item.checkIn[item.checkIn.length - 1]
-                    )}`}
+                {doctors !== 0
+                  ? `Associated with ${getDoctorDeparmentString()} department doctors`
+                  : `No doctors have been made available`}
               </Typography>
             </Typography>
           </Box>
-          <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
-            <Male />
-            <Typography>{getAgeString()}</Typography>
-          </Box>
         </Box>
-        <Divider orientation="vertical" sx={{ height: "40px", mr: 1, ml: 1 }} />
-        <Typography sx={{ flexGrow: "1" }} component="div">
-          Status - {item.active}
-          <Typography className="secondary">
-            Associated with {getDoctorDeparmentString()}department doctors
-          </Typography>
-        </Typography>
+        {/* CONDITIONAL BUTTON */}
+        <DischargePatient />
       </Box>
       <Chip
         label={`See ${collapse.outer ? "Less" : "More"}`}
@@ -223,7 +327,6 @@ export function ItemForTab({ item, collapse, setCollapse }) {
           right: 10,
           color: "primary.main",
           borderColor: "primary.main",
-          fontWeight: "bold",
           "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
             color: "primary.main"
           }
@@ -235,8 +338,14 @@ export function ItemForTab({ item, collapse, setCollapse }) {
           sx={{
             display: "flex",
             alignItems: "center",
-            mt: 2.5,
-            mb: 1
+            width: "100%",
+            mt: 2,
+            mb: 2,
+            "& .MuiTypography-root": {
+              fontWeight: "normal !important",
+              fontSize: "14px !important",
+              color: "text.secondary !important"
+            }
           }}>
           <Box
             component="div"
@@ -261,6 +370,7 @@ export function ItemForTab({ item, collapse, setCollapse }) {
             sx={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               flexGrow: 1
             }}>
             <LocationOn />
@@ -268,8 +378,6 @@ export function ItemForTab({ item, collapse, setCollapse }) {
               {item.details.address.street1}
               <br />
               {item.details.address.street2}
-              <br />
-              {item.details.address.city}
             </Typography>
           </Box>
           <Box
@@ -277,33 +385,33 @@ export function ItemForTab({ item, collapse, setCollapse }) {
             sx={{
               display: "flex",
               alignItems: "center",
-              flexGrow: 1
+              flexGrow: 1,
+              justifyContent: "end"
             }}>
             <LocationCity />
             <Typography>
-              {item.details.address.state}
+              {item.details.address.city}
               <br />
-              {item.details.address.country}
+              {item.details.address.state}, {item.details.address.country}
             </Typography>
           </Box>
         </Box>
-        <Divider />
-        <Box component="div" sx={{ position: "relative" }}>
+        <Divider sx={{ mt: 0.5, mb: 2 }} />
+        <Box component="div" sx={{ position: "relative", width: "100%" }}>
           {!isPatient && <DoctorData />}
           {isPatient && (
             <>
-              {item.associatedDoctors.length === 0 && (
+              {doctors === 0 && (
                 <Typography sx={{ mt: 1, mb: 2 }} component="div">
                   No Patients have been assigned
                 </Typography>
               )}
-              {item.associatedDoctors.length !== 0 && (
+              {doctors !== 0 && (
                 <>
                   <Typography sx={{ mt: 1, mb: 2 }} component="div">
                     <u style={{ fontSize: "1rem" }}>Associated Doctors</u>
                     <Typography className="secondary">
-                      Has been assigned to {item.associatedDoctors.length} different
-                      doctors
+                      Has been assigned to {doctors} different doctors
                     </Typography>
                   </Typography>
                   <Chip
@@ -346,9 +454,15 @@ export function ItemForTab({ item, collapse, setCollapse }) {
   );
 }
 
-function PatientList({ data }) {
+function PatientList({
+  data,
+  setPatient,
+  setDialogOpen,
+  checkIN,
+  onClickEventDischarge
+}) {
   const [collapse, setCollapse] = useState({
-    ...data.map((ele) => ({ outer: false, inner: true }))
+    ...data.map(() => ({ outer: false, inner: true }))
   });
   const handleCollapse = {
     outer: (index) => {
@@ -374,8 +488,35 @@ function PatientList({ data }) {
           item={{ ID: i, ...ele }}
           collapse={collapse[i]}
           setCollapse={handleCollapse}
+          setPatient={setPatient}
+          setDialogOpen={setDialogOpen}
+          checkIN={checkIN}
+          onClickEventDischarge={onClickEventDischarge}
         />
       ))}
+      {data.length === 0 && (
+        <Box
+          component="div"
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 4
+          }}>
+          <Avatar
+            alt="No Results"
+            src={no_patient}
+            sx={{ width: "250px", height: "250px", mt: 1.8, alignSelf: "center" }}
+          />
+          <Typography component="div" variant="h6" sx={{ mt: 1.2, textAlign: "center" }}>
+            <b>No Results Were Obtained</b>
+            <Typography sx={{ color: "text.secondary" }}>
+              Try refreshing or add adding more patients to this section
+            </Typography>
+          </Typography>
+        </Box>
+      )}
     </>
   );
 }
@@ -383,8 +524,18 @@ function PatientList({ data }) {
 export default function PatientData({ broadcastAlert }) {
   const [selectedTab, setSelectedTab] = useState("Actively Watched");
   const [mainCallBackPromise, setMainCallBackPromise] = useState(false);
-  const [promiseResolved, setPromiseResolved] = useState(mainCallBackPromise);
-  const [LoadedData, setLoadedData] = useState({
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogInputOptions, setDialogInputOptions] = useState([]);
+  const [selectedPatient, setSelectedPatiennt] = useState();
+  const [tabChangePromise, setTabChangePromise] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+  const [LoadedData, setLoadedData] = useState({ "Actively Watched": [] });
+  const [LoadingDialogSubmit, setLoadingDialogSubmit] = useState(false);
+  const [dialogInputOptionPromise, setDialogInputOptionsPromise] = useState(false);
+  const [doctor, setDoctor] = useState({});
+  const [searchString, setSearchString] = useState("");
+  // Store the original data when search is used then load later...
+  const [temporaryData, setTemporaryData] = useState({
     "Actively Watched": [],
     "Waiting For Discharge": [],
     "Waiting To Be Assigned": [],
@@ -393,13 +544,18 @@ export default function PatientData({ broadcastAlert }) {
 
   const loadAllPatientsForThisOrg = useCallback(async () => {
     try {
+      const data = {
+        "Actively Watched": [],
+        "Waiting For Discharge": [],
+        "Waiting To Be Assigned": [],
+        "Not Patients": []
+      };
       const results = await getAllPatientData();
-      const data = LoadedData;
       results.data.forEach((patient) => data[patient.active].push(patient));
       setLoadedData(data);
-      setMainCallBackPromise(true);
-      setPromiseResolved(true);
+      setTemporaryData(data);
     } catch (error) {
+      console.log(JSON.stringify(error));
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
@@ -409,27 +565,182 @@ export default function PatientData({ broadcastAlert }) {
             "An unexpected error occured. Please make sure blockchain is running. Contact SuperAdmin for this."
         )
       ]);
+    } finally {
+      setRefresh(true);
       setMainCallBackPromise(true);
-      setPromiseResolved(true);
+      setTabChangePromise(true);
     }
   }, []);
 
-  useEffect(() => {
-    loadAllPatientsForThisOrg();
-  }, [loadAllPatientsForThisOrg]);
+  const loadAllDoctorsForThisOrg = useCallback(async () => {
+    try {
+      const results = await getAllDoctorData();
+      const data = [];
+      results.data.forEach((doc) =>
+        data.push({
+          id: doc.details.passport,
+          name: `${doc.details.firstName} ${doc.details.middleName} ${doc.details.lastName}`,
+          department: doc.details.department
+        })
+      );
+      setDialogInputOptions(data);
+    } catch (error) {
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          "Failed Loading the Input Box",
+          "An unexpected error occured. Please make sure blockchain is running or all Doctors are enrolled before assigning. Contact SuperAdmin for further tips."
+        )
+      ]);
+    } finally {
+      setDialogInputOptionsPromise(true);
+    }
+  });
 
   const handleChange = (_, newValue) => {
-    setPromiseResolved(false);
-    setSelectedTab(newValue);
+    setTabChangePromise(false);
     setTimeout(() => {
-      setPromiseResolved(true);
-    }, 600);
+      setTabChangePromise(true);
+    }, 300);
+    setSelectedPatiennt(null);
+    setSelectedTab(newValue);
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     const searchString = new FormData(e.currentTarget).get("search");
   };
+
+  const handleClose = () => {
+    if (LoadingDialogSubmit) return;
+    setDialogInputOptionsPromise(true);
+    setOpenDialog(!openDialog);
+  };
+
+  const refreshData = () => {
+    setMainCallBackPromise(false);
+    setTabChangePromise(false);
+    setRefresh(false);
+  };
+
+  const checkIN = async () => {
+    try {
+      await CheckInPatient(selectedPatient.id);
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "success",
+          "Patient CheckIn",
+          `Patient with ID : ${selectedPatient.id} was successfully Enrolled into the hospitals. Please see waiting to assign section for the patient name.`
+        )
+      ]);
+    } catch (error) {
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          "Patient CheckIn",
+          error?.response?.data
+            ? error.response.data.DETAILS
+            : `An unexpected error occurrecd checking in. Either the patient is already check in or there is a multiple button press issue. Please try refreshing.`
+        )
+      ]);
+    } finally {
+      refreshData();
+    }
+  };
+
+  const assignPatient = async () => {
+    if (!selectedPatient || !selectedPatient.id || !doctor || !doctor.id) return;
+    setLoadingDialogSubmit(true);
+    try {
+      const results = await AssignDoctor(selectedPatient.id, doctor.id);
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "success",
+          "Patient Assignment to Doctor",
+          `Patient with ID : ${selectedPatient.id} was successfully assigned to doctor in the ${doctor.department} department. Please see actively watched section for the patient name`
+        )
+      ]);
+      handleClose();
+    } catch (error) {
+      console.log(error.response.data);
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          "Patient Assignment to Doctor",
+          error?.response?.data
+            ? error.response.data.DETAILS
+            : `An unexpected error occurrecd assigning the patient. Either the patient is already assigned or there is a multiple button press issue. Please try refreshing.`
+        )
+      ]);
+    } finally {
+      setLoadingDialogSubmit(false);
+      refreshData();
+    }
+  };
+
+  const onClickEventDischarge = async () => {
+    try {
+      await Discharge(selectedPatient.id);
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "success",
+          "Patient Check Out",
+          `Patient with ID : ${selectedPatient.id} was successfully checked out of the hospitals. Please see not patients section for the former patient name.`
+        )
+      ]);
+    } catch (error) {
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          "Patient CheckIn",
+          error?.response?.data
+            ? error.response.data.DETAILS
+            : `An unexpected error occurrecd checking out. Either the patient is already check out or there is a multiple button press issue. Please try refreshing.`
+        )
+      ]);
+    } finally {
+      refreshData();
+    }
+  };
+
+  const search = (e) => {
+    if (LoadedData[selectedTab].length === 0) return;
+    setSearchString(e.target.value.trim());
+    const filter = e.target.value.trim().toUpperCase();
+    const dataFilter = LoadedData[selectedTab];
+    const newData = [];
+    dataFilter.forEach((ele) => {
+      const name = `${ele.details.firstName} ${ele.details.middleName} ${ele.details.lastName}`;
+      const passport = ele.details.passport;
+      if (
+        name.toUpperCase().indexOf(filter) > -1 ||
+        passport.toUpperCase().indexOf(filter) > -1
+      )
+        newData.push(ele);
+    });
+    setLoadedData((prev) => ({ ...prev, [selectedTab]: newData }));
+  };
+  useEffect(() => {
+    if (!refresh) loadAllPatientsForThisOrg();
+  }, [loadAllPatientsForThisOrg, refresh]);
+
+  useEffect(() => {
+    if (openDialog && !dialogInputOptionPromise) loadAllDoctorsForThisOrg();
+    return;
+  }, [loadAllDoctorsForThisOrg, dialogInputOptionPromise, openDialog]);
+
+  useEffect(() => {
+    if (searchString.trim() === "" && temporaryData) {
+      setLoadedData(temporaryData);
+    }
+  }, [searchString, temporaryData]);
   return (
     <Box component="div" sx={{ position: "relative", width: "inherit" }}>
       <AppBar
@@ -457,16 +768,34 @@ export default function PatientData({ broadcastAlert }) {
           onSubmit={handleSearchSubmit}>
           <InputBase
             sx={{ ml: 1, flex: 1 }}
+            disabled={!mainCallBackPromise}
             placeholder="Search Patients By Name or ID"
             inputProps={{
               "aria-label": "search patients by name or ID"
             }}
+            onChange={search}
             id="search"
             name="search"
           />
-          <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
-            <Search sx={{ color: "text.primary" }} />
-          </IconButton>
+          <Tooltip title="Search">
+            <IconButton
+              type="submit"
+              sx={{ p: "10px" }}
+              aria-label="search"
+              onClick={search}>
+              <Search sx={{ color: "text.primary" }} />
+            </IconButton>
+          </Tooltip>
+          <Divider orientation="vertical" sx={{ height: "25px", borderWidth: "1px" }} />
+          {!mainCallBackPromise ? (
+            <CircularProgress size="24px" sx={{ mr: "10px", ml: "10px" }} />
+          ) : (
+            <Tooltip title="Refresh the patient data">
+              <IconButton type="button" onClick={refreshData}>
+                <Refresh sx={{ color: "text.primary" }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Paper>
 
         <Tabs
@@ -502,8 +831,63 @@ export default function PatientData({ broadcastAlert }) {
           />
         </Tabs>
       </AppBar>
+      <Dialog
+        open={openDialog}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+        TransitionComponent={Transition}
+        PaperProps={{
+          sx: {
+            bgcolor: "primary.sectionContainer"
+          }
+        }}>
+        <DialogTitle id="form-dialog-title">Assign To Doctor</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            You may now assign the current patient to the following doctor. Please make
+            sure patient is aware of this before proceeding.
+          </DialogContentText>
+          <Autocomplete
+            disabled={!dialogInputOptionPromise}
+            autoHighlight
+            fullWidth
+            options={dialogInputOptions}
+            getOptionLabel={(option) => `${option.name} - ${option.department}`}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            onChange={(_, val) => setDoctor({ ...val })}
+            renderOption={(props, option) => (
+              <Box component="li" {...props} sx={{ bgcolor: "primary.sectionContainer" }}>
+                <Typography component="h6">
+                  <b>{option.name}</b>
+                  <Typography sx={{ color: "text.secondary" }}>
+                    <small>{option.department}</small>
+                  </Typography>
+                </Typography>
+              </Box>
+            )}
+            renderInput={(params) => (
+              <TextField {...params} label="Doctor Name" fullWidth />
+            )}
+          />
+        </DialogContent>
+        <DialogActions>
+          {!LoadingDialogSubmit && (
+            <>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={assignPatient} color="primary">
+                Assign Patient
+              </Button>
+            </>
+          )}
+          {LoadingDialogSubmit && (
+            <CircularProgress size="24px" sx={{ mr: 2.5, mb: 1.5 }} />
+          )}
+        </DialogActions>
+      </Dialog>
       <Box component="div">
-        {!mainCallBackPromise && !promiseResolved && (
+        {!mainCallBackPromise && (
           <Box
             component="div"
             sx={{
@@ -515,7 +899,16 @@ export default function PatientData({ broadcastAlert }) {
             <CircularProgress sx={{ alignSelf: "center" }} />
           </Box>
         )}
-        {promiseResolved && <PatientList data={LoadedData[selectedTab]} />}
+        {mainCallBackPromise && tabChangePromise && LoadedData[selectedTab] && (
+          <PatientList
+            data={LoadedData[selectedTab]}
+            patientSelected={selectedPatient}
+            setPatient={setSelectedPatiennt}
+            setDialogOpen={setOpenDialog}
+            checkIN={checkIN}
+            onClickEventDischarge={onClickEventDischarge}
+          />
+        )}
       </Box>
     </Box>
   );

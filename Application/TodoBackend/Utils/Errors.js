@@ -86,7 +86,7 @@ errors.not_reachable = new ApiError(
   "Network Not Reachable",
   "Network timeout expired. Please try again later"
 );
-errors.contract_error = new ApiError(401, "Blockchain Error Occurred.");
+errors.contract_error = new ApiError(500, "Blockchain Error Occurred.");
 errors.identity_not_found = new ApiError(
   401,
   "Unknown User",

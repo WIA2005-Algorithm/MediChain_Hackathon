@@ -12,10 +12,10 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Select
+  Select,
+  CircularProgress
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useNavigate } from "react-router-dom";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -46,8 +46,13 @@ import {
   Visibility,
   TransitEnterexit
 } from "@mui/icons-material";
-import { SectionContainer } from "../../StyledComponents";
-import { useState } from "react";
+import {
+  getAlertValues,
+  SectionContainer,
+  departmentOptions
+} from "../../StyledComponents";
+import { useCallback, useEffect, useState } from "react";
+import { getAllDoctorData, getAllPatientData } from "../../../APIs/Admin/main.api";
 const Link = () => <TransitEnterexit sx={{ transform: "rotate(180deg)" }} />;
 ChartJS.register(
   CategoryScale,
@@ -66,12 +71,17 @@ function createDivisionStatsData(icon, department, number) {
 function createNormalSectionBoxData(icon, num, title, linkID = null) {
   return { icon, num, title, linkID };
 }
-function NormalSectionBox({ changeTabTo }) {
+function NormalSectionBox({ changeTabTo, doctors, patients }) {
   const sectionBoxContent = [
-    createNormalSectionBoxData(<KingBed color="inherit" />, 234, "Total Patients", 1),
+    createNormalSectionBoxData(
+      <KingBed color="inherit" />,
+      patients?.length || 0,
+      "Total Patients",
+      1
+    ),
     createNormalSectionBoxData(
       <People color="inherit" />,
-      34,
+      doctors?.length || 0,
       "Total Available Staff",
       2
     ),
@@ -143,19 +153,70 @@ const columns = [
     format: (value) => value.toFixed(0)
   }
 ];
-function DivisionStats({ changeTabTo }) {
-  const rows = [
-    createDivisionStatsData(<EscalatorWarning />, "General", 63),
-    createDivisionStatsData(<LocalHospital />, "Medicine", 63),
-    createDivisionStatsData(<ContentCut />, "Surgery", 63),
-    createDivisionStatsData(<AcUnit />, "Neurology", 63),
-    createDivisionStatsData(<Favorite />, "Cardiology", 63),
-    createDivisionStatsData(<Psychology />, "Psychology", 63),
-    createDivisionStatsData(<Face />, "Dermotology", 63),
-    createDivisionStatsData(<Hearing />, "ENT", 63),
-    createDivisionStatsData(<Visibility />, "Ophthalmology", 63),
-    createDivisionStatsData(<CheckBoxOutlineBlank />, "Other", 63)
-  ];
+function DivisionStats({ changeTabTo, patients }) {
+  const filterThePatientData = () => {
+    const departmentsDict = {};
+    departmentOptions.forEach((ele) => (departmentsDict[ele] = 0));
+    patients.forEach((pt) => {
+      Object.keys(pt.associatedDoctors).forEach((key) => {
+        const ele = pt.associatedDoctors[key];
+        departmentsDict[ele.department] = departmentsDict[ele.department]++;
+      });
+    });
+
+    return [
+      createDivisionStatsData(
+        <EscalatorWarning />,
+        departmentOptions[0],
+        departmentsDict[departmentOptions[0]]
+      ),
+      createDivisionStatsData(
+        <LocalHospital />,
+        departmentOptions[1],
+        departmentsDict[departmentOptions[1]]
+      ),
+      createDivisionStatsData(
+        <ContentCut />,
+        departmentOptions[2],
+        departmentsDict[departmentOptions[2]]
+      ),
+      createDivisionStatsData(
+        <AcUnit />,
+        departmentOptions[3],
+        departmentsDict[departmentOptions[3]]
+      ),
+      createDivisionStatsData(
+        <Favorite />,
+        departmentOptions[4],
+        departmentsDict[departmentOptions[4]]
+      ),
+      createDivisionStatsData(
+        <Psychology />,
+        departmentOptions[5],
+        departmentsDict[departmentOptions[5]]
+      ),
+      createDivisionStatsData(
+        <Face />,
+        departmentOptions[6],
+        departmentsDict[departmentOptions[6]]
+      ),
+      createDivisionStatsData(
+        <Hearing />,
+        departmentOptions[7],
+        departmentsDict[departmentOptions[7]]
+      ),
+      createDivisionStatsData(
+        <Visibility />,
+        departmentOptions[8],
+        departmentsDict[departmentOptions[8]]
+      ),
+      createDivisionStatsData(
+        <CheckBoxOutlineBlank />,
+        departmentOptions[9],
+        departmentsDict[departmentOptions[9]]
+      )
+    ];
+  };
   return (
     <SectionContainer
       sx={{
@@ -219,7 +280,7 @@ function DivisionStats({ changeTabTo }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
+            {filterThePatientData().map((row) => {
               return (
                 <TableRow tabIndex={-1} key={row.department}>
                   {columns.map((column) => {
@@ -498,27 +559,90 @@ function TimeLineGraph() {
     </SectionContainer>
   );
 }
-export function OverViewTab({ changeTabTo }) {
+export function OverViewTab({ changeTabTo, broadcastAlert }) {
+  const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [promiseToRetrivePatients, setPromiseToRetrivePatients] = useState(false);
+  const [promiseToRetriveDoctors, setPromiseToRetriveDoctors] = useState(false);
+
+  const loadAllPatientsForThisOrg = useCallback(async () => {
+    try {
+      const results = await getAllPatientData();
+      setPatients(results.data || []);
+    } catch (error) {
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          error.response?.data?.MESSAGE || "Error Loading the data",
+          error.response?.data?.DETAILS ||
+            "An unexpected error occured. Please make sure blockchain is running. Contact SuperAdmin for this."
+        )
+      ]);
+    } finally {
+      setPromiseToRetrivePatients(true);
+    }
+  }, []);
+
+  const loadAllDoctorsForThisOrg = useCallback(async () => {
+    try {
+      const results = await getAllDoctorData();
+      setDoctors(results.data || []);
+    } catch (error) {
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          "Failed Loading the Input Box",
+          "An unexpected error occured. Please make sure blockchain is running or all Doctors are enrolled before assigning. Contact SuperAdmin for further tips."
+        )
+      ]);
+    } finally {
+      setPromiseToRetriveDoctors(true);
+    }
+  });
+
+  useEffect(() => {
+    if (!promiseToRetrivePatients) loadAllPatientsForThisOrg();
+  }, [loadAllPatientsForThisOrg, promiseToRetrivePatients]);
+
+  useEffect(() => {
+    if (!promiseToRetriveDoctors) loadAllDoctorsForThisOrg();
+  }, [loadAllDoctorsForThisOrg, promiseToRetriveDoctors]);
+
   return (
-    <Box
-      component="div"
-      sx={{
-        width: "100%"
-      }}>
-      <Box
-        sx={{
-          display: "flex",
-          width: "100%"
-        }}>
-        <NormalSectionBox changeTabTo={changeTabTo} />
-      </Box>
-      <Box sx={{ display: "flex", width: "100%" }}>
-        <DivisionStats changeTabTo={changeTabTo} />
-        <StatsSection />
-      </Box>
-      <Box sx={{ display: "flex", width: "100%", minHeight: " 550px" }}>
-        <TimeLineGraph />
-      </Box>
-    </Box>
+    <>
+      {!promiseToRetriveDoctors || !promiseToRetrivePatients ? (
+        <Box
+          component="div"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "500px"
+          }}>
+          <CircularProgress sx={{ alignSelf: "center" }} />
+        </Box>
+      ) : (
+        <Box component="div" sx={{ width: "100%" }}>
+          <Box sx={{ display: "flex", width: "100%" }}>
+            <NormalSectionBox
+              changeTabTo={changeTabTo}
+              doctors={doctors}
+              patients={patients}
+            />
+          </Box>
+          <Box sx={{ display: "flex", width: "100%" }}>
+            <DivisionStats changeTabTo={changeTabTo} patients={patients} />
+            {/* TODO STATS SECTION */}
+            <StatsSection />
+          </Box>
+          <Box sx={{ display: "flex", width: "100%", minHeight: " 550px" }}>
+            {/* TODO TIME LINE GRAPH */}
+            <TimeLineGraph />
+          </Box>
+        </Box>
+      )}
+    </>
   );
 }

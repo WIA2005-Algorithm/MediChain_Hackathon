@@ -4,7 +4,8 @@ const stringify = require("json-stringify-deterministic");
 const sortKeysRecursive = require("sort-keys-recursive");
 const { getTypeEHROrDoctor } = require("./Models/ehr.model.js");
 const ClientIdentity = require("fabric-shim").ClientIdentity;
-const indexedOrg = "orgDetails~PID";
+const indexedOrgForPatients = "orgDetails~PID";
+const indexedOrgForDoctors = "orgDetails~DID";
 
 class FabCar extends Contract {
   async initLedger(ctx) {
@@ -50,7 +51,7 @@ class FabCar extends Contract {
       )
     );
     console.log("Putstate Done...Now indexing");
-    await this.createOrgIndex(ctx, PID, orgDetails.org.toString());
+    await this.createOrgIndex(ctx, PID, orgDetails.org.toString(), indexedOrgForPatients);
     return JSON.stringify(content);
   }
 
@@ -63,21 +64,22 @@ class FabCar extends Contract {
    * This function adds a new doctor to the organization - [INSERTION]
    * USE SubmitTransaction for this rather than evaluate
    */
-  async addDoctor(ctx, DID, docDetails, contact, department) {
+  async addDoctor(ctx, DID, docDetails, address, contact) {
     const member = await ctx.stub.getState(DID);
     if (member && member.length !== 0)
       throw new Error(`The doctor with ${DID} already exists`);
-    console.log("DOC DETAILS IN addDoctor: ", JSON.parse(docDetails));
+    let orgDetails = JSON.parse(this.getOrganizationDetails(ctx));
+    docDetails = JSON.parse(docDetails);
     const content = getTypeEHROrDoctor(
-      JSON.parse(docDetails),
-      JSON.parse(this.getOrganizationDetails(ctx)),
+      docDetails,
+      orgDetails,
+      JSON.parse(address),
       JSON.parse(contact),
       "Doctor"
     );
-    await ctx.stub.putState(
-      DID,
-      Buffer.from(stringify(sortKeysRecursive({ ...content, department })))
-    );
+    await ctx.stub.putState(DID, Buffer.from(stringify(sortKeysRecursive(content))));
+    await this.createOrgIndex(ctx, DID, orgDetails.org.toString(), indexedOrgForDoctors);
+    return JSON.stringify(content);
   }
 
   async checkInPatient(ctx, PID) {
@@ -102,6 +104,9 @@ class FabCar extends Contract {
         "The patient is already checked in. Please checkout the patient and try again."
       );
   }
+
+  // TODO:::
+  async dischargeORCheckOutPatient(ctx, PID) {}
   /**
    *
    * @param {Context} ctx - Transaction
@@ -109,29 +114,34 @@ class FabCar extends Contract {
    * @param {String} DID - DoctorID
    * This function assigns patient to doctor... [UPDATE]
    * USE SubmitTransaction for this rather than evaluate
+   * Patients can be assigned to doctors only by admins
    */
   async assignPatientToDoctor(ctx, PID, DID) {
     let [doctype, doctor] = await this.getMemberType(ctx, DID);
+    console.log(" HUHUHUUHUH 1...");
     if (
-      doctype !== "Doctor" ||
+      doctype !== "Admin" ||
       !JSON.parse(doctor.toString())
         .orgDetails.role.toString()
         .toLowerCase()
         .includes("doctor")
     )
-      throw new Error("Patient can only be registered by an in-hospital doctor.");
+      throw new Error("Patient can only be registered to an in-hospital doctor.");
     let [_, patient] = await this.getMemberType(ctx, PID);
+    console.log(" HUHUHUUHUH 2...");
     patient = JSON.parse(patient.toString());
+    console.log(" HUHUHUUHUH 3...");
     doctor = JSON.parse(doctor.toString());
+    console.log(" HUHUHUUHUH 4...");
     if (doctor.orgDetails.org !== patient.orgDetails.org)
       throw new Error("Patient can only be registered to in-hospital doctor.");
     if (doctor.associatedPatients[PID])
       throw new Error(
-        "Doctor is already assigned to this patient...Please dissolve them first then assign again for new entry or reset status altogether"
+        "Requested doctor has already been assigned to this patient...Please dissolve them first then assign again for new entry or reset status altogether"
       );
     if (patient.checkIn.length === patient.checkOut.length)
       throw new Error(
-        "Patient hasnot yet checkedin themselves. Please checkin the patient first"
+        "Patient has not yet been checked-In. Please check-In the patient first"
       );
     // Update the details
     const ptObj = {
@@ -143,7 +153,7 @@ class FabCar extends Contract {
       department: doctor.details.department,
       assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
       active: ["Verified", "In-progress"],
-      note: "Patient is pending to be examined",
+      note: "Patient is currently being examined",
       EMRID: -500,
       dischargeOk: null
     };
@@ -246,13 +256,29 @@ class FabCar extends Contract {
     }
     return "Not Patients";
   }
-  async createOrgIndex(ctx, PID, orgDetails) {
+  async createOrgIndex(ctx, ID, orgDetails, index) {
     await ctx.stub.putState(
-      await ctx.stub.createCompositeKey(indexedOrg, [orgDetails, PID]),
+      await ctx.stub.createCompositeKey(index, [orgDetails, ID]),
       Buffer.from("\u0000")
     );
   }
 
+  async helperFunctionToGetIndexedData(ctx, index, mspid) {
+    let ResultsIterator = await ctx.stub.getStateByPartialCompositeKey(index, [mspid]);
+    let response = await ResultsIterator.next();
+    const allDataArray = [];
+    while (!response.done) {
+      if (!response || !response.value || !response.value.key) return;
+      let attributes, _;
+      ({ _, attributes } = await ctx.stub.splitCompositeKey(response.value.key));
+      let returnedAssetName = attributes[1];
+      const v = await ctx.stub.getState(returnedAssetName);
+      allDataArray.push(JSON.parse(v.toString()));
+      response = await ResultsIterator.next();
+    }
+
+    return allDataArray;
+  }
   /**
    * GETS ALL THE PATIENTS IN THE CURRENT HOSPITAL CONTEXT
    * @param {TxContext} - Context
@@ -263,22 +289,24 @@ class FabCar extends Contract {
     const [type, mspid] = await this.getMemberType(ctx, "0");
     if (type !== "Admin")
       throw new Error("You are unauthorized to access this part of the site...");
-    let ResultsIterator = await ctx.stub.getStateByPartialCompositeKey(indexedOrg, [
-      mspid
-    ]);
-    // Iterate through result set and for each asset found, transfer to newOwner
-    let response = await ResultsIterator.next();
-    let allPatients = [];
-    while (!response.done) {
-      if (!response || !response.value || !response.value.key) return;
-      let attributes, _;
-      ({ _, attributes } = await ctx.stub.splitCompositeKey(response.value.key));
-      let returnedAssetName = attributes[1];
-      const v = await ctx.stub.getState(returnedAssetName);
-      allPatients.push(JSON.parse(v.toString()));
-      response = await ResultsIterator.next();
-    }
-    return JSON.stringify(allPatients);
+    return JSON.stringify(
+      await this.helperFunctionToGetIndexedData(ctx, indexedOrgForPatients, mspid)
+    );
+  }
+
+  /**
+   * GETS ALL THE DOCTORS IN THE CURRENT HOSPITAL CONTEXT
+   * @param {TxContext} - Context
+   * @param {String} - Doctor ID
+   * @returns
+   */
+  async getAllDoctors(ctx) {
+    const [type, mspid] = await this.getMemberType(ctx, "0");
+    if (type !== "Admin")
+      throw new Error("You are unauthorized to access this part of the site...");
+    return JSON.stringify(
+      await this.helperFunctionToGetIndexedData(ctx, indexedOrgForDoctors, mspid)
+    );
   }
 
   /**

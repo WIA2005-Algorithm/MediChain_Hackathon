@@ -15,7 +15,7 @@ const getTypeEHROrDoctor = (details, orgDetails, address, contact, type) => {
       associatedDoctors: {}
     };
   }
-  return {
+  const content = {
     ...extraAttr,
     secretSharingPair: {},
     ...obtainDetails(
@@ -40,6 +40,8 @@ const getTypeEHROrDoctor = (details, orgDetails, address, contact, type) => {
       contact.whatsapp
     )
   };
+  if (type === "Doctor") content.details["department"] = details["department"];
+  return content;
 };
 
 module.exports = { getTypeEHROrDoctor };

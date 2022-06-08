@@ -45,6 +45,7 @@ export async function EnrollAdmin(orgName) {
  * @param {String} affiliation - "doctor" or "patient"
  */
 export async function RegisterUser(orgName, userId, affiliation) {
+  console.log("HERE 3");
   const { caClient, wallet, ccp } = await intialize(orgName);
   console.log(affiliation, "IN REGISTERuser");
   await registerAndEnrollUser(caClient, wallet, orgName, userId, affiliation, ccp);
