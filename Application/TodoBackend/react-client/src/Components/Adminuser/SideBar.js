@@ -8,12 +8,76 @@ import {
   ListItemIcon,
   ListItemText,
   Drawer,
-  ListItem
+  ListItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
+import { useState } from "react";
+import { ButtonMailto, Transition } from "../StyledComponents";
+
+function ContactUs({ open, setOpen }) {
+  const handleClose = () => setOpen(false);
+  return (
+    <Dialog
+      PaperProps={{
+        sx: {
+          bgcolor: "background.default",
+          backgroundImage: "none"
+        }
+      }}
+      open={open}
+      TransitionComponent={Transition}
+      onClose={handleClose}
+      aria-describedby="alert-dialog-slide-description">
+      <DialogTitle>
+        <Typography component="div" variant="h5" sx={{ mt: 1.2 }}>
+          <b>Contact SuperAdmin</b>
+          <Typography sx={{ color: "text.secondary" }} variant="h6">
+            <small>We're all ears</small>
+          </Typography>
+        </Typography>
+        <Divider sx={{ mt: 1 }} />
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-slide-description">
+          <Typography sx={{ mb: 1 }}>
+            SuperAdmin manages all the tasks around creating, managing blockchain servers
+            as well as hospitals and it's admin users. SuperAdmin does not hold any
+            responsibility against hospital patients and doctors and neither will be held
+            responsible for it in the future.
+          </Typography>
+          <Typography>
+            If you have read the above paragraph and still wish to contact SuperAdmin,
+            then you may do so by clicking the below link.
+          </Typography>
+          <Typography>
+            Email us at :{" "}
+            <u>
+              <b>
+                <ButtonMailto
+                  label="kamal20012011@hotmail.com"
+                  mailto="kamal20012011@hotmail.com"
+                />
+              </b>
+            </u>
+          </Typography>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 export function AppNavSideBar({ optSelected, changeTabTo, navItems }) {
   const drawerWidth = 240;
+  const [open, setOpen] = useState(false);
   return (
     <Drawer
       variant="permanent"
@@ -94,11 +158,13 @@ export function AppNavSideBar({ optSelected, changeTabTo, navItems }) {
             sx={{
               textTransform: "capitalize",
               width: "100%"
-            }}>
+            }}
+            onClick={() => setOpen(true)}>
             <b>Contact SuperAdmin</b>
           </Button>
         </ListItem>
       </Box>
+      {open && <ContactUs open={open} setOpen={setOpen} />}
     </Drawer>
   );
 }

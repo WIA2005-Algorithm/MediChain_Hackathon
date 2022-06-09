@@ -2,6 +2,7 @@ import {
   Badge,
   CircularProgress,
   IconButton,
+  Link,
   Slide,
   Tooltip,
   Typography
@@ -12,11 +13,16 @@ import logo from "../static/images/Logo.png";
 import { useState, useCallback, useEffect, forwardRef } from "react";
 import { getNetworkStatus } from "../APIs/Superuser/network.api.js";
 import {
+  Add,
+  Check,
   CheckCircle,
+  Clear,
+  ClearAll,
   Close,
   DoubleArrow,
   Error,
   Info,
+  RemoveCircle,
   Visibility,
   VisibilityOff
 } from "@mui/icons-material";
@@ -301,3 +307,37 @@ export const departmentOptions = [
   "Ophthalmology",
   "Other"
 ];
+
+export const getIcon = (icon, type = "superuser") => {
+  switch (icon.trim()) {
+    case "add":
+      return ["primary", <Add />];
+    case "removecircle":
+      return ["primary", <RemoveCircle />];
+    case "clear":
+      if (type === "superuser") return ["primary", <Clear />];
+      else return ["primary", <ClearAll />];
+    case "success":
+      return ["success", <Check />];
+    case "info":
+      return ["info", <Info />];
+    case "error":
+      return ["error", <Error />];
+    default:
+      return [null, null];
+  }
+};
+
+export const ButtonMailto = ({ mailto, label }) => {
+  return (
+    <Link
+      to="#"
+      sx={{ cursor: "pointer" }}
+      onClick={(e) => {
+        window.location.href = `mailto:${mailto}`;
+        e.preventDefault();
+      }}>
+      {label}
+    </Link>
+  );
+};

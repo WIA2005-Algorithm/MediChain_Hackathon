@@ -1,11 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import Dialog from "@mui/material/Dialog";
-import Divider from "@mui/material/Divider";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import {
   departmentOptions,
@@ -26,7 +19,13 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip
+  Tooltip,
+  Dialog,
+  Divider,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
 import {
@@ -42,7 +41,8 @@ import {
   AddCircle,
   ContactPhone,
   RemoveCircle,
-  Lock
+  Lock,
+  Close
 } from "@mui/icons-material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CountryCity from "countrycitystatejson";
@@ -817,8 +817,8 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
     }, 600);
   };
   const navigate = useNavigate();
-  const handleClose = (url) => {
-    if (url && user?.org)
+  const handleClose = (status = "") => {
+    if (status === "successful" && user?.org)
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
@@ -831,7 +831,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
             : `Now you may login with yoour credentials to continue. Thank you`
         )
       ]);
-    if (!user)
+    if (!user && status === "successful")
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
@@ -842,7 +842,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
           `You may now login to enter the application.`
         )
       ]);
-    navigate(url && user ? url : -1);
+    navigate(status === "successful" && user ? "../overview" : -1);
   };
   // OPEN OR CLOSE THE ALERT
   const [open, setOpen] = useState(false);
@@ -931,7 +931,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
       user ? true : false
     )
       .then(() => {
-        handleClose(!user ? "../overview" : -1);
+        handleClose("successful");
       })
       .catch((e) => {
         closeForError(
@@ -966,7 +966,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
             color="inherit"
             onClick={() => handleClose()}
             aria-label="close">
-            <CloseIcon />
+            <Close />
           </IconButton>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             {user && "Create New Patient Record"}
@@ -1178,7 +1178,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
                       color="inherit"
                       size="small"
                       onClick={() => setOpen(false)}>
-                      <CloseIcon fontSize="inherit" />
+                      <Close fontSize="inherit" />
                     </IconButton>
                   }>
                   <b style={{ whiteSpace: "pre-wrap" }}>{formResponseAlert}</b>

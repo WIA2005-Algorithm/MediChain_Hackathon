@@ -30,7 +30,6 @@ const loginHelper = (data) => {
 };
 // CREATION OF ADMIN ENTITY INSIDE CREATE ORGANISATION START NETWORK
 router.post("/login", (req, res) => {
-  console.log("hello...I am here");
   let user = null,
     session = null;
   const userID = req.body.userID,
@@ -67,24 +66,36 @@ router.post("/login", (req, res) => {
         role: type,
         org: user.organization
       });
-      console.log(LoginHelp);
       session = LoginHelp.session;
-      console.log(session);
       LoginHelp.next()
-        .then(() =>
-          res.status(200).json({
+        .then(() => {
+          log(
+            `${userID}`,
+            `Login Successfull`,
+            `Login for the user with userID: ${userID} and role: [${type.toUpperCase()}] was successful`,
+            "success"
+          );
+          return res.status(200).json({
             ...session,
             org: user.organization,
             isOnBehalf: -1
-          })
-        )
+          });
+        })
         .catch((err) => {
           throw new Error(err);
         });
     })
     .catch((err) => {
       err = errors.invalid_auth.withDetails(
-        `Either you are not a verified user or your username/password is incorrect : ${err.message}`
+        `Either you are not a verified user or your username/password is incorrect`
+      );
+      log(
+        `${userID}`,
+        `Login failed`,
+        `Login for the user with userID: ${userID} and role: [${type.toUpperCase()}] failed with error - ${
+          err.status
+        }`,
+        "error"
       );
       return res.status(err.status).json(new response.errorResponse(err));
     });
@@ -99,7 +110,7 @@ router.get("/getEnrolledHospitals", (_, res) => {
     .then((data) => {
       const array = [];
       data.forEach((ele) => array.push(`${ele.FullName} - ${ele.Name}`));
-      res.status(200).json(array);
+      return res.status(200).json(array);
     })
     .catch((e) => {
       return res.status(500).json({ message: "Unexpected Error Occured" });
@@ -147,14 +158,25 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
       return LoginHelp.next();
     })
     .then(() => {
-      console.log(" Success full ");
-      res.status(200).json({
+      log(
+        `${userID}`,
+        `Alternate Password Changed Successfully`,
+        `Alternate password change for the user with userID: ${userID} and role: [${user.type.toUpperCase()}] was successful`,
+        "clear"
+      );
+      return res.status(200).json({
         ...session,
         org: user.organization
       });
     })
     .catch((err) => {
       err = errors.signUpError.withDetails(`${err.message}`);
+      log(
+        `${userID}`,
+        `Alternate Password Change Attempted`,
+        `Alternate password change for the user with userID: ${userID} and role: [${user.type.toUpperCase()}] failed`,
+        "error"
+      );
       return res.status(err.status).json(new response.errorResponse(err));
     });
 });
@@ -199,12 +221,25 @@ router.post("/addNewPatient/onBehalf", (req, res) => {
       );
     })
     .then(() => {
-      console.log("Successfulllyyyy DOneeeeee.....");
-      res.sendStatus(200);
+      log(
+        `${req.user.username}`,
+        `Sign Up Successful`,
+        `New Sign Up for userID: ${
+          loginDetails.ID
+        } and role: [${type.toUpperCase()}] was successful`,
+        "add"
+      );
+      return res.sendStatus(200);
     })
     .catch(async (err) => {
       await deleteAdminEntity(loginDetails.ID);
       err = errors.signUpError.withDetails(err);
+      log(
+        `${req.user.username}`,
+        `New Sign Up Attempted`,
+        `Sign up attempted for userID: ${userID} and role: [${user.type.toUpperCase()}] failed`,
+        "error"
+      );
       return res.status(err.status).json(new response.errorResponse(err));
     });
 });
@@ -234,20 +269,78 @@ router.get("/getAllDoctors", authenticateUser, (req, res) => {
 
 router.post("/checkInPatient", authenticateUser, (req, res) => {
   console.log(" Recieved the request to checkin");
-  checkIn(req.user.org, req.user.username, req.body.patientID)
-    .then(() => res.sendStatus(200))
-    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
+  HospitalEntity.findOne({ userID: req.body.patientID })
+    .exec()
+    .then((user) => {
+      console.log(user.password);
+      if (!user.password)
+        throw errors.patient_not_logged.withDetails(
+          "Patient cannot be checked in before the patient doesn't change his password provided by hospital organization"
+        );
+      else return checkIn(req.user.org, req.user.username, req.body.patientID);
+    })
+    .then(() => {
+      log(
+        `${req.user.username}`,
+        `Patient Check In Successful`,
+        `New Patient Check In for userID: ${req.body.patientID} was successful`,
+        "success"
+      );
+      return res.sendStatus(200);
+    })
+    .catch((err) => {
+      log(
+        `${req.user.username}`,
+        `Patient Check In Attempted`,
+        `New Patient Check In for userID: ${req.body.patientID} failed`,
+        "error"
+      );
+      console.log(err);
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 
 router.post("/assignPatient", authenticateUser, (req, res) => {
   assign(req.user.org, req.user.username, req.body.patientID, req.body.doctorID)
-    .then(() => res.sendStatus(200))
-    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
+    .then(() => {
+      log(
+        `${req.user.username}`,
+        `Patient Was Assigned to Doctor`,
+        `New Patient Assignment for userID: ${req.body.patientID} was successful`,
+        "add"
+      );
+      return res.sendStatus(200);
+    })
+    .catch((err) => {
+      log(
+        `${req.user.username}`,
+        `Patient Check In Attempted`,
+        `New Patient Assignment for userID: ${req.body.patientID} failed`,
+        "error"
+      );
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 
 router.post("/discharge", authenticateUser, (req, res) => {
   dischargeORCheckOutPatient(req.user.org, req.user.username, req.body.patientID)
-    .then(() => res.sendStatus(200))
-    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
+    .then(() => {
+      log(
+        `${req.user.username}`,
+        `Patient Was Discharged Successfully`,
+        `Existing Patient Dischargement for userID: ${req.body.patientID} was successful`,
+        "removecircle"
+      );
+      return res.sendStatus(200);
+    })
+    .catch((err) => {
+      log(
+        `${req.user.username}`,
+        `Patient Dischargement Attempted`,
+        `Existing Patient Dischargement for userID: ${req.body.patientID} failed with error 500`,
+        "removecircle"
+      );
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 export default router;

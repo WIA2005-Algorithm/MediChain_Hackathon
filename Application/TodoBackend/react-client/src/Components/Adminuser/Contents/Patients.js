@@ -3,7 +3,6 @@ import Tab from "@mui/material/Tab";
 import { LoadingButton } from "@mui/lab";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Add,
   AddCircle,
   AddTask,
   CallMissedOutgoing,
@@ -73,7 +72,9 @@ function DoctorItem({ data }) {
           <Typography className="secondary">Department - {data.department}</Typography>
         </Typography>
       </Box>
-      <Box component="div" sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
+      <Box
+        component="div"
+        sx={{ minWidth: "50%", maxWidth: "50%", display: "flex", alignItems: "center" }}>
         <Divider orientation="vertical" sx={{ height: "40px", mr: 2, ml: 1 }} />
         <Typography sx={{ flexGrow: 1 }} component="div">
           <Box component="div" sx={{ display: "flex" }}>
@@ -83,7 +84,7 @@ function DoctorItem({ data }) {
             {data.active[1] === "In-progress" ? (
               <Loop sx={{ color: "error.main" }} />
             ) : (
-              <CheckCircle sx={{ color: "success.main" }} />
+              <CheckCircle sx={{ color: "success.main" }} fontSize="small" />
             )}
           </Box>
           <Typography className="secondary">{data.note}</Typography>
@@ -93,16 +94,7 @@ function DoctorItem({ data }) {
   );
 }
 
-const DoctorData = ({ item, setPatient, checkIN, setDialogOpen }) => {
-  const [loading, setLoading] = useState(false);
-  const performClick = async () => {
-    setPatient({ id: item.details.passport });
-    if (item.active === "Not Patients") {
-      setLoading(true);
-      await checkIN();
-      setLoading(false);
-    } else setDialogOpen(true);
-  };
+const DoctorData = ({ item, checkIN, setDialogOpen, loadingCheckIn }) => {
   return (
     <>
       <Typography sx={{ mt: 1, mb: 2 }} component="div">
@@ -112,11 +104,14 @@ const DoctorData = ({ item, setPatient, checkIN, setDialogOpen }) => {
         </Typography>
       </Typography>
       <LoadingButton
-        loading={loading}
-        onClick={performClick}
+        loading={loadingCheckIn}
+        onClick={async () => {
+          if (item.active === "Not Patients") await checkIN(item.details.passport);
+          else setDialogOpen({ status: true, id: item.details.passport });
+        }}
         variant="outlined"
         endIcon={
-          !loading &&
+          !loadingCheckIn &&
           (item.active === "Not Patients" ? (
             <AddCircle sx={{ color: "primary.main" }} />
           ) : (
@@ -141,10 +136,10 @@ function ItemForTab({
   item,
   collapse,
   setCollapse,
-  setPatient,
   setDialogOpen,
   checkIN,
-  onClickEventDischarge
+  onClickEventDischarge,
+  loadingCheckIn
 }) {
   const handleCollapseOuterClick = () => setCollapse.outer(item.ID);
   const handleCollapseInnerClick = () => setCollapse.inner(item.ID);
@@ -186,10 +181,7 @@ function ItemForTab({
       return (
         <Button
           fullWidth
-          onClick={() => {
-            setPatient({ id: item.details.passport });
-            setDialogOpen(true);
-          }}
+          onClick={() => setDialogOpen({ status: true, id: item.details.passport })}
           sx={{
             textTransform: "capitalize",
             m: 1,
@@ -294,7 +286,7 @@ function ItemForTab({
               <Typography>{getAgeString()}</Typography>
             </Box>
           </Box>
-          <Box sx={{ flexGrow: "1", display: "flex" }} component="div">
+          <Box sx={{ minWidth: "50%", maxWidth: "50%", display: "flex" }} component="div">
             <Divider orientation="vertical" sx={{ height: "40px", mr: 2, ml: 1 }} />
             <Typography sx={{ flexGrow: "1" }} component="div">
               Status - {item.active}
@@ -404,7 +396,7 @@ function ItemForTab({
               item={item}
               checkIN={checkIN}
               setDialogOpen={setDialogOpen}
-              setPatient={setPatient}
+              loadingCheckIn={loadingCheckIn}
             />
           )}
           {isPatient && (
@@ -464,10 +456,10 @@ function ItemForTab({
 
 function PatientList({
   data,
-  setPatient,
   setDialogOpen,
   checkIN,
-  onClickEventDischarge
+  onClickEventDischarge,
+  loadingCheckIn
 }) {
   const [collapse, setCollapse] = useState({
     ...data.map(() => ({ outer: false, inner: true }))
@@ -496,10 +488,10 @@ function PatientList({
           item={{ ID: i, ...ele }}
           collapse={collapse[i]}
           setCollapse={handleCollapse}
-          setPatient={setPatient}
           setDialogOpen={setDialogOpen}
           checkIN={checkIN}
           onClickEventDischarge={onClickEventDischarge}
+          loadingCheckIn={loadingCheckIn}
         />
       ))}
       {data.length === 0 && (
@@ -532,15 +524,15 @@ function PatientList({
 export default function PatientData({ broadcastAlert }) {
   const [selectedTab, setSelectedTab] = useState("Actively Watched");
   const [mainCallBackPromise, setMainCallBackPromise] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState({ status: false, id: null });
   const [dialogInputOptions, setDialogInputOptions] = useState([]);
-  const [selectedPatient, setSelectedPatiennt] = useState();
   const [tabChangePromise, setTabChangePromise] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [LoadedData, setLoadedData] = useState({ "Actively Watched": [] });
   const [LoadingDialogSubmit, setLoadingDialogSubmit] = useState(false);
   const [dialogInputOptionPromise, setDialogInputOptionsPromise] = useState(false);
   const [doctor, setDoctor] = useState({});
+  const [loadingCheckIn, setLoadingCheckIn] = useState(false);
   const [searchString, setSearchString] = useState("");
   // Store the original data when search is used then load later...
   const [temporaryData, setTemporaryData] = useState({
@@ -611,14 +603,13 @@ export default function PatientData({ broadcastAlert }) {
     setTimeout(() => {
       setTabChangePromise(true);
     }, 300);
-    setSelectedPatiennt(null);
     setSelectedTab(newValue);
   };
 
   const handleClose = () => {
     if (LoadingDialogSubmit) return;
     setDialogInputOptionsPromise(true);
-    setOpenDialog(!openDialog);
+    setOpenDialog((prev) => ({ ...prev, status: !prev.status }));
   };
 
   const refreshData = () => {
@@ -627,18 +618,23 @@ export default function PatientData({ broadcastAlert }) {
     setRefresh(false);
   };
 
-  const checkIN = async () => {
+  const checkIN = async (ID) => {
+    setLoadingCheckIn(true);
     try {
-      await CheckInPatient(selectedPatient.id);
+      console.log("HELLLOOO");
+      await CheckInPatient(ID);
+      console.log(" NOOO");
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
           "success",
           "Patient CheckIn",
-          `Patient with ID : ${selectedPatient.id} was successfully Enrolled into the hospitals. Please see waiting to assign section for the patient name.`
+          `Patient with ID : ${ID} was successfully Enrolled into the hospitals. Please see waiting to assign section for the patient name.`
         )
       ]);
+      refreshData();
     } catch (error) {
+      console.log(error);
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
@@ -650,24 +646,25 @@ export default function PatientData({ broadcastAlert }) {
         )
       ]);
     } finally {
-      refreshData();
+      setLoadingCheckIn(false);
     }
   };
 
   const assignPatient = async () => {
-    if (!selectedPatient || !selectedPatient.id || !doctor || !doctor.id) return;
+    if (!openDialog.id || !doctor || !doctor.id) return;
     setLoadingDialogSubmit(true);
     try {
-      const results = await AssignDoctor(selectedPatient.id, doctor.id);
+      await AssignDoctor(openDialog.id, doctor.id);
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
           "success",
           "Patient Assignment to Doctor",
-          `Patient with ID : ${selectedPatient.id} was successfully assigned to doctor in the ${doctor.department} department. Please see actively watched section for the patient name`
+          `Patient with ID : ${openDialog.id} was successfully assigned to doctor in the ${doctor.department} department. Please see actively watched section for the patient name`
         )
       ]);
       handleClose();
+      refreshData();
     } catch (error) {
       console.log(error.response.data);
       broadcastAlert((prev) => [
@@ -682,21 +679,21 @@ export default function PatientData({ broadcastAlert }) {
       ]);
     } finally {
       setLoadingDialogSubmit(false);
-      refreshData();
     }
   };
 
   const onClickEventDischarge = async () => {
     try {
-      await Discharge(selectedPatient.id);
+      await Discharge(openDialog.id);
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
           "success",
           "Patient Check Out",
-          `Patient with ID : ${selectedPatient.id} was successfully checked out of the hospitals. Please see not patients section for the former patient name.`
+          `Patient with ID : ${openDialog.id} was successfully checked out of the hospitals. Please see not patients section for the former patient name.`
         )
       ]);
+      refreshData();
     } catch (error) {
       broadcastAlert((prev) => [
         ...prev,
@@ -708,8 +705,6 @@ export default function PatientData({ broadcastAlert }) {
             : `An unexpected error occurrecd checking out. Either the patient is already check out or there is a multiple button press issue. Please try refreshing.`
         )
       ]);
-    } finally {
-      refreshData();
     }
   };
 
@@ -746,7 +741,7 @@ export default function PatientData({ broadcastAlert }) {
   }, [loadAllPatientsForThisOrg, refresh]);
 
   useEffect(() => {
-    if (openDialog && !dialogInputOptionPromise) loadAllDoctorsForThisOrg();
+    if (openDialog.status && !dialogInputOptionPromise) loadAllDoctorsForThisOrg();
     return;
   }, [loadAllDoctorsForThisOrg, dialogInputOptionPromise, openDialog]);
 
@@ -840,7 +835,7 @@ export default function PatientData({ broadcastAlert }) {
         </Tabs>
       </AppBar>
       <Dialog
-        open={openDialog}
+        open={openDialog.status}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
         TransitionComponent={Transition}
@@ -910,11 +905,10 @@ export default function PatientData({ broadcastAlert }) {
         {mainCallBackPromise && tabChangePromise && LoadedData[selectedTab] && (
           <PatientList
             data={LoadedData[selectedTab]}
-            patientSelected={selectedPatient}
-            setPatient={setSelectedPatiennt}
             setDialogOpen={setOpenDialog}
             checkIN={checkIN}
             onClickEventDischarge={onClickEventDischarge}
+            loadingCheckIn={loadingCheckIn}
           />
         )}
       </Box>

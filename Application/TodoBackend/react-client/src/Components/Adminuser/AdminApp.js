@@ -6,16 +6,10 @@ import { AppContentBar } from "./AppBar";
 import { OverViewTab } from "./Contents/OverView";
 import PatientData from "./Contents/Patients";
 import { AppNavSideBar } from "./SideBar";
-import {
-  AssignmentTurnedIn,
-  ExitToApp,
-  History,
-  MedicalServices,
-  PeopleAlt,
-  QueryStats,
-  ReceiptLong
-} from "@mui/icons-material";
+import { History, MedicalServices, PeopleAlt, QueryStats } from "@mui/icons-material";
 import RegisterPatient from "./DialogContent/RegisterPatientOrDoctor";
+import DoctorData from "./Contents/Doctors";
+import ActivityLogs from "../Superuser/activity_logs";
 
 export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) {
   const [optSelected, setOptSelected] = useState(0);
@@ -84,6 +78,8 @@ export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) 
           />
           <Route path="/patients" element={<PatientData broadcastAlert={setNotis} />} />
           <Route path="/overview" element={<OverViewTab changeTabTo={navigate} />} />
+          <Route path="/doctors" element={<DoctorData broadcastAlert={setNotis} />} />
+          <Route path="/act_history" element={<ActivityLogs />} />
           <Route
             path="/"
             element={<OverViewTab changeTabTo={navigate} broadcastAlert={setNotis} />}

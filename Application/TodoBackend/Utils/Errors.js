@@ -97,6 +97,12 @@ errors.signUpError = new ApiError(
   "Unknown Error",
   "Looks like there was an error in processing your request"
 );
+
+errors.patient_not_logged = new ApiError(
+  401,
+  "Patient not logged atleast once",
+  "Looks like there was an error in processing your request"
+);
 //--------------- SOME OTHERS LOGIC ERRORS -------------------/
 errors.required_key = new ApiError(
   400,

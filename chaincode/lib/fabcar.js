@@ -151,7 +151,7 @@ class FabCar extends Contract {
     // Update the details
     const ptObj = {
       name: `${patient.details.firstName} ${patient.details.middleName} ${patient.details.lastName}`,
-      active: patient.active,
+      active: "Actively Watched",
       assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
       dischargeOk: null
     };

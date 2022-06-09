@@ -562,13 +562,12 @@ function TimeLineGraph() {
 export function OverViewTab({ changeTabTo, broadcastAlert }) {
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
-  const [promiseToRetrivePatients, setPromiseToRetrivePatients] = useState(false);
-  const [promiseToRetriveDoctors, setPromiseToRetriveDoctors] = useState(false);
+  const [promiseToRetriveData, setPromiseToRetriveData] = useState(false);
 
   const loadAllPatientsForThisOrg = useCallback(async () => {
     try {
-      const results = await getAllPatientData();
-      setPatients(results.data || []);
+      setPatients((await getAllPatientData()).data || []);
+      setDoctors((await getAllDoctorData()).data || []);
     } catch (error) {
       broadcastAlert((prev) => [
         ...prev,
@@ -580,39 +579,17 @@ export function OverViewTab({ changeTabTo, broadcastAlert }) {
         )
       ]);
     } finally {
-      setPromiseToRetrivePatients(true);
+      setPromiseToRetriveData(true);
     }
   }, []);
 
-  const loadAllDoctorsForThisOrg = useCallback(async () => {
-    try {
-      const results = await getAllDoctorData();
-      setDoctors(results.data || []);
-    } catch (error) {
-      broadcastAlert((prev) => [
-        ...prev,
-        getAlertValues(
-          "error",
-          "Failed Loading the Input Box",
-          "An unexpected error occured. Please make sure blockchain is running or all Doctors are enrolled before assigning. Contact SuperAdmin for further tips."
-        )
-      ]);
-    } finally {
-      setPromiseToRetriveDoctors(true);
-    }
-  });
-
   useEffect(() => {
-    if (!promiseToRetrivePatients) loadAllPatientsForThisOrg();
-  }, [loadAllPatientsForThisOrg, promiseToRetrivePatients]);
-
-  useEffect(() => {
-    if (!promiseToRetriveDoctors) loadAllDoctorsForThisOrg();
-  }, [loadAllDoctorsForThisOrg, promiseToRetriveDoctors]);
+    if (!promiseToRetriveData) loadAllPatientsForThisOrg();
+  }, [loadAllPatientsForThisOrg, promiseToRetriveData]);
 
   return (
     <>
-      {!promiseToRetriveDoctors || !promiseToRetrivePatients ? (
+      {!promiseToRetriveData ? (
         <Box
           component="div"
           sx={{

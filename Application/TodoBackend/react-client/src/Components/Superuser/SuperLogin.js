@@ -8,7 +8,8 @@ import {
   SectionContainer,
   Logo,
   Transition,
-  GetVisibility
+  GetVisibility,
+  ButtonMailto
 } from "../StyledComponents.js";
 import {
   AccountCircle,
@@ -16,9 +17,7 @@ import {
   AlternateEmail,
   LocalHospital,
   Lock,
-  Person,
-  Visibility,
-  VisibilityOff
+  Person
 } from "@mui/icons-material";
 import {
   Alert,
@@ -56,18 +55,6 @@ const login = async (user, pass, type) => {
     default:
       break;
   }
-};
-const ButtonMailto = ({ mailto, label }) => {
-  return (
-    <Link
-      to="#"
-      onClick={(e) => {
-        window.location.href = `mailto:${mailto}`;
-        e.preventDefault();
-      }}>
-      {label}
-    </Link>
-  );
 };
 const otherLogins = [
   { type: "admin", label: "Admin", url: "/admin/login", icon: <AdminPanelSettings /> },
