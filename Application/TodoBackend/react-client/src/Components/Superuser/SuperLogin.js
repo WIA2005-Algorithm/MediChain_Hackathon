@@ -283,25 +283,27 @@ export default function Login({ setLogin, pathname, message, loginType }) {
             pr: -1,
             mb: 2.5
           }}>
-          {otherLogins.map((ele) => {
-            if (ele.type === loginType) return <></>;
-            else
-              return (
-                <Box
-                  component="div"
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center"
-                  }}>
-                  <Button
-                    onClick={() => navigate(ele.url)}
-                    startIcon={ele.icon}
-                    sx={{ textTransform: "capitalize", ml: 1 }}>
-                    <b>{ele.label}</b>
-                  </Button>
-                </Box>
-              );
+          {otherLogins.map((ele, i) => {
+            return (
+              <span key={i}>
+                {ele.type !== loginType && (
+                  <Box
+                    component="div"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center"
+                    }}>
+                    <Button
+                      onClick={() => navigate(ele.url)}
+                      startIcon={ele.icon}
+                      sx={{ textTransform: "capitalize", ml: 1 }}>
+                      <b>{ele.label}</b>
+                    </Button>
+                  </Box>
+                )}
+              </span>
+            );
           })}
         </Box>
         <Divider textAlign="center" sx={{ width: "100%", mb: 1.5 }} />

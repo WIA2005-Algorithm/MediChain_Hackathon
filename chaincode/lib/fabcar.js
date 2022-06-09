@@ -77,7 +77,12 @@ class FabCar extends Contract {
       JSON.parse(contact),
       "Doctor"
     );
-    await ctx.stub.putState(DID, Buffer.from(stringify(sortKeysRecursive(content))));
+    await ctx.stub.putState(
+      DID,
+      Buffer.from(
+        stringify(sortKeysRecursive({ ...content, active: ["Active", "Unoccupied"] }))
+      )
+    );
     await this.createOrgIndex(ctx, DID, orgDetails.org.toString(), indexedOrgForDoctors);
     return JSON.stringify(content);
   }
@@ -145,7 +150,9 @@ class FabCar extends Contract {
       );
     // Update the details
     const ptObj = {
-      accepted: this.toDate(ctx.stub.getTxTimestamp()),
+      name: `${patient.details.firstName} ${patient.details.middleName} ${patient.details.lastName}`,
+      active: patient.active,
+      assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
       dischargeOk: null
     };
     const docObj = {
@@ -158,6 +165,7 @@ class FabCar extends Contract {
       dischargeOk: null
     };
     doctor.associatedPatients[PID] = ptObj;
+    doctor.active = ["Active", "Occupied"];
     patient.associatedDoctors[DID] = docObj; // Tag to recognize no record has yet been registered in the name of this patient
     patient.active = this.getStatus(
       patient.checkIn,

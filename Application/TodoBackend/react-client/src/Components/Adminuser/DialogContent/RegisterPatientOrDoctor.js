@@ -33,8 +33,6 @@ import {
   ExpandCircleDown,
   Grid3x3,
   AlternateEmail,
-  Visibility,
-  VisibilityOff,
   AssistantPhoto,
   LocationCity,
   FmdGood,

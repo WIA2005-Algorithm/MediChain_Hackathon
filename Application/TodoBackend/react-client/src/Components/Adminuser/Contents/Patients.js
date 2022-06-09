@@ -92,7 +92,52 @@ function DoctorItem({ data }) {
     </Box>
   );
 }
-export function ItemForTab({
+
+const DoctorData = ({ item, setPatient, checkIN, setDialogOpen }) => {
+  const [loading, setLoading] = useState(false);
+  const performClick = async () => {
+    setPatient({ id: item.details.passport });
+    if (item.active === "Not Patients") {
+      setLoading(true);
+      await checkIN();
+      setLoading(false);
+    } else setDialogOpen(true);
+  };
+  return (
+    <>
+      <Typography sx={{ mt: 1, mb: 2 }} component="div">
+        <u style={{ fontSize: "1rem" }}>Associated Doctors</u>
+        <Typography className="secondary">
+          The doctors have yet not been assigned to this patient
+        </Typography>
+      </Typography>
+      <LoadingButton
+        loading={loading}
+        onClick={performClick}
+        variant="outlined"
+        endIcon={
+          !loading &&
+          (item.active === "Not Patients" ? (
+            <AddCircle sx={{ color: "primary.main" }} />
+          ) : (
+            <AddTask sx={{ color: "primary.main" }} />
+          ))
+        }
+        sx={{
+          textTransform: "capitalize",
+          position: "absolute",
+          top: 10,
+          right: 10,
+          "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
+            color: "primary.main"
+          }
+        }}>
+        <b>{item.active === "Not Patients" ? "Check In" : "Assign"}</b>
+      </LoadingButton>
+    </>
+  );
+};
+function ItemForTab({
   item,
   collapse,
   setCollapse,
@@ -118,50 +163,6 @@ export function ItemForTab({
     else string += item.details.gender;
     string += ` - ${age} years old`;
     return string;
-  };
-
-  const DoctorData = () => {
-    const [loading, setLoading] = useState(false);
-    const performClick = async () => {
-      setPatient({ id: item.details.passport });
-      if (item.active === "Not Patients") {
-        setLoading(true);
-        await checkIN();
-        setLoading(false);
-      } else setDialogOpen(true);
-    };
-    return (
-      <>
-        <Typography sx={{ mt: 1, mb: 2 }} component="div">
-          <u style={{ fontSize: "1rem" }}>Associated Doctors</u>
-          <Typography className="secondary">
-            The doctors have yet not been assigned to this patient
-          </Typography>
-        </Typography>
-        <LoadingButton
-          loading={loading}
-          onClick={performClick}
-          variant="outlined"
-          endIcon={
-            item.active === "Not Patients" ? (
-              <AddCircle sx={{ color: "primary.main" }} />
-            ) : (
-              <AddTask sx={{ color: "primary.main" }} />
-            )
-          }
-          sx={{
-            textTransform: "capitalize",
-            position: "absolute",
-            top: 10,
-            right: 10,
-            "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
-              color: "primary.main"
-            }
-          }}>
-          <b>{item.active === "Not Patients" ? "Check In" : "Assign"}</b>
-        </LoadingButton>
-      </>
-    );
   };
 
   const getDoctorDeparmentString = () => {
@@ -398,7 +399,14 @@ export function ItemForTab({
         </Box>
         <Divider sx={{ mt: 0.5, mb: 2 }} />
         <Box component="div" sx={{ position: "relative", width: "100%" }}>
-          {!isPatient && <DoctorData />}
+          {!isPatient && (
+            <DoctorData
+              item={item}
+              checkIN={checkIN}
+              setDialogOpen={setDialogOpen}
+              setPatient={setPatient}
+            />
+          )}
           {isPatient && (
             <>
               {doctors === 0 && (
@@ -607,11 +615,6 @@ export default function PatientData({ broadcastAlert }) {
     setSelectedTab(newValue);
   };
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const searchString = new FormData(e.currentTarget).get("search");
-  };
-
   const handleClose = () => {
     if (LoadingDialogSubmit) return;
     setDialogInputOptionsPromise(true);
@@ -710,10 +713,21 @@ export default function PatientData({ broadcastAlert }) {
     }
   };
 
-  const search = (e) => {
-    if (LoadedData[selectedTab].length === 0) return;
-    setSearchString(e.target.value.trim());
-    const filter = e.target.value.trim().toUpperCase();
+  const handleSearchSubmit = (e) => {
+    let filterString;
+    // Submit when onchange by input
+    if (e.target.id === "search") filterString = e.target.value.trim().toUpperCase();
+    else {
+      // Submit when submitted by clicking button
+      e.preventDefault();
+      filterString = new FormData(e.currentTarget).get("search").trim().toUpperCase();
+    }
+    setSearchString(filterString);
+    if (filterString.length === 0 || LoadedData[selectedTab].length === 0) return;
+    searchHelper(filterString);
+  };
+
+  const searchHelper = (filter) => {
     const dataFilter = LoadedData[selectedTab];
     const newData = [];
     dataFilter.forEach((ele) => {
@@ -737,9 +751,7 @@ export default function PatientData({ broadcastAlert }) {
   }, [loadAllDoctorsForThisOrg, dialogInputOptionPromise, openDialog]);
 
   useEffect(() => {
-    if (searchString.trim() === "" && temporaryData) {
-      setLoadedData(temporaryData);
-    }
+    if (searchString.trim() === "" && temporaryData) setLoadedData(temporaryData);
   }, [searchString, temporaryData]);
   return (
     <Box component="div" sx={{ position: "relative", width: "inherit" }}>
@@ -768,21 +780,17 @@ export default function PatientData({ broadcastAlert }) {
           onSubmit={handleSearchSubmit}>
           <InputBase
             sx={{ ml: 1, flex: 1 }}
-            disabled={!mainCallBackPromise}
+            disabled={!mainCallBackPromise || !refresh}
             placeholder="Search Patients By Name or ID"
             inputProps={{
               "aria-label": "search patients by name or ID"
             }}
-            onChange={search}
+            onChange={handleSearchSubmit}
             id="search"
             name="search"
           />
           <Tooltip title="Search">
-            <IconButton
-              type="submit"
-              sx={{ p: "10px" }}
-              aria-label="search"
-              onClick={search}>
+            <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
               <Search sx={{ color: "text.primary" }} />
             </IconButton>
           </Tooltip>

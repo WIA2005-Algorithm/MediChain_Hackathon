@@ -21,7 +21,6 @@ export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) 
   const [optSelected, setOptSelected] = useState(0);
   const baseURL = "/admin/hospital";
   const adminItems = [
-    //TODO: ADD URL INSIDE BELOW ICON ATTRIBUTE
     {
       id: 0,
       name: "Overview",
@@ -45,25 +44,6 @@ export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) 
       name: "Activity History",
       icon: <History />,
       url: `${baseURL}/act_history`
-    },
-    //TODO: ADD URL INSIDE BELOW ICON ATTRIBUTE
-    {
-      id: 4,
-      name: "Enroll Patient",
-      icon: <ReceiptLong />,
-      url: "/"
-    },
-    {
-      id: 5,
-      name: "Assign Patient",
-      icon: <AssignmentTurnedIn />,
-      url: "/"
-    },
-    {
-      id: 6,
-      name: "Discharge Patients",
-      icon: <ExitToApp />,
-      url: "/"
     }
   ];
   const nav = useNavigate();
@@ -80,7 +60,6 @@ export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) 
   const navigate = (id, ...extra) => {
     // 0: overview, 1: patients, 2: doctor, 3:activity history
     try {
-      console.log(`Called me - ID: ${id} to go to ${adminItems[id].url}`);
       setOptSelected(parseInt(id));
       nav(adminItems[parseInt(id)].url, { state: { extra } });
     } catch (e) {
