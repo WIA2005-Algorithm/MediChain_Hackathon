@@ -6,6 +6,7 @@ import {
   createEntity,
   deleteAdminEntity,
   dischargeORCheckOutPatient,
+  patientCheckInCheckOutStats,
   retriveAllDoctors,
   retriveAllPatients
 } from "../controllers/Entity.controller.js";
@@ -221,23 +222,27 @@ router.post("/addNewPatient/onBehalf", (req, res) => {
       );
     })
     .then(() => {
+      console.log("HELLO - 1");
       log(
-        `${req.user.username}`,
+        `${loginDetails.ID}`,
         `Sign Up Successful`,
         `New Sign Up for userID: ${
           loginDetails.ID
         } and role: [${type.toUpperCase()}] was successful`,
         "add"
       );
+      console.log("HELLO - 2");
       return res.sendStatus(200);
     })
     .catch(async (err) => {
       await deleteAdminEntity(loginDetails.ID);
       err = errors.signUpError.withDetails(err);
       log(
-        `${req.user.username}`,
+        `${loginDetails.ID}`,
         `New Sign Up Attempted`,
-        `Sign up attempted for userID: ${userID} and role: [${user.type.toUpperCase()}] failed`,
+        `Sign up attempted for userID: ${
+          loginDetails.ID
+        } and role: [${type.toUpperCase()}] failed`,
         "error"
       );
       return res.status(err.status).json(new response.errorResponse(err));
@@ -272,8 +277,7 @@ router.post("/checkInPatient", authenticateUser, (req, res) => {
   HospitalEntity.findOne({ userID: req.body.patientID })
     .exec()
     .then((user) => {
-      console.log(user.password);
-      if (!user.password)
+      if (!user?.password)
         throw errors.patient_not_logged.withDetails(
           "Patient cannot be checked in before the patient doesn't change his password provided by hospital organization"
         );
@@ -342,5 +346,17 @@ router.post("/discharge", authenticateUser, (req, res) => {
       );
       return res.status(err.status).json(new response.errorResponse(err));
     });
+});
+
+router.get("/getPatientCheckInCheckOutStats", authenticateUser, (req, res) => {
+  console.log("HERE PLEASE");
+  patientCheckInCheckOutStats(
+    req.user.org,
+    req.user.username,
+    req.query.fromRange,
+    req.query.toRange
+  )
+    .then((data) => res.status(200).json(data))
+    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
 });
 export default router;

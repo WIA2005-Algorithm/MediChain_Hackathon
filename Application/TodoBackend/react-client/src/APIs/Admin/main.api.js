@@ -40,8 +40,13 @@ export const patientLoginAuth = (username, password) =>
     type: "patient"
   });
 
+export const doctorLoginAuth = (username, password) =>
+  axios.post("/entity/login", {
+    userID: username,
+    password: password,
+    type: "doctor"
+  });
 export const getAllPatientData = () => axios.get("/entity/getAllPatients");
-// TODO
 export const getAllDoctorData = () => axios.get("/entity/getAllDoctors");
 
 export const CheckInPatient = (patientID) =>
@@ -50,5 +55,11 @@ export const CheckInPatient = (patientID) =>
 export const AssignDoctor = (patientID, doctorID) =>
   axios.post("/entity/assignPatient", { patientID, doctorID });
 
-// TODO:
 export const Discharge = (patientID) => axios.post("/entity/discharge", { patientID });
+export const PatientDataStatsCheckInCheckOut = (fromRange, toRange) =>
+  axios.get("/entity/getPatientCheckInCheckOutStats", {
+    params: {
+      fromRange,
+      toRange
+    }
+  });

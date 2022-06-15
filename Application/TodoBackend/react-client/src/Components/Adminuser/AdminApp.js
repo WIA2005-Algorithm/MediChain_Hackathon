@@ -77,7 +77,10 @@ export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) 
             element={<RegisterPatient broadcastAlert={setNotis} user={user} />}
           />
           <Route path="/patients" element={<PatientData broadcastAlert={setNotis} />} />
-          <Route path="/overview" element={<OverViewTab changeTabTo={navigate} />} />
+          <Route
+            path="/overview"
+            element={<OverViewTab changeTabTo={navigate} broadcastAlert={setNotis} />}
+          />
           <Route path="/doctors" element={<DoctorData broadcastAlert={setNotis} />} />
           <Route path="/act_history" element={<ActivityLogs />} />
           <Route

@@ -17,6 +17,7 @@ import { HospitalAdminContent } from "./Components/Adminuser/AdminApp";
 import SuperAdminContent from "./Components/Superuser/SuperUserAdmin";
 import { Box } from "@mui/system";
 import RegisterPatient from "./Components/Adminuser/DialogContent/RegisterPatientOrDoctor";
+import DoctorApp from "./Components/Doctoruser/DoctorApp";
 
 const getDesignTokens = (mode) => ({
   "@global": {
@@ -42,13 +43,13 @@ const getDesignTokens = (mode) => ({
             main: "#0C3E8C",
             sectionContainer: "#FFF",
             sectionBorder: "rgba(0, 0, 0, 0.12)",
-            background100: "rgba(12, 62, 140, 0.04)"
+            background100: "rgba(12, 62, 140, 0.1)"
           }
         : {
             main: amber[600],
             sectionContainer: "#0A1929",
             sectionBorder: "rgba(255, 255, 255, 0.12)",
-            background100: "rgba(255, 179, 0, 0.08)"
+            background100: "rgba(255, 179, 0, 0.1)"
           })
     },
     ...(mode === "light"
@@ -102,15 +103,11 @@ const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
   console.log(2, pathname);
   const wasLogged = logged;
   useEffect(() => {
-    if (user && user.role !== type) {
-      console.log(3, user && user.role !== type);
-      logout();
-    }
+    if (user && user.role !== type) logout();
   }, []);
 
   if (user && user.role === type && pathname.includes(type))
     return <Navigate to={pathname} replace />;
-  console.log(type);
   return (
     <Navigate
       to={`/${type}/login`}
@@ -135,8 +132,10 @@ const GoFromLogin = ({ user, setLogin, logout, type = "superuser" }) => {
   }, []);
   let pathname;
   if (type === "superuser") pathname = state ? state.pathname : "/superuser/networks";
-  else pathname = state ? state.pathname : `/admin/hospital/`;
-  console.log(pathname);
+  else if (type === "admin") pathname = state ? state.pathname : `/admin/hospital/`;
+  else if (type === "doctor") pathname = state ? state.pathname : "/doctor/my_patients";
+  else pathname = state ? state.pathname : "/patient/overview";
+
   if (user && user.role === type && pathname.includes(type))
     return <Navigate to={pathname} replace />;
   return (
@@ -219,6 +218,22 @@ function App() {
                       logout={logout}
                       user={user}
                       setNotis={setNotis}
+                    />
+                  }
+                />
+              )}
+
+              {isLogged && user && user.role === "doctor" && (
+                <Route
+                  exact
+                  path="/doctor/*"
+                  element={
+                    <DoctorApp
+                      mode={colorMode}
+                      newMode={ChangeColorMode}
+                      logout={logout}
+                      moreUserDetails={user}
+                      broadcastAlert={setNotis}
                     />
                   }
                 />

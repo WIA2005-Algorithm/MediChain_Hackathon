@@ -41,6 +41,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import {
   adminLoginAuth,
+  doctorLoginAuth,
   loginOnBehalfOF,
   patientLoginAuth
 } from "../../APIs/Admin/main.api.js";
@@ -52,6 +53,8 @@ const login = async (user, pass, type) => {
       return adminLoginAuth(user, pass);
     case "patient":
       return patientLoginAuth(user, pass);
+    case "doctor":
+      return doctorLoginAuth(user, pass);
     default:
       break;
   }
@@ -117,6 +120,7 @@ export default function Login({ setLogin, pathname, message, loginType }) {
     const data = new FormData(event.currentTarget);
     login(data.get("username").trim(), data.get("password").trim(), loginType)
       .then((r) => {
+        console.log(r);
         if (r.data) {
           if (r.data.isOnBehalf === -1 || loginType !== "patient") {
             setLogin(r.data);

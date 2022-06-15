@@ -52,7 +52,11 @@ import {
   departmentOptions
 } from "../../StyledComponents";
 import { useCallback, useEffect, useState } from "react";
-import { getAllDoctorData, getAllPatientData } from "../../../APIs/Admin/main.api";
+import {
+  getAllDoctorData,
+  getAllPatientData,
+  PatientDataStatsCheckInCheckOut
+} from "../../../APIs/Admin/main.api";
 const Link = () => <TransitEnterexit sx={{ transform: "rotate(180deg)" }} />;
 ChartJS.register(
   CategoryScale,
@@ -304,7 +308,7 @@ function DivisionStats({ changeTabTo, patients }) {
 }
 
 const statsDataInOut = (data = []) => ({
-  labels: ["In Patients", "Waiting/Out Patients"],
+  labels: ["Checked In", "Checked Out"],
   datasets: [
     {
       label: "# of Patients In and Out",
@@ -316,8 +320,8 @@ const statsDataInOut = (data = []) => ({
   ]
 });
 
-function StatsInOutPatient() {
-  const getData = statsDataInOut([23, 34]);
+function StatsInOutPatient({ IN, OUT }) {
+  const getData = statsDataInOut([IN, OUT]);
   return (
     <Box
       sx={{
@@ -330,20 +334,24 @@ function StatsInOutPatient() {
 }
 
 const statsGenderData = (data) => ({
-  labels: ["Male", "Female"],
+  labels: ["Male", "Female", "Other"],
   datasets: [
     {
       label: "# of Patients By Gender",
       data: data,
-      backgroundColor: ["rgb(255, 223, 111, 0.5)", "rgba(255, 99, 132, 0.5)"],
-      borderColor: ["rgb(255, 223, 111)", "rgb(255, 99, 132)"],
+      backgroundColor: [
+        "rgb(255, 223, 111, 0.5)",
+        "rgba(255, 99, 132, 0.5)",
+        "rgba(255, 237, 0, 0.5)"
+      ],
+      borderColor: ["rgb(255, 223, 111)", "rgb(255, 99, 132)", "rgb(255, 237, 0)"],
       borderWidth: 2.5
     }
   ]
 });
 
-function StatsGenderPatient() {
-  const getData = statsGenderData([23, 34]);
+function StatsGenderPatient({ Male, Female, Other }) {
+  const getData = statsGenderData([Male, Female, Other]);
   return (
     <Box
       sx={{
@@ -355,11 +363,71 @@ function StatsGenderPatient() {
   );
 }
 
-function StatsSection() {
+function StatsSection({ broadcastAlert }) {
   const [statsDay, setStatsDay] = useState(0);
+  const [promiseStats, setPromiseStats] = useState(false);
+  const [statsData, setStatsData] = useState({
+    checkedIn: 0,
+    checkedOut: 0,
+    Male: 0,
+    Female: 0,
+    Other: 0
+  });
   const handleChange = (event) => {
     setStatsDay(event.target.value);
   };
+
+  const getRangeUsingStatsDay = () => {
+    const now = new Date();
+    switch (parseInt(statsDay)) {
+      case 0:
+        return [new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime(), now.getTime()];
+      case 1:
+        return [
+          new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).getTime(),
+          new Date(now.getTime() - 24 * 61 * 60 * 1000).getTime()
+        ];
+      case 2:
+        return [
+          new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).getTime(),
+          now.getTime()
+        ];
+      case 3:
+        return [
+          new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).getTime(),
+          now.getTime()
+        ];
+      default:
+        return [new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime(), now.getTime()];
+    }
+  };
+  const handleCall = useCallback(async () => {
+    setPromiseStats(false);
+    const range = getRangeUsingStatsDay();
+    console.log(range);
+    try {
+      const results = await PatientDataStatsCheckInCheckOut(range[0], range[1]);
+      console.log(results.data);
+      if (results.data) setStatsData(results.data);
+    } catch (error) {
+      broadcastAlert((prev) => [
+        ...prev,
+        getAlertValues(
+          "error",
+          "Error Loading Statistics",
+          error.response?.data?.DETAILS ||
+            "An unexpected error occured. Please make sure blockchain is running. Contact SuperAdmin for this."
+        )
+      ]);
+    } finally {
+      setPromiseStats(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleCall();
+  }, [statsDay]);
+
   return (
     <SectionContainer
       sx={{
@@ -369,47 +437,69 @@ function StatsSection() {
         minWidth: "720px",
         m: 2
       }}>
-      <Typography
-        component="div"
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}>
-        <span>
-          <b>Patients Statistics for Hospital</b>
-          <br></br>
-          <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
-            Select from the options to see the suitable statistics
+      {!promiseStats ? (
+        <Box
+          component="div"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "500px"
+          }}>
+          <CircularProgress sx={{ alignSelf: "center" }} />
+        </Box>
+      ) : (
+        <>
+          <Typography
+            component="div"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+            <span>
+              <b>Patients Statistics for Hospital</b>
+              <br></br>
+              <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
+                Select from the options to see the suitable statistics
+              </Typography>
+            </span>
+            <FormControl variant="standard" sx={{ minWidth: "200px" }}>
+              <InputLabel id="stats-select-doughnut-and-polar-graph">Show For</InputLabel>
+              <Select
+                labelId="stats-select-doughnut-and-polar-graph"
+                id="stats-select-doughnut-and-polar-graph-standard"
+                value={statsDay}
+                // TODO: HANDLE ON CHANGE
+                onChange={handleChange}
+                label="Show For">
+                <MenuItem value={0}>Today</MenuItem>
+                <MenuItem value={1}>Yesterday</MenuItem>
+                <MenuItem value={2}>This week</MenuItem>
+                <MenuItem value={3}>This month</MenuItem>
+              </Select>
+            </FormControl>
           </Typography>
-        </span>
-        <FormControl variant="standard" sx={{ minWidth: "200px" }}>
-          <InputLabel id="stats-select-doughnut-and-polar-graph">Show For</InputLabel>
-          <Select
-            labelId="stats-select-doughnut-and-polar-graph"
-            id="stats-select-doughnut-and-polar-graph-standard"
-            value={statsDay}
-            // TODO: HANDLE ON CHANGE
-            onChange={handleChange}
-            label="Show For">
-            <MenuItem value={0}>Today</MenuItem>
-            <MenuItem value={1}>Yesterday</MenuItem>
-            <MenuItem value={2}>Last week</MenuItem>
-            <MenuItem value={3}>Last month</MenuItem>
-          </Select>
-        </FormControl>
-      </Typography>
-      <Divider sx={{ mt: 2, mb: 1 }} />
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center"
-        }}>
-        <StatsInOutPatient />
-        <Divider orientation="vertical" />
-        <StatsGenderPatient />
-      </Box>
+          <Divider sx={{ mt: 2, mb: 1 }} />
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center"
+            }}>
+            <StatsInOutPatient
+              IN={statsData["checkedIn"]}
+              OUT={statsData["checkedOut"]}
+            />
+            <Divider orientation="vertical" />
+            <StatsGenderPatient
+              Male={statsData["Male"]}
+              Female={statsData["Female"]}
+              Other={statsData["Other"]}
+            />
+          </Box>
+        </>
+      )}
     </SectionContainer>
   );
 }
@@ -612,7 +702,7 @@ export function OverViewTab({ changeTabTo, broadcastAlert }) {
           <Box sx={{ display: "flex", width: "100%" }}>
             <DivisionStats changeTabTo={changeTabTo} patients={patients} />
             {/* TODO STATS SECTION */}
-            <StatsSection />
+            <StatsSection broadcastAlert={broadcastAlert} />
           </Box>
           <Box sx={{ display: "flex", width: "100%", minHeight: " 550px" }}>
             {/* TODO TIME LINE GRAPH */}

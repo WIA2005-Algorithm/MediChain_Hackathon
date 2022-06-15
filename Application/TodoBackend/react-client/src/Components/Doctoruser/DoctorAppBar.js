@@ -1,33 +1,45 @@
 import {
+  AccountBox,
   DarkMode,
   DarkModeOutlined,
+  Description,
   KeyboardArrowDown,
-  Logout
+  Logout,
+  ManageSearch,
+  Notifications
 } from "@mui/icons-material";
 import {
-  Toolbar,
-  IconButton,
-  Tooltip,
   AppBar,
   Avatar,
+  Chip,
   Divider,
+  IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
-  Chip,
+  Toolbar,
+  Tooltip,
   Typography
 } from "@mui/material";
-import { AppIconHead } from "../StyledComponents";
-import adminImg from "../../static/images/admin.png";
 import { Box } from "@mui/system";
+import { AppIconHead, StyledBadge } from "../StyledComponents";
+import adminImg from "../../static/images/admin.png";
 import { useState } from "react";
-
-export function AppContentBar({ mode, newMode, logout, user }) {
+import { useNavigate } from "react-router-dom";
+export default function AppHeader({
+  mode,
+  newMode,
+  logout,
+  user,
+  moreUserDetails,
+  broadcastAlert
+}) {
   const GetMode = () => (mode === "dark" ? <DarkMode /> : <DarkModeOutlined />);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => setAnchorEl(null);
   const open = Boolean(anchorEl);
+  const nav = useNavigate();
   return (
     <AppBar
       position="fixed"
@@ -39,16 +51,34 @@ export function AppContentBar({ mode, newMode, logout, user }) {
         color: "text.primary"
       }}>
       <Toolbar variant="dense">
-        {/* TODO: CHANGE APP HOME LINK */}
-        <AppIconHead homeLink="/admin/hospital/" role="Hospital Admin" />
+        <AppIconHead homeLink={"/doctor/my_patients"} role={"Hospital Doctor"} />
         <Box sx={{ color: "primary.main" }}>
           <Tooltip title={`Change to ${mode === "light" ? "Dark" : "Light"} Mode`}>
             <IconButton
               size="large"
               color="inherit"
-              sx={{ padding: 1, mr: 1 }}
+              sx={{ padding: 1 }}
               onClick={() => newMode()}>
               <GetMode />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Notifications">
+            <IconButton
+              // TODO:: THE ONCLICK
+              //   onClick
+              size="large"
+              aria-label="Notifications"
+              color="inherit"
+              sx={{ padding: 1, mr: 1 }}>
+              <StyledBadge
+                overlap="circular"
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right"
+                }}
+                variant="dot">
+                <Notifications />
+              </StyledBadge>
             </IconButton>
           </Tooltip>
           <Tooltip title="You">
@@ -64,10 +94,10 @@ export function AppContentBar({ mode, newMode, logout, user }) {
                   ml: -0.5
                 }
               }}
-              label={user.username.split()[0]}
+              label={`Dr. ${user?.details?.lastName || ""}`}
               onClick={handleClick}
               onDelete={handleClick}
-              avatar={<Avatar atl={user.username[0]} src={adminImg} />}
+              avatar={<Avatar atl={"Profile Image"} src={adminImg} />}
               deleteIcon={<KeyboardArrowDown />}
             />
           </Tooltip>
@@ -109,11 +139,35 @@ export function AppContentBar({ mode, newMode, logout, user }) {
           <MenuItem onClick={handleClose}>
             <Avatar sx={{ bgcolor: "primary.main" }}>H</Avatar>
             <Typography component="span" sx={{ fontSize: "13px", ml: 0.5 }}>
-              <div>AdminID : {user.username}</div>
-              <div>Organization : {user.org}</div>
+              <div>
+                Name :{" "}
+                {`Dr. ${user?.details?.firstName || ""} ${
+                  user?.details?.middleName || ""
+                } ${user?.details?.lastName || ""}`}
+              </div>
+              <div>DoctorID : {moreUserDetails.username}</div>
+              <div>Hospital : {moreUserDetails.org}</div>
             </Typography>
           </MenuItem>
           <Divider />
+          <MenuItem>
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <ManageSearch />
+            </ListItemIcon>
+            Request External Patient Record
+          </MenuItem>
+          <MenuItem>
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <Description />
+            </ListItemIcon>
+            Activity History
+          </MenuItem>
+          <MenuItem onClick={() => nav("/doctor/about_me")}>
+            <ListItemIcon sx={{ color: "text.primary" }}>
+              <AccountBox />
+            </ListItemIcon>
+            My Profile
+          </MenuItem>
           <MenuItem onClick={() => logout()}>
             <ListItemIcon sx={{ color: "text.primary" }}>
               <Logout fontSize="small" />

@@ -188,6 +188,7 @@ class FabCar extends Contract {
     return patient.toString();
   }
 
+  // TODO ::
   async getPatientRecords(ctx, PID) {
     //PHR and EMR if neccessary
     //FUNCTION ASSOCIATED TO ABOVE FUNCTION...
@@ -264,6 +265,7 @@ class FabCar extends Contract {
     }
     return "Not Patients";
   }
+
   async createOrgIndex(ctx, ID, orgDetails, index) {
     await ctx.stub.putState(
       await ctx.stub.createCompositeKey(index, [orgDetails, ID]),
@@ -302,6 +304,23 @@ class FabCar extends Contract {
     );
   }
 
+  async getDotorBasicDetails(ctx, docID) {
+    const [type, _] = await this.getMemberType(ctx, docID);
+    if (type != "Doctor")
+      throw new Error("You are unauthorized to access this part of the site...");
+    const doc = await ctx.stub.getState(docID);
+    if (!doc || doc.length === 0) throw new Error("You have queried and empty result");
+    return JSON.stringify(JSON.parse(doc.toString()));
+  }
+
+  async getPatientBasicDetails(ctx, PtID) {
+    const [type, _] = await this.getMemberType(ctx, PtID);
+    if (type != "Doctor" && type != "Patient")
+      throw new Error("You are unauthorized to access this part of the site...");
+    const pt = await ctx.stub.getState(PtID);
+    if (!pt || pt.length === 0) throw new Error("You have queried and empty result");
+    return JSON.stringify(JSON.parse(pt.toString()));
+  }
   /**
    * GETS ALL THE DOCTORS IN THE CURRENT HOSPITAL CONTEXT
    * @param {TxContext} - Context
@@ -347,37 +366,75 @@ class FabCar extends Contract {
     }
   }
 
-  async queryAllCars(ctx) {
-    const startKey = "";
-    const endKey = "";
-    const allResults = [];
-    for await (const { key, value } of ctx.stub.getStateByRange(startKey, endKey)) {
-      const strValue = Buffer.from(value).toString("utf8");
-      let record;
-      try {
-        record = JSON.parse(strValue);
-      } catch (err) {
-        console.log(err);
-        record = strValue;
-      }
-      allResults.push({ Key: key, Record: record });
+  // TODO: Policies to access are not undefined, do that
+  async getHistoryForAsset(ctx, id) {
+    const ResultsIterator = await ctx.stub.getHistoryForKey(id);
+    let response = await ResultsIterator.next();
+    const allDataArray = [];
+    while (!response.done) {
+      if (!response || !response.value || !response.value.key) return;
+      console.info(`found state update with value: ${res.value.value.toString("utf8")}`);
+      const obj = JSON.parse(res.value.value.toString("utf8"));
+      allDataArray.push({ ...obj, timestamp: this.toDate(res.value.timestamp) });
+      response = await ResultsIterator.next();
     }
-    console.info(allResults);
-    return JSON.stringify(allResults);
+
+    return JSON.stringify(allDataArray);
   }
 
-  async changeCarOwner(ctx, carNumber, newOwner) {
-    console.info("============= START : changeCarOwner ===========");
-
-    const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
-    if (!carAsBytes || carAsBytes.length === 0) {
-      throw new Error(`${carNumber} does not exist`);
+  // TODO Check
+  async getAllPatientsHistoryForAssets(ctx) {
+    let ResultsIterator = await ctx.stub.getStateByPartialCompositeKey(
+      indexedOrgForPatients,
+      [mspid]
+    );
+    let response = await ResultsIterator.next();
+    const allDataIDs = [];
+    while (!response.done) {
+      if (!response || !response.value || !response.value.key) return;
+      let attributes, _;
+      ({ _, attributes } = await ctx.stub.splitCompositeKey(response.value.key));
+      let returnedAssetName = attributes[1];
+      allDataIDs.push(returnedAssetName);
+      response = await ResultsIterator.next();
     }
-    const car = JSON.parse(carAsBytes.toString());
-    car.owner = newOwner;
 
-    await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-    console.info("============= END : changeCarOwner ===========");
+    let totalData = [];
+    allDataIDs.forEach(async (ID) => {
+      const dataC = JSON.parse(await this.getHistoryForAsset(ctx, ID));
+      if (dataC) totalData.push(dataC);
+    });
+
+    return JSON.stringify(totalData);
+  }
+
+  // FROMDAY IS LESSER THAN TODAY
+  async getPatientCheckInCheckOutStats(ctx, fromDayRange, toDayRange) {
+    const data = JSON.parse(await this.getAllPatients(ctx));
+    const returnedData = { checkedIn: 0, checkedOut: 0, Male: 0, Female: 0, Other: 0 };
+    data.forEach((patient) => {
+      patient.checkIn.forEach((time) => {
+        if (
+          parseInt(time) >= parseInt(fromDayRange) &&
+          parseInt(time) <= parseInt(toDayRange)
+        ) {
+          returnedData.checkedIn++;
+          const maleFemale =
+            String(patient.details.gender)[0].toUpperCase() +
+            String(patient.details.gender).slice(1).toLowerCase();
+          returnedData[maleFemale]++;
+        }
+      });
+      patient.checkOut.forEach((time) => {
+        if (
+          parseInt(time) >= parseInt(fromDayRange) &&
+          parseInt(time) <= parseInt(toDayRange)
+        )
+          returnedData.checkedOut++;
+      });
+    });
+
+    return JSON.stringify(returnedData);
   }
 }
 

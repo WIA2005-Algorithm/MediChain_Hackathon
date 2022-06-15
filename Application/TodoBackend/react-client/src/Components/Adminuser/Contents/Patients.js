@@ -184,14 +184,13 @@ function ItemForTab({
           onClick={() => setDialogOpen({ status: true, id: item.details.passport })}
           sx={{
             textTransform: "capitalize",
-            m: 1,
             mt: 2,
-            mb: 2,
-            border: "1px solid",
-            borderColor: "primary.main",
+            mb: 1,
+            backgroundColor: "primary.background100",
             "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
               color: "primary.main"
-            }
+            },
+            fontWeight: "bolder"
           }}>
           <b>Assign More Doctors</b>
         </Button>
