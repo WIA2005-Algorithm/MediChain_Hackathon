@@ -257,7 +257,7 @@ export function AddNewNotification({ notis, Onremove }) {
   return (
     <Box
       sx={{
-        position: "absolute",
+        position: "fixed",
         right: 0,
         top: 0,
         paddingLeft: "32px",
@@ -340,4 +340,35 @@ export const ButtonMailto = ({ mailto, label }) => {
       {label}
     </Link>
   );
+};
+
+export const getFormattedDate = (d) => {
+  const date = new Date(d);
+  return `${date.toLocaleString("default", {
+    month: "long"
+  })} ${date.getDate()}, ${date.getFullYear()}`;
+};
+
+export const getDoctorDeparmentString = (item, doctors) => {
+  let departmentStr = "";
+  const array = Object.keys(item.associatedDoctors);
+  array.forEach((itm, i) => {
+    const doc = item.associatedDoctors[itm];
+    if (array.length > 1 && i === doctors - 1) departmentStr += " and ";
+    departmentStr += doc.department + (i === doctors - 1 ? "" : ", ");
+  });
+  return departmentStr;
+};
+
+export const getAgeString = (item) => {
+  let string = "";
+  var ageDifMs = Date.now() - new Date(item.details.DOB).getTime();
+  var ageDate = new Date(ageDifMs);
+  const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+  string += age > 18 ? "Adult " : "Young ";
+  if (item.details.gender !== "Male" && item.details.gender !== "Female")
+    string += `[Gender ${item.details.gender}]`;
+  else string += item.details.gender;
+  string += ` - ${age} years old`;
+  return string;
 };

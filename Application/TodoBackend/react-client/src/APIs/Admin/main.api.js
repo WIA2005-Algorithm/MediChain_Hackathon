@@ -55,7 +55,10 @@ export const CheckInPatient = (patientID) =>
 export const AssignDoctor = (patientID, doctorID) =>
   axios.post("/entity/assignPatient", { patientID, doctorID });
 
-export const Discharge = (patientID) => axios.post("/entity/discharge", { patientID });
+export const Discharge = (patientID) => {
+  console.log(patientID);
+  axios.post("/entity/checkOutPatient", { patientID });
+};
 export const PatientDataStatsCheckInCheckOut = (fromRange, toRange) =>
   axios.get("/entity/getPatientCheckInCheckOutStats", {
     params: {

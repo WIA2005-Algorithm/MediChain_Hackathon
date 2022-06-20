@@ -31,15 +31,14 @@ import {
   Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { getAlertValues, SectionContainer } from "../../StyledComponents";
+import {
+  getAgeString,
+  getAlertValues,
+  getFormattedDate,
+  SectionContainer
+} from "../../StyledComponents";
 import { getAllDoctorData } from "../../../APIs/Admin/main.api";
 import no_patient from "../../../static/images/no_patient.jpg";
-const getFormattedDate = (d) => {
-  const date = new Date(d);
-  return `${date.toLocaleString("default", {
-    month: "long"
-  })} ${date.getDate()}, ${date.getFullYear()}`;
-};
 function PatientItem({ data }) {
   return (
     <Box component="div" sx={{ display: "flex", width: "100%", mb: 2 }}>
@@ -80,19 +79,6 @@ function ItemForTab({ item, collapse, setCollapse }) {
   const handleCollapseOuterClick = () => setCollapse.outer(item.ID);
   const handleCollapseInnerClick = () => setCollapse.inner(item.ID);
   const patientLength = Object.keys(item.associatedPatients).length;
-
-  const getAgeString = () => {
-    let string = "";
-    var ageDifMs = Date.now() - new Date(item.details.DOB).getTime();
-    var ageDate = new Date(ageDifMs);
-    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-    string += age > 18 ? "Adult " : "Young ";
-    if (item.details.gender !== "Male" && item.details.gender !== "Female")
-      string += `[Gender ${item.details.gender}]`;
-    else string += item.details.gender;
-    string += ` - ${age} years old`;
-    return string;
-  };
 
   return (
     <SectionContainer
@@ -135,7 +121,7 @@ function ItemForTab({ item, collapse, setCollapse }) {
           </Box>
           <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
             <Male />
-            <Typography>{getAgeString()}</Typography>
+            <Typography>{getAgeString(item)}</Typography>
           </Box>
         </Box>
         <Box sx={{ minWidth: "50%", maxWidth: "50%", display: "flex" }} component="div">

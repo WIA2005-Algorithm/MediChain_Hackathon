@@ -126,6 +126,7 @@ export async function dischargeORCheckOutPatient(orgName, issuerID, PtID) {
   try {
     await contract.submitTransaction("dischargeORCheckOutPatient", PtID);
   } catch (e) {
+    console.log(e);
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
         ? e.toString().split("Error:")[2]

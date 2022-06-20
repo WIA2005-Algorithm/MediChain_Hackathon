@@ -1,11 +1,10 @@
 import { CircularProgress, Container, Toolbar } from "@mui/material";
-import { Box } from "@mui/system";
 import { useCallback, useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { getDoctorInfo } from "../../APIs/doctor/doctor.api";
 import { getAlertValues } from "../StyledComponents";
-import AboutME from "./Contents/AboutMe";
 import DoctorDashBoard from "./Contents/DoctorDashBoard";
+import PatientProfile from "./Contents/PatientProfile";
 import AppHeader from "./DoctorAppBar";
 
 export default function DoctorApp({
@@ -71,9 +70,9 @@ export default function DoctorApp({
           <Container maxWidth="xl">
             <Routes>
               <Route
-                path={"/about_me"}
+                path={"/my_patients/detailedView"}
                 element={
-                  <AboutME
+                  <PatientProfile
                     user={doctor}
                     moreUserDetails={moreUserDetails}
                     broadcastAlert={broadcastAlert}
@@ -81,7 +80,7 @@ export default function DoctorApp({
                 }
               />
               <Route
-                path="/all_patients"
+                path="/my_patients"
                 element={
                   <DoctorDashBoard
                     user={doctor}

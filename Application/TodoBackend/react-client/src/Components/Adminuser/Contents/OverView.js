@@ -461,7 +461,8 @@ function StatsSection({ broadcastAlert }) {
               <b>Patients Statistics for Hospital</b>
               <br></br>
               <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
-                Select from the options to see the suitable statistics
+                Select from the options to see the suitable statistics. <br /> Please
+                Note: A single check-In is counted as 1
               </Typography>
             </span>
             <FormControl variant="standard" sx={{ minWidth: "200px" }}>

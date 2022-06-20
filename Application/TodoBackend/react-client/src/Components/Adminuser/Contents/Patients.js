@@ -12,6 +12,7 @@ import {
   ExpandMore,
   Face,
   HourglassBottom,
+  Info,
   LocationCity,
   LocationOn,
   Logout,
@@ -44,7 +45,14 @@ import {
   Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { getAlertValues, SectionContainer, Transition } from "../../StyledComponents";
+import {
+  getAgeString,
+  getAlertValues,
+  getDoctorDeparmentString,
+  getFormattedDate,
+  SectionContainer,
+  Transition
+} from "../../StyledComponents";
 import {
   AssignDoctor,
   CheckInPatient,
@@ -53,12 +61,6 @@ import {
   getAllPatientData
 } from "../../../APIs/Admin/main.api";
 import no_patient from "../../../static/images/no_patient.jpg";
-const getFormattedDate = (d) => {
-  const date = new Date(d);
-  return `${date.toLocaleString("default", {
-    month: "long"
-  })} ${date.getDate()}, ${date.getFullYear()}`;
-};
 function DoctorItem({ data }) {
   return (
     <Box component="div" sx={{ display: "flex", width: "100%", mb: 1 }}>
@@ -69,6 +71,11 @@ function DoctorItem({ data }) {
           <Typography className="secondary">
             Assigned to patient on {getFormattedDate(data.assignedOn)}
           </Typography>
+          {data?.deAssigned && (
+            <Typography className="secondary">
+              De-Assigned by doctor on {getFormattedDate(data.deAssigned)}
+            </Typography>
+          )}
           <Typography className="secondary">Department - {data.department}</Typography>
         </Typography>
       </Box>
@@ -87,7 +94,7 @@ function DoctorItem({ data }) {
               <CheckCircle sx={{ color: "success.main" }} fontSize="small" />
             )}
           </Box>
-          <Typography className="secondary">{data.note}</Typography>
+          <Typography className="secondary">Note by doctor : {data.note}</Typography>
         </Typography>
       </Box>
     </Box>
@@ -147,32 +154,6 @@ function ItemForTab({
     item.active === "Actively Watched" || item.active === "Waiting For Discharge";
   const doctors = Object.keys(item.associatedDoctors).length;
 
-  const getAgeString = () => {
-    let string = "";
-    var ageDifMs = Date.now() - new Date(item.details.DOB).getTime();
-    var ageDate = new Date(ageDifMs);
-    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-    string += age > 18 ? "Adult " : "Young ";
-    if (item.details.gender !== "Male" && item.details.gender !== "Female")
-      string += `[Gender ${item.details.gender}]`;
-    else string += item.details.gender;
-    string += ` - ${age} years old`;
-    return string;
-  };
-
-  const getDoctorDeparmentString = () => {
-    let departmentStr = "";
-    const array = Object.keys(item.associatedDoctors);
-    array.forEach((itm, i) => {
-      const doc = item.associatedDoctors[itm];
-      console.log(doc.department);
-      if (array.length > 1 && i === doctors - 1) departmentStr += " and ";
-      departmentStr += doc.department + (i === doctors - 1 ? "" : ", ");
-    });
-
-    return departmentStr;
-  };
-
   const DischargePatient = () => {
     const [promiseForDischarge, setPromiseForDischarge] = useState(false);
     if (item.active !== "Waiting For Discharge" && item.active !== "Actively Watched")
@@ -197,45 +178,71 @@ function ItemForTab({
       );
 
     let dischargeTrue = true;
-    Object.keys(item.associatedDoctors).every((ele) => {
+    Object.keys(item.associatedDoctors).every((key) => {
+      const ele = item.associatedDoctors[key];
       if (ele.active[1] === "In-progress") {
         dischargeTrue = false;
         return false;
       }
-
       return true;
     });
 
     return (
       <>
+        <Button
+          fullWidth
+          onClick={() => setDialogOpen({ status: true, id: item.details.passport })}
+          sx={{
+            textTransform: "capitalize",
+            mt: 2,
+            backgroundColor: "primary.background100",
+            "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
+              color: "primary.main"
+            },
+            fontWeight: "bolder"
+          }}>
+          <b>Assign More Doctors</b>
+        </Button>
         <LoadingButton
           fullWidth
           onClick={async () => {
             setPromiseForDischarge(true);
-            await onClickEventDischarge();
+            await onClickEventDischarge(item.details.passport);
             setPromiseForDischarge(false);
           }}
           loading={promiseForDischarge}
           disabled={!dischargeTrue}
           sx={{
-            m: 1,
-            mt: 2,
-            mb: 2,
-            border: "1px solid",
-            borderColor: "primary.main",
             textTransform: "capitalize",
+            mt: 1,
+            mb: 5,
+            backgroundColor: "primary.background100",
             "& .MuiSvgIcon-root, .MuiSvgIcon-root:hover": {
               color: "primary.main"
-            }
+            },
+            fontWeight: "bolder"
           }}>
-          <b>Discharge Patient</b>
+          <b>Check-Out Patient</b>
         </LoadingButton>
-        {!dischargeTrue && (
-          <Typography fontSize="small">
-            Patient is still in observation by some of the doctors associated with them.
-            Please check the doctor notes for more information.
-          </Typography>
-        )}
+        <Tooltip
+          title={
+            dischargeTrue
+              ? "All doctors associated to this patient have discharged themselves from the patient with a suitable note and de-assigning time. You can assign more doctors for further screening before checkout"
+              : "Patient is still in observation by some of the doctors associated with them. Please check the doctor notes for more information. You can assign more doctors for further screening as well."
+          }>
+          <Chip
+            label={<b>Info</b>}
+            color="info"
+            variant="outlined"
+            icon={<Info sx={{ color: "primary.main" }} />}
+            sx={{
+              mt: -3.5,
+              fontWeight: "normal !important",
+              fontSize: "14px",
+              float: "right"
+            }}
+          />
+        </Tooltip>
       </>
     );
   };
@@ -282,7 +289,7 @@ function ItemForTab({
             </Box>
             <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
               <Male />
-              <Typography>{getAgeString()}</Typography>
+              <Typography>{getAgeString(item)}</Typography>
             </Box>
           </Box>
           <Box sx={{ minWidth: "50%", maxWidth: "50%", display: "flex" }} component="div">
@@ -291,7 +298,10 @@ function ItemForTab({
               Status - {item.active}
               <Typography className="secondary">
                 {doctors !== 0
-                  ? `Associated with ${getDoctorDeparmentString()} department doctors`
+                  ? `Associated with ${getDoctorDeparmentString(
+                      item,
+                      doctors
+                    )} department doctors`
                   : `No doctors have been made available`}
               </Typography>
             </Typography>
@@ -455,30 +465,13 @@ function ItemForTab({
 
 function PatientList({
   data,
+  collapse,
+  setCollapse,
   setDialogOpen,
   checkIN,
   onClickEventDischarge,
   loadingCheckIn
 }) {
-  const [collapse, setCollapse] = useState({
-    ...data.map(() => ({ outer: false, inner: true }))
-  });
-  const handleCollapse = {
-    outer: (index) => {
-      const current = collapse[index].outer;
-      setCollapse({
-        ...collapse,
-        [index]: { ...collapse[index], outer: !current }
-      });
-    },
-    inner: (index) => {
-      const current = collapse[index].inner;
-      setCollapse({
-        ...collapse,
-        [index]: { ...collapse[index], inner: !current }
-      });
-    }
-  };
   return (
     <>
       {data.map((ele, i) => (
@@ -486,7 +479,7 @@ function PatientList({
           key={i}
           item={{ ID: i, ...ele }}
           collapse={collapse[i]}
-          setCollapse={handleCollapse}
+          setCollapse={setCollapse}
           setDialogOpen={setDialogOpen}
           checkIN={checkIN}
           onClickEventDischarge={onClickEventDischarge}
@@ -541,6 +534,30 @@ export default function PatientData({ broadcastAlert }) {
     "Not Patients": []
   });
 
+  const [collapse, setCollapse] = useState({ "Actively Watched": {} });
+  const handleCollapse = {
+    outer: (index) => {
+      const current = collapse[selectedTab][index].outer;
+      setCollapse((prev) => ({
+        ...prev,
+        [selectedTab]: {
+          ...prev[selectedTab],
+          [index]: { ...prev[selectedTab][index], outer: !current }
+        }
+      }));
+    },
+    inner: (index) => {
+      const current = collapse[selectedTab][index].inner;
+      setCollapse((prev) => ({
+        ...prev,
+        [selectedTab]: {
+          ...prev[selectedTab],
+          [index]: { ...prev[selectedTab][index], inner: !current }
+        }
+      }));
+    }
+  };
+
   const loadAllPatientsForThisOrg = useCallback(async () => {
     try {
       const data = {
@@ -553,6 +570,17 @@ export default function PatientData({ broadcastAlert }) {
       results.data.forEach((patient) => data[patient.active].push(patient));
       setLoadedData(data);
       setTemporaryData(data);
+      // Collapsing items and uncollapsing
+      const collapseData = {};
+      Object.keys(data).forEach((key) => {
+        collapseData[key] = {
+          ...data[key].map(() => ({
+            outer: key === "Not Patients" || key === "Waiting To Be Assigned",
+            inner: true
+          }))
+        };
+      });
+      setCollapse(collapseData);
     } catch (error) {
       console.log(JSON.stringify(error));
       broadcastAlert((prev) => [
@@ -681,15 +709,15 @@ export default function PatientData({ broadcastAlert }) {
     }
   };
 
-  const onClickEventDischarge = async () => {
+  const onClickEventDischarge = async (ID) => {
     try {
-      await Discharge(openDialog.id);
+      await Discharge(ID);
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
           "success",
           "Patient Check Out",
-          `Patient with ID : ${openDialog.id} was successfully checked out of the hospitals. Please see not patients section for the former patient name.`
+          `Patient with ID : ${ID} was successfully checked out of the hospitals. Please see not patients section for the former patient name.`
         )
       ]);
       refreshData();
@@ -860,7 +888,9 @@ export default function PatientData({ broadcastAlert }) {
             renderOption={(props, option) => (
               <Box component="li" {...props} sx={{ bgcolor: "primary.sectionContainer" }}>
                 <Typography component="h6">
-                  <b>{option.name}</b>
+                  <b>
+                    {option.name} - [{option.id}]
+                  </b>
                   <Typography sx={{ color: "text.secondary" }}>
                     <small>{option.department}</small>
                   </Typography>
@@ -904,6 +934,8 @@ export default function PatientData({ broadcastAlert }) {
         {mainCallBackPromise && tabChangePromise && LoadedData[selectedTab] && (
           <PatientList
             data={LoadedData[selectedTab]}
+            collapse={collapse[selectedTab]}
+            setCollapse={handleCollapse}
             setDialogOpen={setOpenDialog}
             checkIN={checkIN}
             onClickEventDischarge={onClickEventDischarge}

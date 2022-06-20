@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getDotorDetails, getPatientDetails } from "../controllers/doctor.controller.js";
+import {
+  dischargePatientForDoctor,
+  getDotorDetails,
+  getPatientDetails
+} from "../controllers/doctor.controller.js";
 import { authenticateUser } from "../server_config.js";
 import { ApiError, response } from "../Utils/Errors.js";
 const router = Router();
@@ -38,4 +42,17 @@ router.get("/getPatient", authenticateUser, (req, res) => {
     });
 });
 
+router.post("/dischargePTForDoctor", authenticateUser, (req, res) => {
+  dischargePatientForDoctor(req.user.org, req.user.username, req.body.PTID, req.body.NOTE)
+    .then(() => res.sendStatus(200))
+    .catch((err) => {
+      if (!(err instanceof ApiError))
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
+      return res.status(err.status).json(new response.errorResponse(err));
+    });
+});
 export default router;

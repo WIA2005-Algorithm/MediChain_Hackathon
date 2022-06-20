@@ -15,7 +15,7 @@ import { getHashedUserID, GetHashOf, HospitalEntity } from "../models/Entity.mod
 import { Organizations } from "../models/Network.model.js";
 import { log } from "../models/Utilities.model.js";
 import { authenticateUser, getAccessToken } from "../server_config.js";
-import errors, { response } from "../Utils/Errors.js";
+import errors, { ApiError, response } from "../Utils/Errors.js";
 const router = Router();
 
 const loginHelper = (data) => {
@@ -222,7 +222,6 @@ router.post("/addNewPatient/onBehalf", (req, res) => {
       );
     })
     .then(() => {
-      console.log("HELLO - 1");
       log(
         `${loginDetails.ID}`,
         `Sign Up Successful`,
@@ -231,12 +230,16 @@ router.post("/addNewPatient/onBehalf", (req, res) => {
         } and role: [${type.toUpperCase()}] was successful`,
         "add"
       );
-      console.log("HELLO - 2");
       return res.sendStatus(200);
     })
     .catch(async (err) => {
       await deleteAdminEntity(loginDetails.ID);
-      err = errors.signUpError.withDetails(err);
+      if (!(err instanceof ApiError))
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
       log(
         `${loginDetails.ID}`,
         `New Sign Up Attempted`,
@@ -326,7 +329,8 @@ router.post("/assignPatient", authenticateUser, (req, res) => {
     });
 });
 
-router.post("/discharge", authenticateUser, (req, res) => {
+router.post("/checkOutPatient", authenticateUser, (req, res) => {
+  console.log("LOL --->", req.body.patientID);
   dischargeORCheckOutPatient(req.user.org, req.user.username, req.body.patientID)
     .then(() => {
       log(
@@ -338,6 +342,12 @@ router.post("/discharge", authenticateUser, (req, res) => {
       return res.sendStatus(200);
     })
     .catch((err) => {
+      if (!(err instanceof ApiError))
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
       log(
         `${req.user.username}`,
         `Patient Dischargement Attempted`,
@@ -357,6 +367,14 @@ router.get("/getPatientCheckInCheckOutStats", authenticateUser, (req, res) => {
     req.query.toRange
   )
     .then((data) => res.status(200).json(data))
-    .catch((err) => res.status(err.status).json(new response.errorResponse(err)));
+    .catch((err) => {
+      if (!(err instanceof ApiError))
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
+      res.status(err.status).json(new response.errorResponse(err));
+    });
 });
 export default router;

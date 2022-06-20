@@ -817,6 +817,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
     }, 600);
   };
   const navigate = useNavigate();
+
   const handleClose = (status = "") => {
     if (status === "successful" && user?.org)
       broadcastAlert((prev) => [
@@ -842,7 +843,11 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
           `You may now login to enter the application.`
         )
       ]);
-    navigate(status === "successful" && user ? "../overview" : -1);
+    navigate(
+      status === "successful" && user
+        ? "../overview"
+        : `/${String(TYPE).toLowerCase()}/login`
+    );
   };
   // OPEN OR CLOSE THE ALERT
   const [open, setOpen] = useState(false);

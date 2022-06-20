@@ -28,8 +28,9 @@ class FabCar extends Contract {
     const member = await ctx.stub.getState(PID);
     if (member && member.length !== 0)
       throw new Error(`The patient with given ID already exists`);
-
     let orgDetails = JSON.parse(this.getOrganizationDetails(ctx));
+    if (!orgDetails)
+      throw new Error("This is not valid transaction, please try again later");
     const content = getTypeEHROrDoctor(
       JSON.parse(ptDetails),
       orgDetails,
@@ -69,6 +70,8 @@ class FabCar extends Contract {
     if (member && member.length !== 0)
       throw new Error(`The doctor with ${DID} already exists`);
     let orgDetails = JSON.parse(this.getOrganizationDetails(ctx));
+    if (!orgDetails)
+      throw new Error("This is not valid transaction, please try again later");
     docDetails = JSON.parse(docDetails);
     const content = getTypeEHROrDoctor(
       docDetails,
@@ -88,13 +91,14 @@ class FabCar extends Contract {
   }
 
   async checkInPatient(ctx, PID) {
-    let patient = await ctx.stub.getState(PID);
+    let [type, patient] = await this.getMemberType(ctx, PID);
     if (
-      !patient ||
-      patient.length === 0 ||
+      type !== "Admin" ||
       !JSON.parse(patient).orgDetails.role.toLowerCase().includes("patient")
     )
-      throw new Error("The patient identity does not exist.");
+      throw new Error(
+        "The patient identity does not exist or you are trying to access the unauthorized area"
+      );
     patient = JSON.parse(patient);
     if (patient.checkIn.length === patient.checkOut.length) {
       patient.checkIn.push(this.toDate(ctx.stub.getTxTimestamp()));
@@ -110,8 +114,82 @@ class FabCar extends Contract {
       );
   }
 
-  // TODO:::
-  async dischargeORCheckOutPatient(ctx, PID) {}
+  async dischargePatientForDoctor(ctx, DOCID, PID, Note) {
+    let [doctype, patient] = await this.getMemberType(ctx, PID);
+    if (
+      doctype !== "Doctor" ||
+      !JSON.parse(patient.toString())
+        .orgDetails.role.toString()
+        .toLowerCase()
+        .includes("patient")
+    )
+      throw new Error("Patient can only be discharged to an in-hospital doctor");
+    patient = JSON.parse(patient.toString());
+    let doctor = JSON.parse((await ctx.stub.getState(DOCID)).toString());
+    let isTotalDischarge = true;
+
+    patient.associatedDoctors[DOCID].dischargeOk = true;
+
+    Object.keys(patient.associatedDoctors).every((doc) => {
+      const ele = patient.associatedDoctors[doc];
+      if (ele.dischargeOk === null) {
+        isTotalDischarge = false;
+        return false;
+      }
+      return true;
+    });
+    if (isTotalDischarge) patient.active = "Waiting For Discharge";
+    const temp = patient.associatedDoctors[DOCID];
+    temp.active[1] = "Done";
+    temp["deAssigned"] = this.toDate(ctx.stub.getTxTimestamp());
+    temp.note = Note;
+    patient.associatedDoctors[DOCID] = temp;
+    doctor.active = ["Active", "Unoccupied"];
+    if (doctor.associatedPatients.hasOwnProperty(PID))
+      delete doctor.associatedPatients[PID];
+    await ctx.stub.putState(DOCID, Buffer.from(stringify(doctor)));
+    await ctx.stub.putState(PID, Buffer.from(stringify(patient)));
+  }
+
+  async dischargeORCheckOutPatient(ctx, PID) {
+    let [type, patient] = await this.getMemberType(ctx, PID);
+    if (
+      type !== "Admin" ||
+      !JSON.parse(patient.toString())
+        .orgDetails.role.toString()
+        .toLowerCase()
+        .includes("patient")
+    )
+      throw new Error("Patient can only be checked Out by an in-hospital admin");
+    patient = JSON.parse(patient.toString());
+    if (patient.active !== "Waiting For Discharge")
+      throw new Error(
+        "Patient is either not checked-In or has some doctors associated to him"
+      );
+
+    let isTotalDischarge = true;
+    Object.keys(patient.associatedDoctors).every((doc) => {
+      const ele = patient.associatedDoctors[doc];
+      if (ele.dischargeOk === null) {
+        isTotalDischarge = false;
+        return false;
+      }
+      return true;
+    });
+    if (!isTotalDischarge)
+      throw new Error(
+        "Please make sure patient has no associated doctors currently reviewing them"
+      );
+    patient.associatedDoctors = {};
+    patient.checkOut.push(this.toDate(ctx.stub.getTxTimestamp()));
+    patient.active = this.getStatus(
+      patient.checkIn,
+      patient.checkOut,
+      patient.associatedDoctors
+    );
+
+    await ctx.stub.putState(PID, Buffer.from(stringify(patient)));
+  }
   /**
    *
    * @param {Context} ctx - Transaction
@@ -123,7 +201,6 @@ class FabCar extends Contract {
    */
   async assignPatientToDoctor(ctx, PID, DID) {
     let [doctype, doctor] = await this.getMemberType(ctx, DID);
-    console.log(" HUHUHUUHUH 1...");
     if (
       doctype !== "Admin" ||
       !JSON.parse(doctor.toString())
@@ -133,11 +210,8 @@ class FabCar extends Contract {
     )
       throw new Error("Patient can only be registered to an in-hospital doctor.");
     let [_, patient] = await this.getMemberType(ctx, PID);
-    console.log(" HUHUHUUHUH 2...");
     patient = JSON.parse(patient.toString());
-    console.log(" HUHUHUUHUH 3...");
     doctor = JSON.parse(doctor.toString());
-    console.log(" HUHUHUUHUH 4...");
     if (doctor.orgDetails.org !== patient.orgDetails.org)
       throw new Error("Patient can only be registered to in-hospital doctor.");
     if (doctor.associatedPatients[PID])
@@ -257,7 +331,7 @@ class FabCar extends Contract {
   }
 
   getStatus(checkIn, checkOut, docs) {
-    if (checkIn.length >= checkOut.length) {
+    if (checkIn.length > checkOut.length) {
       if (Object.keys(docs).length === 0) return "Waiting To Be Assigned";
       for (const key of Object.keys(docs))
         if (!docs[key].dischargeOk) return "Actively Watched";
@@ -339,7 +413,7 @@ class FabCar extends Contract {
   /**
    * @param {TxContext} ctx
    * @param {String} id - Member ID
-   * @returns {String} - [Admin, Patient, Doctor]
+   * @returns {String} - [Admin, Patient/Doctor]
    */
   async getMemberType(ctx, id) {
     let member = await ctx.stub.getState(id);

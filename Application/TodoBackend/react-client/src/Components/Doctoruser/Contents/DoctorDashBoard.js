@@ -25,37 +25,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPatientInfo } from "../../../APIs/doctor/doctor.api";
 import no_patient from "../../../static/images/no_patient.jpg";
-import { SectionContainer } from "../../StyledComponents";
-const getFormattedDate = (d) => {
-  const date = new Date(d);
-  return `${date.toLocaleString("default", {
-    month: "long"
-  })} ${date.getDate()}, ${date.getFullYear()}`;
-};
-
-const getDoctorDeparmentString = (item, doctors) => {
-  let departmentStr = "";
-  const array = Object.keys(item.associatedDoctors);
-  array.forEach((itm, i) => {
-    const doc = item.associatedDoctors[itm];
-    if (array.length > 1 && i === doctors - 1) departmentStr += " and ";
-    departmentStr += doc.department + (i === doctors - 1 ? "" : ", ");
-  });
-  return departmentStr;
-};
-
-const getAgeString = (item) => {
-  let string = "";
-  var ageDifMs = Date.now() - new Date(item.details.DOB).getTime();
-  var ageDate = new Date(ageDifMs);
-  const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-  string += age > 18 ? "Adult " : "Young ";
-  if (item.details.gender !== "Male" && item.details.gender !== "Female")
-    string += `[Gender ${item.details.gender}]`;
-  else string += item.details.gender;
-  string += ` - ${age} years old`;
-  return string;
-};
+import {
+  getAgeString,
+  getDoctorDeparmentString,
+  getFormattedDate,
+  SectionContainer
+} from "../../StyledComponents";
 
 function Patient({ item, nav }) {
   const [doctors, _] = useState(Object.keys(item.associatedDoctors).length);
@@ -114,7 +89,7 @@ function Patient({ item, nav }) {
                   {doctors !== 0
                     ? `${getDoctorDeparmentString(item, doctors)}`
                     : `No doctors have been made available`}
-                </b>
+                </b>{" "}
                 department doctors
               </Typography>
             </Typography>
@@ -185,7 +160,7 @@ function Patient({ item, nav }) {
         </Box>
         <Button
           fullWidth
-          onClick={() => nav("detailedView", { state: item })}
+          onClick={() => nav("/doctor/my_patients/detailedView", { state: item })}
           sx={{
             textTransform: "capitalize",
             mt: 2,
@@ -217,6 +192,7 @@ export default function DoctorDashBoard({
   const [searchString, setSearchString] = useState("");
   const nav = useNavigate();
   const getPatientDatas = useCallback(() => {
+    console.log("hello");
     setLoading(true);
     const IDS = Object.entries(user.associatedPatients).map(([key, _]) => key);
     Promise.all(IDS.map((ID) => getPatientInfo(ID)))
@@ -227,7 +203,7 @@ export default function DoctorDashBoard({
         setTemporaryData(datas);
       })
       .catch((err) => {});
-  }, []);
+  }, [user]);
   const refreshData = () => setRefresh(true);
   const handleSearchSubmit = (e) => {
     let filterString;
@@ -258,7 +234,7 @@ export default function DoctorDashBoard({
     setItems(newData);
   };
   useEffect(() => {
-    getPatientDatas();
+    if (refresh) getPatientDatas();
   }, [getPatientDatas, refresh]);
 
   useEffect(() => {

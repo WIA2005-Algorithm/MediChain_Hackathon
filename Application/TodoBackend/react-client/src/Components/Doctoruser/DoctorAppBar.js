@@ -1,5 +1,4 @@
 import {
-  AccountBox,
   DarkMode,
   DarkModeOutlined,
   Description,
@@ -39,7 +38,6 @@ export default function AppHeader({
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => setAnchorEl(null);
   const open = Boolean(anchorEl);
-  const nav = useNavigate();
   return (
     <AppBar
       position="fixed"
@@ -161,12 +159,6 @@ export default function AppHeader({
               <Description />
             </ListItemIcon>
             Activity History
-          </MenuItem>
-          <MenuItem onClick={() => nav("/doctor/about_me")}>
-            <ListItemIcon sx={{ color: "text.primary" }}>
-              <AccountBox />
-            </ListItemIcon>
-            My Profile
           </MenuItem>
           <MenuItem onClick={() => logout()}>
             <ListItemIcon sx={{ color: "text.primary" }}>
