@@ -203,8 +203,10 @@ function FileUploadComponent({ doctor, patient, broadcastAlert }) {
     e.preventDefault();
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("PTID", patient.details.passport);
+    formData.append("DOCID", doctor.details.passport);
     setSubmit(true);
-    uploadFile(file, patient.details.passport, doctor.details.passport)
+    uploadFile(formData)
       .then((r) => {
         // TODO IN THE BACKEND
       })

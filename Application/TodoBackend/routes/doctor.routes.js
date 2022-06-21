@@ -55,4 +55,7 @@ router.post("/dischargePTForDoctor", authenticateUser, (req, res) => {
       return res.status(err.status).json(new response.errorResponse(err));
     });
 });
+
+// TODO
+router.post("/uploadPatientFile", authenticateUser, (req, res) => {});
 export default router;
