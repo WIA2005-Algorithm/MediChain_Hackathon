@@ -62,7 +62,13 @@ export function HospitalAdminContent({ mode, newMode, logout, user, setNotis }) 
   };
   return (
     <Box sx={{ display: "flex" }}>
-      <AppContentBar mode={mode} newMode={newMode} logout={logout} user={user} />
+      <AppContentBar
+        mode={mode}
+        newMode={newMode}
+        logout={logout}
+        user={user}
+        broadcastAlert={setNotis}
+      />
       <AppNavSideBar
         user={user}
         optSelected={optSelected}

@@ -9,6 +9,7 @@ import { Superuser } from "./models/Network.model.js";
 import errors, { response } from "./Utils/Errors.js";
 import { System_logs } from "./models/Utilities.model.js";
 import { HospitalEntity } from "./models/Entity.model.js";
+import { Notification, RequestModel } from "./models/NotificationModel.js";
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -31,7 +32,6 @@ const roleBasedTokenVerify = (role, refreshToken) => {
   switch (role) {
     case "admin":
       return HospitalEntity.findOne({ refreshToken }).exec();
-
     default:
       return Superuser.findOne({ refreshToken }).exec();
   }
@@ -54,9 +54,38 @@ const getAccessTokenObj = (role, user) => {
       };
   }
 };
-app.post("/api/update-token", (req, res) => {
+
+export function authenticateUser(req, res, next) {
+  const authToken = req.headers.authorization;
+  if (authToken == null)
+    return res
+      .status(401)
+      .json(
+        new response.errorResponse(
+          errors.invalid_auth.withDetails(
+            "Seems like you have not logged in. Please login to continue"
+          )
+        )
+      );
+  jwt.verify(authToken, ACCESS_TOKEN, (_, user) => {
+    if (!user)
+      return res
+        .status(401)
+        .json(
+          new response.errorResponse(
+            errors.invalid_permission.withDetails(
+              "Time expired. Please login again to continue"
+            )
+          )
+        );
+    req.user = user;
+    next();
+  });
+}
+
+app.post("/api/update-token", authenticateUser, (req, res) => {
   const err = errors.required_auth.withDetails("The token is not valid"),
-    role = req.body.role,
+    role = req.user.role,
     refreshToken = req.body.refreshToken;
   roleBasedTokenVerify(role, refreshToken)
     .then(() => {
@@ -73,22 +102,6 @@ app.post("/api/update-token", (req, res) => {
     });
 });
 
-export function authenticateUser(req, res, next) {
-  const authToken = req.headers.authorization;
-  if (authToken == null)
-    return res
-      .status(401)
-      .json(new response.errorResponse(errors.invalid_auth.withDetails("null")));
-  jwt.verify(authToken, ACCESS_TOKEN, (_, user) => {
-    if (!user)
-      return res
-        .status(401)
-        .json(new response.errorResponse(errors.invalid_permission.withDetails("null")));
-    req.user = user;
-    next();
-  });
-}
-
 app.post("/api/systemLogs", authenticateUser, (req, res) => {
   System_logs.find({ User: req.user.username })
     .sort({ createdAt: -1 })
@@ -98,6 +111,48 @@ app.post("/api/systemLogs", authenticateUser, (req, res) => {
     });
 });
 
+app.post("/api/markNotificationRead", authenticateUser, (req, res) => {
+  Notification.findByIdAndUpdate(req.body._id, { Read: true })
+    .exec()
+    .then(() => {
+      return res.sendStatus(200);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.sendStatus(500);
+    });
+});
+
+app.get("/api/getNotificationData", authenticateUser, (req, res) => {
+  const ToString = `${req.user.org}#${req.user.role}#${req.user.username}`;
+  Notification.find({ To: ToString })
+    .sort({ createdAt: -1 })
+    .exec()
+    .then((data) => {
+      console.log("HELLOOOOO----HELLOOOO", data);
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.sendStatus(500);
+    });
+});
+
+app.get("/api/getRequestData", authenticateUser, (req, res) => {
+  console.log("HELLOOO-------HELLOOO");
+  const ToString = `${req.user.org}#${req.user.role}#${req.user.username}`;
+  RequestModel.find({ RID: ToString })
+    .sort({ createdAt: -1 })
+    .exec()
+    .then((data) => {
+      console.log("HELLOOOOO----HELLOOOO", data);
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.sendStatus(500);
+    });
+});
 assert(PORT, "Port is required");
 assert(HOST, "Host is required");
 assert(DATABASE_URI, "Database URI is required");

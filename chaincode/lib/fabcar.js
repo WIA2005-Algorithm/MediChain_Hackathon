@@ -24,6 +24,17 @@ class FabCar extends Contract {
    * This function adds a patient to the hospital. - [INSERTION]
    * USE SubmitTransaction for this rather than evaluate
    */
+
+  // TODO FOR DIALOG IN ADMIN
+  async checkIfPatientExists(ctx, PID, org) {
+    const member = await ctx.stub.getState(PID);
+    const pt = JSON.parse(member.toString());
+    if (!member || member.length === 0)
+      throw new Error(`The patient with given ID does not exists`);
+    if (pt.orgDetails.org !== `${org.toUpperCase()}MSP`)
+      throw new Error(`The patient with given ID is associated to different hospital`);
+  }
+
   async addPatientEHR(ctx, PID, ptDetails, address, contact) {
     const member = await ctx.stub.getState(PID);
     if (member && member.length !== 0)
@@ -236,7 +247,8 @@ class FabCar extends Contract {
       active: ["Verified", "In-progress"],
       note: "Patient is currently being examined",
       EMRID: -500,
-      dischargeOk: null
+      dischargeOk: null,
+      email: doctor.details.email
     };
     doctor.associatedPatients[PID] = ptObj;
     doctor.active = ["Active", "Occupied"];
@@ -258,7 +270,7 @@ class FabCar extends Contract {
    * USE EvaluateTransaction
    */
   async getPatientDetails(ctx, PID) {
-    const [_, patient] = await this.getMemberType(ctx, PID);
+    const [type, patient] = await this.getMemberType(ctx, PID);
     return patient.toString();
   }
 
@@ -347,6 +359,26 @@ class FabCar extends Contract {
     );
   }
 
+  async acceptRequestToFromAdmin(ctx, DocID, PTID, UID, FromDOCID) {
+    let [type, doc] = await this.getMemberType(ctx, DocID);
+    if (type !== "Doctor")
+      throw new Error("You are unauthorized to access this part of the site...");
+    doc = JSON.parse(doc.toString());
+    // doctor.patientID.fromExternalDoctor = Key;
+    doc.secretSharingPair[PTID] = { [FromDOCID]: UID };
+    await ctx.stub.putState(DocID, Buffer.from(stringify(doc)));
+  }
+
+  async acceptRequestToFromDoctors(ctx, PTID, UID, FromDOCID) {
+    let [type, patient] = await this.getMemberType(ctx, PTID);
+    if (type !== "Patient")
+      throw new Error("You are unauthorized to access this part of the site...");
+    patient = JSON.parse(patient.toString());
+    // doctor.patientID.fromExternalDoctor = Key;
+    patient.secretSharingPair[FromDOCID] = UID;
+    await ctx.stub.putState(PTID, Buffer.from(stringify(patient)));
+  }
+
   async helperFunctionToGetIndexedData(ctx, index, mspid) {
     let ResultsIterator = await ctx.stub.getStateByPartialCompositeKey(index, [mspid]);
     let response = await ResultsIterator.next();
@@ -389,7 +421,7 @@ class FabCar extends Contract {
 
   async getPatientBasicDetails(ctx, PtID) {
     const [type, _] = await this.getMemberType(ctx, PtID);
-    if (type != "Doctor" && type != "Patient")
+    if (type !== "Doctor" && type !== "Patient")
       throw new Error("You are unauthorized to access this part of the site...");
     const pt = await ctx.stub.getState(PtID);
     if (!pt || pt.length === 0) throw new Error("You have queried and empty result");

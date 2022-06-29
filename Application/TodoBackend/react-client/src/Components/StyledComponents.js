@@ -1,9 +1,15 @@
 import {
+  Avatar,
   Badge,
   CircularProgress,
+  Container,
+  Divider,
   IconButton,
   Link,
+  Menu,
+  MenuItem,
   Slide,
+  Toolbar,
   Tooltip,
   Typography
 } from "@mui/material";
@@ -22,11 +28,20 @@ import {
   DoubleArrow,
   Error,
   Info,
+  PlaylistAddCheckCircle,
+  RadioButtonChecked,
   RemoveCircle,
+  Replay,
   Visibility,
   VisibilityOff
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import no_patient from "../static/images/no_patient.jpg";
+import {
+  getNotificationData,
+  getRequestData,
+  markNotificationRead
+} from "../APIs/Utilities/api";
 
 export const SectionContainer = styled("div")(({ theme }) => ({
   color: theme.palette.text.primary,
@@ -35,7 +50,6 @@ export const SectionContainer = styled("div")(({ theme }) => ({
   fontSize: theme.typography.fontSize,
   borderRadius: 8,
   boxShadow: theme.palette.shape.boxShadow
-  // border: `1px solid ${theme.palette.primary.sectionBorder}`
 }));
 
 export const Logo = () => (
@@ -259,7 +273,7 @@ export function AddNewNotification({ notis, Onremove }) {
       sx={{
         position: "fixed",
         right: 0,
-        top: 0,
+        top: "70px",
         paddingLeft: "32px",
         width: "fit-content",
         height: "fit-content",
@@ -349,6 +363,14 @@ export const getFormattedDate = (d) => {
   })} ${date.getDate()}, ${date.getFullYear()}`;
 };
 
+export const getTime = (d) => {
+  return new Date(d).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+};
+
 export const getDoctorDeparmentString = (item, doctors) => {
   let departmentStr = "";
   const array = Object.keys(item.associatedDoctors);
@@ -372,3 +394,458 @@ export const getAgeString = (item) => {
   string += ` - ${age} years old`;
   return string;
 };
+
+/// Boolean(dialog) --> is to check if dialog is open
+const AlertNotification = ({ item, setRefresh, onClickProps, handleClose }) => {
+  let From = item.From.split("#");
+  if (From[0] === "null") From = null;
+  const [progress, setProgress] = useState(false);
+  const { setDialogData } = onClickProps;
+  const handleClick = async (e) => {
+    e.stopPropagation();
+    if (item.Read) return;
+    setProgress(true);
+    try {
+      await markNotificationRead(item._id);
+      setRefresh(true);
+    } catch (err) {
+      console.log(err.message);
+      setProgress(false);
+    }
+  };
+
+  const handleOnClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (item.NotificationAccept === "null" || item.NotificationDeny === "null") return;
+    setDialogData(item);
+    handleClose();
+  };
+  return (
+    <div>
+      <MenuItem onClick={handleOnClick} style={{ whiteSpace: "normal", width: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%"
+          }}
+          component="div">
+          <Box component="div" sx={{ display: "flex", alignItems: "flex-start" }}>
+            {!item.Read && <RadioButtonChecked fontSize="small" sx={{ mr: 1 }} />}
+            {item.Read && <CheckCircle fontSize="small" sx={{ mr: 1 }} />}
+            <Typography component="div" sx={{ fontSize: "14px" }}>
+              {item.Read ? item.NotificationString : <b>{item.NotificationString}</b>}{" "}
+              {item.NotificationAccept !== "null" && item.NotificationDeny !== "null" ? (
+                <Box
+                  sx={{ color: "primary.main", display: "inline-block" }}
+                  component="div">
+                  <b>
+                    <u>Read More</u>
+                  </b>
+                </Box>
+              ) : (
+                ""
+              )}
+              <Typography sx={{ color: "text.secondary", fontSize: "13px", mt: 0.5 }}>
+                From: {From ? `${From[0]}, ${From[1]}` : "Web System"}
+              </Typography>
+              <Typography sx={{ color: "text.secondary", fontSize: "13px", pt: 0 }}>
+                {`${getFormattedDate(item.createdAt)} at ${getTime(item.createdAt)}`}
+              </Typography>
+            </Typography>
+          </Box>
+          {!progress ? (
+            <Tooltip title="Mark as read">
+              <IconButton onClick={handleClick}>
+                <PlaylistAddCheckCircle fontSize="large" />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <CircularProgress />
+          )}
+        </Box>
+      </MenuItem>
+      <Divider />
+    </div>
+  );
+};
+
+export function AlertNotifications({ anchorEl, handleClose, onClickProps }) {
+  const [process, setProcess] = useState(true);
+  const [data, setData] = useState([]);
+
+  const getData = useCallback(async () => {
+    setProcess(true);
+    try {
+      const r = await getNotificationData();
+      setData(() => r.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setProcess(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (process) getData();
+  }, [getData, process]);
+
+  return (
+    <Menu
+      anchorEl={anchorEl}
+      id="notification-menu"
+      open={Boolean(anchorEl)}
+      onClose={handleClose}
+      PaperProps={{
+        elevation: 0,
+        sx: {
+          overflow: "visible",
+          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+          "&:before": {
+            content: '""',
+            display: "block",
+            position: "absolute",
+            top: 0,
+            right: 14,
+            width: 10,
+            height: 10,
+            bgcolor: "background.paper",
+            transform: "translateY(-50%) rotate(45deg)",
+            zIndex: 0
+          }
+        }
+      }}
+      sx={{
+        "& .MuiList-root": {
+          pt: "0px !important",
+          minWidth: "500px !important",
+          maxWidth: "500px !important",
+          maxHeight: "calc(100vh - 370px)",
+          overflowY: "auto",
+          overflowX: "hidden"
+        },
+        "& .MuiSvgIcon-root": {
+          color: "primary.main"
+        }
+      }}
+      transformOrigin={{ horizontal: "right", vertical: "top" }}
+      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+      <Box
+        component={"div"}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          width: "100%",
+          bgcolor: "primary.sectionContainer",
+          color: "text.primary",
+          display: "flex",
+          p: 2,
+          justifyContent: "space-between",
+          alignItems: "center",
+          position: "fixed"
+        }}>
+        <Typography sx={{ fontSize: "18px" }} component="div">
+          <b>Notifications</b>
+          <Typography
+            sx={{ color: "text.secondary", mt: 0.5 }}
+            style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <RadioButtonChecked fontSize="small" sx={{ mr: 1 }} />
+            <small>Un-Read Messages</small>
+          </Typography>
+          <Typography
+            sx={{ color: "text.secondary", mt: 0.5 }}
+            style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <CheckCircle fontSize="small" sx={{ mr: 1 }} />
+            <small>Messages Read</small>
+          </Typography>
+        </Typography>
+        {process ? (
+          <CircularProgress size={"32px"} />
+        ) : (
+          <Tooltip title="Reload Notifications">
+            <IconButton
+              onClick={() => setProcess(true)}
+              sx={{ border: "2px solid", borderColor: "primary.main" }}>
+              <Replay />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+      <Toolbar sx={{ mb: 6 }} />
+      <Divider sx={{ mt: "0px !important" }} />
+      {process ? (
+        <Container
+          maxWidth="xl"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "300px",
+            minWidth: "500px",
+            mt: 1,
+            mb: 1
+          }}>
+          <CircularProgress size={"30px"} />
+        </Container>
+      ) : data.length !== 0 ? (
+        data.map((item) => (
+          <AlertNotification
+            key={item._id}
+            item={item}
+            setRefresh={setProcess}
+            onClickProps={onClickProps}
+            handleClose={handleClose}
+          />
+        ))
+      ) : (
+        <MenuItem>
+          <Box
+            component="div"
+            sx={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mt: 2,
+              mb: 2,
+              minHeight: "300px"
+            }}>
+            <Avatar
+              alt="No Results"
+              src={no_patient}
+              sx={{ width: "150px", height: "150px", mt: 1.8, alignSelf: "center" }}
+            />
+            <Typography
+              component="div"
+              variant="h6"
+              sx={{ mt: 1.2, textAlign: "center" }}>
+              <b>No New Notifications Found</b>
+              <Typography className="secondary">
+                Try refreshing or Comeback Later
+              </Typography>
+            </Typography>
+          </Box>
+        </MenuItem>
+      )}
+    </Menu>
+  );
+}
+
+const RequestNotification = ({ item, handleClose }) => {
+  const handleRequestClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  console.log(item.Data);
+  const requestExists = item.Data !== "null";
+  return (
+    <div>
+      <MenuItem
+        onClick={handleRequestClick}
+        style={{ whiteSpace: "normal", width: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%"
+          }}
+          component="div">
+          <Box component="div" sx={{ display: "flex", alignItems: "flex-start" }}>
+            <>
+              {item.Status === "Active" && (
+                <RadioButtonChecked fontSize="small" sx={{ mr: 1 }} />
+              )}
+              {item.Status !== "Active" && (
+                <CheckCircle fontSize="small" sx={{ mr: 1 }} />
+              )}
+              <Typography component="div" sx={{ fontSize: "14px" }}>
+                {item.Status === "Active" ? (
+                  item.CommentToAccessOrDeny
+                ) : (
+                  <b>{item.CommentToAccessOrDeny}</b>
+                )}{" "}
+                {requestExists ? (
+                  <Box
+                    sx={{ color: "primary.main", display: "inline-block" }}
+                    component="div">
+                    <b>
+                      <u>Read More</u>
+                    </b>
+                  </Box>
+                ) : (
+                  ""
+                )}
+                {item.Status === "Active" && (
+                  <Typography sx={{ color: "text.secondary", fontSize: "13px", mt: 0.5 }}>
+                    {requestExists ? "Acceptance" : "Denial"} Note : {item.Note}
+                  </Typography>
+                )}
+                <Typography sx={{ color: "text.secondary", fontSize: "13px", mt: 0.5 }}>
+                  From: Web System
+                </Typography>
+                <Typography sx={{ color: "text.secondary", fontSize: "13px", pt: 0 }}>
+                  {`${getFormattedDate(item.createdAt)} at ${getTime(item.createdAt)}`}
+                </Typography>
+              </Typography>
+            </>
+          </Box>
+        </Box>
+      </MenuItem>
+      <Divider />
+    </div>
+  );
+};
+export function RequestNotifications({ anchorEl, handleClose }) {
+  const [process, setProcess] = useState(true);
+  const [data, setData] = useState([]);
+  const getData = useCallback(async () => {
+    setProcess(true);
+    try {
+      const r = await getRequestData();
+      setData(() => r.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setProcess(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (process) getData();
+  }, [getData, process]);
+
+  return (
+    <Menu
+      anchorEl={anchorEl}
+      id="notification-menu"
+      open={Boolean(anchorEl)}
+      onClose={handleClose}
+      PaperProps={{
+        elevation: 0,
+        sx: {
+          overflow: "visible",
+          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+          "&:before": {
+            content: '""',
+            display: "block",
+            position: "absolute",
+            top: 0,
+            right: 14,
+            width: 10,
+            height: 10,
+            bgcolor: "background.paper",
+            transform: "translateY(-50%) rotate(45deg)",
+            zIndex: 0
+          }
+        }
+      }}
+      sx={{
+        "& .MuiList-root": {
+          pt: "0px !important",
+          minWidth: "500px !important",
+          maxWidth: "500px !important",
+          maxHeight: "calc(100vh - 370px)",
+          overflowY: "auto",
+          overflowX: "hidden"
+        },
+        "& .MuiSvgIcon-root": {
+          color: "primary.main"
+        }
+      }}
+      transformOrigin={{ horizontal: "right", vertical: "top" }}
+      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+      <Box
+        component={"div"}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          width: "100%",
+          bgcolor: "primary.sectionContainer",
+          color: "text.primary",
+          display: "flex",
+          p: 2,
+          justifyContent: "space-between",
+          alignItems: "center",
+          position: "fixed"
+        }}>
+        <Typography sx={{ fontSize: "18px" }} component="div">
+          <b>Access Requests</b>
+          <Typography
+            sx={{ color: "text.secondary", mt: 0.5 }}
+            style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <RadioButtonChecked fontSize="small" sx={{ mr: 1 }} />
+            <small>Active Requests</small>
+          </Typography>
+          <Typography
+            sx={{ color: "text.secondary", mt: 0.5 }}
+            style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <CheckCircle fontSize="small" sx={{ mr: 1 }} />
+            <small>In-Active Requests</small>
+          </Typography>
+        </Typography>
+        {process ? (
+          <CircularProgress size={"32px"} />
+        ) : (
+          <Tooltip title={"Reload Requests"}>
+            <IconButton
+              onClick={() => setProcess(true)}
+              sx={{ border: "2px solid", borderColor: "primary.main" }}>
+              <Replay />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+      <Toolbar sx={{ mb: 6 }} />
+      <Divider sx={{ mt: "0px !important" }} />
+      {process ? (
+        <Container
+          maxWidth="xl"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "300px",
+            minWidth: "500px",
+            mt: 1,
+            mb: 1
+          }}>
+          <CircularProgress size={"30px"} />
+        </Container>
+      ) : data.length !== 0 ? (
+        data.map((item) => (
+          <RequestNotification key={item._id} item={item} handleClose={handleClose} />
+        ))
+      ) : (
+        <MenuItem>
+          <Box
+            component="div"
+            sx={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mt: 2,
+              mb: 2,
+              minHeight: "300px"
+            }}>
+            <Avatar
+              alt="No Results"
+              src={no_patient}
+              sx={{ width: "150px", height: "150px", mt: 1.8, alignSelf: "center" }}
+            />
+            <Typography
+              component="div"
+              variant="h6"
+              sx={{ mt: 1.2, textAlign: "center" }}>
+              <b>{"No New Requests Found"}</b>
+              <Typography className="secondary">
+                Try refreshing or Comeback Later
+              </Typography>
+            </Typography>
+          </Box>
+        </MenuItem>
+      )}
+    </Menu>
+  );
+}

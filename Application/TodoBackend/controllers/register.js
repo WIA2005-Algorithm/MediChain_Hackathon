@@ -12,6 +12,7 @@ import { log } from "../models/Utilities.model.js";
  * @returns {JSON_OBJECT - caClient, wallet, ccp}
  */
 export const intialize = async (orgName) => {
+  console.log(orgName);
   console.log(" INSIDE INILIALIZE - 3");
   const ccp = buildCCPOrg(orgName);
   console.log(" INSIDE INILIALIZE - 4");

@@ -18,7 +18,8 @@ import SuperAdminContent from "./Components/Superuser/SuperUserAdmin";
 import { Box } from "@mui/system";
 import RegisterPatient from "./Components/Adminuser/DialogContent/RegisterPatientOrDoctor";
 import DoctorApp from "./Components/Doctoruser/DoctorApp";
-
+import LandingPage from "./Components/Landing";
+import PatientApp from "./Components/Patientuser/PatientApp";
 const getDesignTokens = (mode) => ({
   "@global": {
     "*::-webkit-scrollbar": {
@@ -122,7 +123,6 @@ const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
   );
 };
 const GoFromLogin = ({ user, setLogin, logout, type = "superuser" }) => {
-  console.log(4, user);
   const { state } = useLocation();
   useEffect(() => {
     if (user && user.role !== type) {
@@ -173,166 +173,194 @@ function App() {
 
   const theme = createTheme(getDesignTokens(colorMode));
   return (
-    <ColorModeContext.Provider value={{ colorMode, update: setColorMode }}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline enableColorScheme />
-        {!userAvailable && (
-          <Box
-            sx={{
-              display: "flex",
-              height: "100vh",
-              width: "100vw",
-              justifyContent: "center",
-              alignItems: "center"
-            }}>
-            <CircularProgress />
-          </Box>
-        )}
-        {userAvailable && (
-          <Router>
-            <Routes>
-              {isLogged && user && user.role === "superadmin" && (
-                <Route
-                  path="/superuser/networks/*"
-                  element={
-                    <SuperAdminContent
-                      newMode={ChangeColorMode}
-                      mode={colorMode}
-                      logout={logout}
-                      user={user}
-                      setNotis={setNotis}
-                      nav={navigation}
-                      setNav={setNavigation}
-                    />
-                  }
-                />
-              )}
-              {isLogged && user && user.role === "admin" && (
-                <Route
-                  exact
-                  path={`/admin/hospital/*`}
-                  element={
-                    <HospitalAdminContent
-                      mode={colorMode}
-                      newMode={ChangeColorMode}
-                      logout={logout}
-                      user={user}
-                      setNotis={setNotis}
-                    />
-                  }
-                />
-              )}
+    <Router>
+      <ColorModeContext.Provider value={{ colorMode, update: setColorMode }}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline enableColorScheme />
+          {userAvailable ? (
+            <>
+              <Routes>
+                {isLogged && user && user.role === "superadmin" && (
+                  <Route
+                    path="/superuser/networks/*"
+                    element={
+                      <SuperAdminContent
+                        newMode={ChangeColorMode}
+                        mode={colorMode}
+                        logout={logout}
+                        user={user}
+                        setNotis={setNotis}
+                        nav={navigation}
+                        setNav={setNavigation}
+                      />
+                    }
+                  />
+                )}
+                {isLogged && user && user.role === "admin" && (
+                  <Route
+                    exact
+                    path={`/admin/hospital/*`}
+                    element={
+                      <HospitalAdminContent
+                        mode={colorMode}
+                        newMode={ChangeColorMode}
+                        logout={logout}
+                        user={user}
+                        setNotis={setNotis}
+                      />
+                    }
+                  />
+                )}
 
-              {isLogged && user && user.role === "doctor" && (
+                {isLogged && user && user.role === "doctor" && (
+                  <Route
+                    exact
+                    path="/doctor/*"
+                    element={
+                      <DoctorApp
+                        mode={colorMode}
+                        newMode={ChangeColorMode}
+                        logout={logout}
+                        moreUserDetails={user}
+                        broadcastAlert={setNotis}
+                      />
+                    }
+                  />
+                )}
+
+                {isLogged && user && user.role === "patient" && (
+                  <Route
+                    exact
+                    path="/patient/*"
+                    element={
+                      <PatientApp
+                        mode={colorMode}
+                        newMode={ChangeColorMode}
+                        logout={logout}
+                        moreUserDetails={user}
+                        broadcastAlert={setNotis}
+                      />
+                    }
+                  />
+                )}
                 <Route
                   exact
+                  path="/superuser/login"
+                  element={<GoFromLogin user={user} setLogin={login} logout={logout} />}
+                />
+                <Route
+                  exact
+                  path="/admin/login"
+                  element={
+                    <GoFromLogin
+                      user={user}
+                      setLogin={login}
+                      logout={logout}
+                      type="admin"
+                    />
+                  }
+                />
+                <Route
+                  exact
+                  path="/patient/signup"
+                  element={<RegisterPatient broadcastAlert={setNotis} user={user} />}
+                />
+                <Route
+                  exact
+                  path="/patient/login"
+                  element={
+                    <GoFromLogin
+                      user={user}
+                      setLogin={login}
+                      logout={logout}
+                      type="patient"
+                    />
+                  }
+                />
+                <Route
+                  exact
+                  path="/doctor/login"
+                  element={
+                    <GoFromLogin
+                      user={user}
+                      setLogin={login}
+                      logout={logout}
+                      type="doctor"
+                    />
+                  }
+                />
+
+                <Route
+                  exact
+                  path="/doctor/signup"
+                  element={
+                    <RegisterPatient
+                      broadcastAlert={setNotis}
+                      user={user}
+                      TYPE="doctor"
+                    />
+                  }
+                />
+
+                <Route
+                  exact
+                  path="/admin/*"
+                  element={
+                    <GoToLogin
+                      logged={isLogged}
+                      user={user}
+                      logout={logout}
+                      type="admin"
+                    />
+                  }
+                />
+                <Route
+                  path="/superuser/*"
+                  element={<GoToLogin logged={isLogged} user={user} logout={logout} />}
+                />
+                <Route
+                  exact
+                  path="/patient/*"
+                  element={
+                    <GoToLogin
+                      logged={isLogged}
+                      user={user}
+                      logout={logout}
+                      type="patient"
+                    />
+                  }
+                />
+                <Route
                   path="/doctor/*"
                   element={
-                    <DoctorApp
-                      mode={colorMode}
-                      newMode={ChangeColorMode}
+                    <GoToLogin
+                      logged={isLogged}
+                      user={user}
                       logout={logout}
-                      moreUserDetails={user}
-                      broadcastAlert={setNotis}
+                      type="doctor"
                     />
                   }
                 />
-              )}
-              <Route
-                exact
-                path="/superuser/login"
-                element={<GoFromLogin user={user} setLogin={login} logout={logout} />}
-              />
-              <Route
-                exact
-                path="/admin/login"
-                element={
-                  <GoFromLogin
-                    user={user}
-                    setLogin={login}
-                    logout={logout}
-                    type="admin"
-                  />
-                }
-              />
-              <Route
-                exact
-                path="/patient/signup"
-                element={<RegisterPatient broadcastAlert={setNotis} user={user} />}
-              />
-              <Route
-                exact
-                path="/patient/login"
-                element={
-                  <GoFromLogin
-                    user={user}
-                    setLogin={login}
-                    logout={logout}
-                    type="patient"
-                  />
-                }
-              />
-              <Route
-                exact
-                path="/doctor/login"
-                element={
-                  <GoFromLogin
-                    user={user}
-                    setLogin={login}
-                    logout={logout}
-                    type="doctor"
-                  />
-                }
-              />
 
-              <Route
-                exact
-                path="/doctor/signup"
-                element={
-                  <RegisterPatient broadcastAlert={setNotis} user={user} TYPE="doctor" />
-                }
-              />
-
-              <Route
-                exact
-                path="/admin/*"
-                element={
-                  <GoToLogin logged={isLogged} user={user} logout={logout} type="admin" />
-                }
-              />
-              <Route
-                path="/superuser/*"
-                element={<GoToLogin logged={isLogged} user={user} logout={logout} />}
-              />
-              <Route
-                exact
-                path="/patient/*"
-                element={
-                  <GoToLogin
-                    logged={isLogged}
-                    user={user}
-                    logout={logout}
-                    type="patient"
-                  />
-                }
-              />
-              <Route
-                path="/doctor/*"
-                element={
-                  <GoToLogin
-                    logged={isLogged}
-                    user={user}
-                    logout={logout}
-                    type="doctor"
-                  />
-                }
-              />
-            </Routes>
-            <AddNewNotification notis={notis} Onremove={handleRemove} />
-          </Router>
-        )}
-      </ThemeProvider>
-    </ColorModeContext.Provider>
+                <Route path="/" element={<LandingPage />} />
+              </Routes>
+              <AddNewNotification notis={notis} Onremove={handleRemove} />
+            </>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                height: "100vh",
+                width: "100vw",
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
+              <CircularProgress />
+            </Box>
+          )}
+        </ThemeProvider>
+      </ColorModeContext.Provider>
+    </Router>
   );
 }
 export default App;

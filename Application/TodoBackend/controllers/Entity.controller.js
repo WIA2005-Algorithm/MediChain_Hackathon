@@ -126,6 +126,23 @@ export async function dischargeORCheckOutPatient(orgName, issuerID, PtID) {
   try {
     await contract.submitTransaction("dischargeORCheckOutPatient", PtID);
   } catch (e) {
+    throw errors.contract_error.withDetails(
+      e.toString().includes("No valid responses from any peers")
+        ? e.toString().split("Error:")[2]
+        : "An unexpected error has occured while transacting your request. Please try again"
+    );
+  } finally {
+    gateway.disconnect();
+  }
+}
+
+export async function getPatientDetails(orgName, issuerID, PtID) {
+  const { contract, gateway } = await getContract(orgName, issuerID);
+  try {
+    const result = await contract.evaluateTransaction("getPatientDetails", PtID);
+    console.log(Buffer.from(result, "base64").toString("ascii"));
+    return JSON.parse(Buffer.from(result, "base64").toString("ascii"));
+  } catch (e) {
     console.log(e);
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")

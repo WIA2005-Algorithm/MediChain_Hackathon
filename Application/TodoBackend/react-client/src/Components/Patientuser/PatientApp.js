@@ -1,30 +1,27 @@
 import { CircularProgress, Container, Toolbar } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { getDoctorInfo } from "../../APIs/doctor/doctor.api";
+import { getPatientInfo } from "../../APIs/Patient/api";
 import { getAlertValues } from "../StyledComponents";
-import ActivityLogs from "../Superuser/activity_logs";
-import DoctorDashBoard from "./Contents/DoctorDashBoard";
-import PatientProfile from "./Contents/PatientProfile";
-import AppHeader from "./DoctorAppBar";
+import Profile from "./Content/Patient";
+import PatientAppBar from "./PatientAppBar";
 
-export default function DoctorApp({
+export default function PatientApp({
   newMode,
   mode,
   logout,
   moreUserDetails,
   broadcastAlert
 }) {
-  const [doctor, setDoctor] = useState();
+  const [patient, setPatient] = useState();
   const [loading, setLoading] = useState(false);
   // TRUE MEANS INSTRUCTION TO REFRESH IT
   const [refresh, setRefresh] = useState(true);
-  const getTheDoctorInformation = useCallback(async () => {
+  const getThePatientInformation = useCallback(async () => {
     try {
-      const result = await getDoctorInfo();
-      setDoctor(result.data);
+      const result = await getPatientInfo();
+      setPatient(result.data);
       setLoading(true);
-      // INSTRUCTION DONE RESET TO FALSE
       setRefresh(false);
     } catch (error) {
       broadcastAlert((prev) => [
@@ -40,8 +37,8 @@ export default function DoctorApp({
     }
   }, []);
   useEffect(() => {
-    getTheDoctorInformation();
-  }, [getTheDoctorInformation, refresh]);
+    getThePatientInformation();
+  }, [getThePatientInformation, refresh]);
   return (
     <>
       {!loading && (
@@ -59,11 +56,11 @@ export default function DoctorApp({
 
       {loading && (
         <>
-          <AppHeader
+          <PatientAppBar
             mode={mode}
             newMode={newMode}
             logout={logout}
-            user={doctor}
+            user={patient}
             moreUserDetails={moreUserDetails}
             broadcastAlert={broadcastAlert}
           />
@@ -71,20 +68,10 @@ export default function DoctorApp({
           <Container maxWidth="xl">
             <Routes>
               <Route
-                path={"/my_patients/detailedView"}
+                path={"/overview"}
                 element={
-                  <PatientProfile
-                    user={doctor}
-                    moreUserDetails={moreUserDetails}
-                    broadcastAlert={broadcastAlert}
-                  />
-                }
-              />
-              <Route
-                path="/my_patients"
-                element={
-                  <DoctorDashBoard
-                    user={doctor}
+                  <Profile
+                    item={patient}
                     moreUserDetails={moreUserDetails}
                     broadcastAlert={broadcastAlert}
                     setRefresh={setRefresh}
@@ -92,10 +79,7 @@ export default function DoctorApp({
                   />
                 }
               />
-
-              <Route path="/activity" element={<ActivityLogs />} />
-
-              <Route path="/" element={<Navigate to="/my_patients" replace />} />
+              <Route path="/" element={<Navigate to="/overview" replace />} />
             </Routes>
           </Container>
         </>

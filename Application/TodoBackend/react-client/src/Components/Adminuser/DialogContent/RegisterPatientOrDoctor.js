@@ -397,7 +397,7 @@ function PersonalDetails({
             </MenuItem>
             <MenuItem value={"Male"}>Male</MenuItem>
             <MenuItem value={"Female"}>Female</MenuItem>
-            <MenuItem value={"NA"}>Prefer Not to Say</MenuItem>
+            <MenuItem value={"Other"}>Prefer Not to Say</MenuItem>
           </Select>
           <FormHelperText>Please key in your gender for the record</FormHelperText>
         </FormControl>
@@ -703,7 +703,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
   const [loginDetails, setLoginDetails] = useState({
     fields: {
       active: false,
-      org: (user && user.org) || "",
+      org: (user && `${user.fullOrg} - ${user.org}`) || "",
       ID: "",
       password: "",
       //TODO WHEN ADDING DOCTOR SIGNUP

@@ -40,6 +40,7 @@ router.post("/create/organization", authenticateUser, (req, res) => {
   createEntity({
     userID: req.body.adminID,
     password: req.body.password,
+    FullOrganization: req.body.fullName,
     organization: req.body.id,
     type: "admin"
   })

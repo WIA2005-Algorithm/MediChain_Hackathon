@@ -112,26 +112,18 @@ export const registerAndEnrollUser = async (
 };
 
 export async function getContract(orgName, userID) {
-  console.log(" INSIDE GET CONTRACT - 2");
   const { wallet, ccp } = await intialize(orgName);
-  console.log(" INSIDE GET CONTRACT - 3");
   const userIdentity = await wallet.get(userID);
-  console.log(" INSIDE GET CONTRACT - 4");
-  console.log(userID);
   if (!userIdentity)
     throw errors.identity_not_found.withDetails("No more details available");
-  console.log(" INSIDE GET CONTRACT - 5");
   try {
     const gateway = new Gateway();
-    console.log(" INSIDE GET CONTRACT - 6");
     await gateway.connect(ccp, {
       wallet,
       identity: userID,
       discovery: { enabled: true, asLocalhost: true }
     });
-    console.log(" INSIDE GET CONTRACT - 7");
     const contract = (await gateway.getNetwork(channelName)).getContract(chaincodeName);
-    console.log(" INSIDE GET CONTRACT - 8");
     return { contract, gateway };
   } catch (e) {
     throw errors.not_reachable.withDetails(e.message);

@@ -11,6 +11,7 @@ const EntityType = new Schema(
     userID: { type: String, required: true, index: { unique: true } },
     password: { type: String, default: null },
     organization: { type: String, required: true },
+    FullOrganization: { type: String, required: true },
     type: { type: String, required: true },
     alternateKey: { type: Array, default: null },
     refreshToken: { type: String }

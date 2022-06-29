@@ -6,16 +6,20 @@ import {
   createEntity,
   deleteAdminEntity,
   dischargeORCheckOutPatient,
+  getPatientDetails,
   patientCheckInCheckOutStats,
   retriveAllDoctors,
   retriveAllPatients
 } from "../controllers/Entity.controller.js";
 import { RegisterUser } from "../controllers/register.js";
+import { CreateNotificationModelObject } from "../controllers/RequestData.controller.js";
 import { getHashedUserID, GetHashOf, HospitalEntity } from "../models/Entity.model.js";
 import { Organizations } from "../models/Network.model.js";
+import { Notification, RequestModel } from "../models/NotificationModel.js";
 import { log } from "../models/Utilities.model.js";
 import { authenticateUser, getAccessToken } from "../server_config.js";
 import errors, { ApiError, response } from "../Utils/Errors.js";
+import { v4 as UID } from "uuid";
 const router = Router();
 
 const loginHelper = (data) => {
@@ -65,7 +69,8 @@ router.post("/login", (req, res) => {
         _id: user._id,
         username: userID,
         role: type,
-        org: user.organization
+        org: user.organization,
+        fullOrg: user.FullOrganization
       });
       session = LoginHelp.session;
       LoginHelp.next()
@@ -105,12 +110,17 @@ router.post("/login", (req, res) => {
 /**
  * Get all the enrolled hospitals
  */
-router.get("/getEnrolledHospitals", (_, res) => {
+router.get("/getEnrolledHospitals", (req, res) => {
+  const substract = req.query.substract;
+  console.log(substract);
   Organizations.find({ Enrolled: 1 })
     .exec()
     .then((data) => {
       const array = [];
-      data.forEach((ele) => array.push(`${ele.FullName} - ${ele.Name}`));
+      data.forEach((ele) => {
+        if (!substract || substract !== ele.Name)
+          array.push(`${ele.FullName} - ${ele.Name}`);
+      });
       return res.status(200).json(array);
     })
     .catch((e) => {
@@ -184,34 +194,29 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
 router.post("/addNewPatient/onBehalf", (req, res) => {
   const { loginDetails, personalDetails, address, contactDetails } = req.body.payloadData;
   // As In doctor's signup --> Organization is in the format of "NAME - SHORTFORMID"
-  if (!req.body.onBehalf)
-    loginDetails.org = String(loginDetails.org.split("-")[1]).trim();
-  console.log(" REACHED HERE...");
-  let encryptedID;
+  loginDetails.org = [
+    loginDetails.org.split("-")[0].trim(),
+    loginDetails.org.split("-")[1].trim()
+  ];
+  console.log(loginDetails.org);
   // TYPE IS capitalized after below statement
   const type = `${String(loginDetails.TYPE).charAt(0).toUpperCase()}${String(
     loginDetails.TYPE
   ).slice(1)}`;
-
-  getHashedUserID(loginDetails.ID)
-    .then((hash) => {
-      console.log(" HERE 2;", loginDetails.org);
-      encryptedID = hash;
-      return RegisterUser(loginDetails.org, loginDetails.ID, type);
-    })
-    .then(() =>
-      createEntity({
-        userID: loginDetails.ID,
-        organization: loginDetails.org,
-        type: String(type.toLowerCase()),
-        alternateKey: req.body.onBehalf ? loginDetails.password : [],
-        password: req.body.onBehalf ? null : loginDetails.password
-      })
-    )
+  createEntity({
+    userID: loginDetails.ID,
+    organization: loginDetails.org[1].trim(),
+    FullOrganization: loginDetails.org[0].trim(),
+    type: String(type.toLowerCase()),
+    alternateKey: req.body.onBehalf ? loginDetails.password : [],
+    password: req.body.onBehalf ? null : loginDetails.password
+  })
     .then(() => {
-      console.log(personalDetails);
+      return RegisterUser(loginDetails.org[1], loginDetails.ID, type);
+    })
+    .then(() => {
       addMember(
-        loginDetails.org,
+        loginDetails.org[1],
         loginDetails.ID,
         {
           personalDetails,
@@ -276,7 +281,6 @@ router.get("/getAllDoctors", authenticateUser, (req, res) => {
 });
 
 router.post("/checkInPatient", authenticateUser, (req, res) => {
-  console.log(" Recieved the request to checkin");
   HospitalEntity.findOne({ userID: req.body.patientID })
     .exec()
     .then((user) => {
@@ -359,7 +363,6 @@ router.post("/checkOutPatient", authenticateUser, (req, res) => {
 });
 
 router.get("/getPatientCheckInCheckOutStats", authenticateUser, (req, res) => {
-  console.log("HERE PLEASE");
   patientCheckInCheckOutStats(
     req.user.org,
     req.user.username,
@@ -375,6 +378,131 @@ router.get("/getPatientCheckInCheckOutStats", authenticateUser, (req, res) => {
           "There is an unexpected error in the contract.."
         ).withDetails(err.message);
       res.status(err.status).json(new response.errorResponse(err));
+    });
+});
+
+router.get("/getPatientDetails", authenticateUser, (req, res) => {
+  console.log(req.query.ID);
+  getPatientDetails(req.user.org, req.user.username, req.query.ID)
+    .then((data) => {
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      if (!(err instanceof ApiError))
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
+      res.status(err.status).json(new response.errorResponse(err));
+    });
+});
+
+router.post("/acceptExternalDoctorRequest", authenticateUser, (req, res) => {
+  const { PatientID, FromDoc, FromOrg } = req.body.data;
+  const doctors = req.body.selectedEMR;
+  const notifObj = req.body.notifObj;
+  RequestModel.findOneAndUpdate(
+    { RID: `${FromOrg}#doctor#${FromDoc}` },
+    { EMRRequested: JSON.stringify(doctors) }
+  )
+    .exec()
+    .then(() => {
+      return doctors.forEach(async (ele) => {
+        req.body.data.UID = UID();
+        const ID = JSON.parse(ele).ID;
+        await CreateNotificationModelObject({
+          To: `${req.user.org}#doctor#${ID}`,
+          From: `Hospital Admin#${req.user.org}#admin#${req.user.username}`,
+          NotificationString: `The hospital admin is requesting your access to share the data of patient with ID : ${PatientID} with external doctor of ${FromOrg}`,
+          NotificationAccept: "Accept and reply back to Admin",
+          NotificationDeny: "Decline with a polite note",
+          Data: JSON.stringify(req.body.data)
+        });
+      });
+    })
+    .then(() => {
+      return CreateNotificationModelObject({
+        To: `${FromOrg}#doctor#${FromDoc}`,
+        From: `Hospital Admin#${req.user.org}#admin#${req.user.username}`,
+        NotificationString: `The hospital admin has accepted your access request. Please wait while your request is fully processed`,
+        NotificationAccept: "null",
+        NotificationDeny: "null",
+        Data: JSON.stringify(req.body.data)
+      });
+    })
+    .then(() => {
+      return CreateNotificationModelObject({
+        To: `${req.user.org}#admin#${req.user.username}`,
+        From: "null",
+        NotificationString: `You have accepted the request of doctor from ${FromOrg} to share patient record information and broadcasted the request to associated doctors`,
+        NotificationAccept: "null",
+        NotificationDeny: "null",
+        Data: JSON.stringify(req.body.data)
+      });
+    })
+    .then(() => {
+      return Notification.findByIdAndUpdate(notifObj._id, {
+        Read: true,
+        NotificationAccept: "null",
+        NotificationDeny: "null"
+      });
+    })
+    .then(() => res.sendStatus(200))
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json("An unexpected error occured");
+    });
+});
+
+router.post("/denyExternalDoctorRequest", authenticateUser, (req, res) => {
+  const { FromDoc, FromOrg, PatientOrg } = req.body.data;
+  const note = req.body.note;
+  const notifObj = req.body.notifObj;
+  RequestModel.findOneAndUpdate(
+    { RID: `${FromOrg}#doctor#${FromDoc}` },
+    {
+      Status: "Not Active",
+      CommentToAccessOrDeny:
+        "Your request to access the external patient data was denied by the admin with a reason mentioned below",
+      Note: note,
+      Data: null
+    }
+  )
+    .exec()
+    .then(() => {
+      return CreateNotificationModelObject({
+        To: `${FromOrg}#doctor#${FromDoc}`,
+        From: `Hospital Admin#${req.user.org}#admin#${req.user.username}`,
+        NotificationString: `The request has been denied by the hospital organization. Note from hospital : ${note}`,
+        NotificationAccept: "null",
+        NotificationDeny: "null",
+        Data: JSON.stringify(req.body.data)
+      });
+    })
+    .then(() => {
+      return CreateNotificationModelObject({
+        To: `${req.user.org}#admin#${req.user.username}`,
+        From: "null",
+        NotificationString: `You denied the external doctor's request to share your patient record for Patient from ${PatientOrg} with note -: ${note}`,
+        NotificationAccept: "null",
+        NotificationDeny: "null",
+        Data: JSON.stringify(req.body.data)
+      });
+    })
+    .then(() => {
+      return Notification.findByIdAndUpdate(notifObj._id, {
+        Read: true,
+        NotificationAccept: "null",
+        NotificationDeny: "null"
+      });
+    })
+    .then(() => {
+      return res.sendStatus(200);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json("An unexpected error occured");
     });
 });
 export default router;

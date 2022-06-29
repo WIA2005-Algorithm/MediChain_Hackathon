@@ -13,7 +13,8 @@ export const adminLoginAuth = (username, password) =>
     type: "admin"
   });
 
-export const getHospitalsEnrolled = () => axios.get("/entity/getEnrolledHospitals");
+export const getHospitalsEnrolled = (substract = null) =>
+  axios.get("/entity/getEnrolledHospitals", { params: { substract } });
 
 export const addNewPatientOrDoctorAPI = (
   loginDetails,
@@ -66,3 +67,19 @@ export const PatientDataStatsCheckInCheckOut = (fromRange, toRange) =>
       toRange
     }
   });
+
+export const getPatientDetails = (ID) => {
+  return axios.get("/entity/getPatientDetails", { params: { ID } });
+};
+
+export const acceptExternalDoctorRequest = (selectedEMR, data, notifObj) => {
+  return axios.post("/entity/acceptExternalDoctorRequest", {
+    selectedEMR,
+    data,
+    notifObj
+  });
+};
+
+export const denyExternalDoctorRequest = (data, note, notifObj) => {
+  return axios.post("/entity/denyExternalDoctorRequest", { data, note, notifObj });
+};

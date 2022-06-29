@@ -25,3 +25,22 @@ export const dischargePTForDoctor = (PTID, DOCID, NOTE) => {
     NOTE
   });
 };
+
+export const requestExternalPatient = (docName, PTID, PTORG) => {
+  PTORG = String(PTORG.split("-")[1]).trim();
+  console.log(PTORG);
+  return axios.post("/doctor/requestExternalPatient", {
+    docName,
+    PTID,
+    PTORG
+  });
+};
+
+export const acceptRequestToFromAdmin = (data, doctor, notifObj) => {
+  return axios.post("/doctor/acceptRequestToFromAdmin", { data, doctor, notifObj });
+};
+
+export const denyRequestToFromAdmin = (data, note, others, notifObj) => {
+  console.log("HELLO1---", data, note, others, notifObj);
+  return axios.post("/doctor/denyRequestToFromAdmin", { data, note, others, notifObj });
+};

@@ -90,7 +90,7 @@ export const useAuth = () => {
     let intervalID = setInterval(() => {
       getLoggedStatus();
       if (!isLogged) clearInterval(intervalID);
-    }, 120000);
+    }, 20000);
     return () => clearInterval(intervalID);
   }, [getLoggedStatus, isLogged]);
 
