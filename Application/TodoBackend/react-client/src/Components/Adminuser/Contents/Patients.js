@@ -650,7 +650,6 @@ export default function PatientData({ broadcastAlert }) {
     try {
       console.log("HELLLOOO");
       await CheckInPatient(ID);
-      console.log(" NOOO");
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
@@ -729,7 +728,7 @@ export default function PatientData({ broadcastAlert }) {
           "Patient CheckIn",
           error?.response?.data
             ? error.response.data.DETAILS
-            : `An unexpected error occurrecd checking out. Either the patient is already check out or there is a multiple button press issue. Please try refreshing.`
+            : `An unexpected error occurrecd checking in. Either the patient is already check in or there is a multiple button press issue. Please try refreshing.`
         )
       ]);
     }

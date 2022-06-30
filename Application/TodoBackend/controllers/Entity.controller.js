@@ -153,3 +153,33 @@ export async function getPatientDetails(orgName, issuerID, PtID) {
     gateway.disconnect();
   }
 }
+
+export async function getPatientDataStatsTimeLine(
+  orgName,
+  issuerID,
+  fromRange,
+  toRange,
+  time
+) {
+  const { contract, gateway } = await getContract(orgName, issuerID);
+  try {
+    if (toRange < fromRange)
+      throw errors.contract_error.withDetails("The range input provided is wrong");
+    const result = await contract.evaluateTransaction(
+      "getPatientDataStatsTimeLine",
+      fromRange,
+      toRange,
+      time
+    );
+    console.log(result.toString());
+    return JSON.parse(result.toString());
+  } catch (e) {
+    throw errors.contract_error.withDetails(
+      e.toString().includes("No valid responses from any peers")
+        ? e.toString().split("Error:")[2]
+        : "An unexpected error has occured while transacting your request. Please try again"
+    );
+  } finally {
+    gateway.disconnect();
+  }
+}

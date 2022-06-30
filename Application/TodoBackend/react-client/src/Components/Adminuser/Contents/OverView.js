@@ -55,6 +55,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   getAllDoctorData,
   getAllPatientData,
+  getPatientDataStatsTimeLine,
   PatientDataStatsCheckInCheckOut
 } from "../../../APIs/Admin/main.api";
 const Link = () => <TransitEnterexit sx={{ transform: "rotate(180deg)" }} />;
@@ -363,6 +364,31 @@ function StatsGenderPatient({ Male, Female, Other }) {
   );
 }
 
+const getRangeUsingStatsDay = (Day) => {
+  const now = new Date();
+  switch (parseInt(Day)) {
+    case 0:
+      return [new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime(), now.getTime()];
+    case 1:
+      return [
+        new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).getTime(),
+        new Date(now.getTime() - 24 * 59 * 60 * 1000).getTime()
+      ];
+    case 2:
+      return [
+        new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).getTime(),
+        now.getTime()
+      ];
+    case 3:
+      return [
+        new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).getTime(),
+        now.getTime()
+      ];
+    default:
+      return [new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime(), now.getTime()];
+  }
+};
+
 function StatsSection({ broadcastAlert }) {
   const [statsDay, setStatsDay] = useState(0);
   const [promiseStats, setPromiseStats] = useState(false);
@@ -373,58 +399,31 @@ function StatsSection({ broadcastAlert }) {
     Female: 0,
     Other: 0
   });
-  const handleChange = (event) => {
-    setStatsDay(event.target.value);
+  const handleChange = (e) => {
+    setStatsDay(e.target.value);
   };
-
-  const getRangeUsingStatsDay = () => {
-    const now = new Date();
-    switch (parseInt(statsDay)) {
-      case 0:
-        return [new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime(), now.getTime()];
-      case 1:
-        return [
-          new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).getTime(),
-          new Date(now.getTime() - 24 * 61 * 60 * 1000).getTime()
-        ];
-      case 2:
-        return [
-          new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).getTime(),
-          now.getTime()
-        ];
-      case 3:
-        return [
-          new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).getTime(),
-          now.getTime()
-        ];
-      default:
-        return [new Date(now.getTime() - 24 * 60 * 60 * 1000).getTime(), now.getTime()];
-    }
-  };
-  const handleCall = useCallback(async () => {
-    setPromiseStats(false);
-    const range = getRangeUsingStatsDay();
-    console.log(range);
-    try {
-      const results = await PatientDataStatsCheckInCheckOut(range[0], range[1]);
-      console.log(results.data);
-      if (results.data) setStatsData(results.data);
-    } catch (error) {
-      broadcastAlert((prev) => [
-        ...prev,
-        getAlertValues(
-          "error",
-          "Error Loading Statistics",
-          error.response?.data?.DETAILS ||
-            "An unexpected error occured. Please make sure blockchain is running. Contact SuperAdmin for this."
-        )
-      ]);
-    } finally {
-      setPromiseStats(true);
-    }
-  }, []);
 
   useEffect(() => {
+    const handleCall = async () => {
+      setPromiseStats(false);
+      const range = getRangeUsingStatsDay(statsDay);
+      try {
+        const results = await PatientDataStatsCheckInCheckOut(range[0], range[1]);
+        if (results.data) setStatsData(results.data);
+      } catch (error) {
+        broadcastAlert((prev) => [
+          ...prev,
+          getAlertValues(
+            "error",
+            "Error Loading Statistics",
+            error.response?.data?.DETAILS ||
+              "An unexpected error occured. Please make sure blockchain is running. Contact SuperAdmin for this."
+          )
+        ]);
+      } finally {
+        setPromiseStats(true);
+      }
+    };
     handleCall();
   }, [statsDay]);
 
@@ -549,32 +548,69 @@ const nightLabels = [
   "7 am"
 ];
 
-const getDataForLineGraph = (data = [], morning = true) => {
+const getDataForLineGraph = (data1 = [], data2 = [], morning = true) => {
   return {
     labels: morning ? morningLabels : nightLabels,
     datasets: [
       {
-        label: "Number of Patients",
-        data,
+        label: "Number of Patients Checked In",
+        data: data1,
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)"
+      },
+      {
+        label: "Number of Patients Checked Out",
+        data: data2,
+        borderColor: "rgb(255, 223, 111)",
+        backgroundColor: "rgb(255, 223, 111, 0.5)"
       }
     ]
   };
 };
 
-function TimeAdmittedPatients() {
-  const data = getDataForLineGraph([34, 56, 56, 77, 23, 56, 56, 32, 45, 37, 32, 23, 15]);
+function TimeAdmittedPatients({ data, whatTimeOfDayMorning = true }) {
+  const totalData = getDataForLineGraph(data[0], data[1], whatTimeOfDayMorning);
   return (
     <Box sx={{ maxWidth: "900px", width: "100%" }}>
-      <Line options={optionsForTimeAdmitted} data={data} redraw={true} />
+      <Line options={optionsForTimeAdmitted} data={totalData} />
     </Box>
   );
 }
 
-function TimeLineGraph() {
+function getRangeUsingStatsDayForTimeLine(Day, time) {
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const dayBeforeYesterday = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+  switch (Day) {
+    case 0:
+      today.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
+      let to = new Date();
+      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      console.log(today, to);
+      return [today.getTime(), to.getTime()];
+    case 1:
+      yesterday.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
+      to = new Date();
+      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      return [yesterday.getTime(), to.getTime()];
+    case 2:
+      dayBeforeYesterday.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
+      to = new Date();
+      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      return [dayBeforeYesterday.getTime(), to.getTime()];
+    default:
+      today.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
+      to = new Date();
+      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      console.log(today, to);
+      return [today.getTime(), to.getTime()];
+  }
+}
+
+function TimeLineGraph({ broadcastAlert }) {
   const [statsDate, setstatsDate] = useState(0);
   const [statsDay, setstatsDay] = useState(0);
+  const [statsData, setStatsData] = useState([]);
   const handleChangeDate = (e) => {
     setstatsDate(e.target.value);
   };
@@ -582,6 +618,30 @@ function TimeLineGraph() {
   const handleChangeDay = (e) => {
     setstatsDay(e.target.value);
   };
+
+  useEffect(() => {
+    const handleCall = async () => {
+      const time = statsDay === 0 ? "morning" : "night";
+      const range = getRangeUsingStatsDayForTimeLine(statsDate, time);
+      console.log(range);
+      try {
+        const results = await getPatientDataStatsTimeLine(range[0], range[1], time);
+        console.log(results.data);
+        if (results.data) setStatsData(results.data);
+      } catch (error) {
+        broadcastAlert((prev) => [
+          ...prev,
+          getAlertValues(
+            "error",
+            "Error Loading Statistics",
+            error.response?.data?.DETAILS ||
+              "An unexpected error occured. Please make sure blockchain is running. Contact SuperAdmin for this."
+          )
+        ]);
+      }
+    };
+    handleCall();
+  }, [statsDay, statsDate]);
   return (
     <SectionContainer
       sx={{
@@ -602,14 +662,14 @@ function TimeLineGraph() {
         }}>
         <Typography sx={{ whiteSpace: "nowrap" }} component="div">
           <span>
-            <b>Admitted Patients By Department</b>
+            <b>Admitted Patients By Time</b>
             <br></br>
             <Typography
               sx={{
                 fontSize: "13px",
                 color: "text.secondary"
               }}>
-              Scroll for more departments
+              Select from the options to see the suitable statistics
             </Typography>
           </span>
         </Typography>
@@ -625,7 +685,7 @@ function TimeLineGraph() {
               label="Date">
               <MenuItem value={0}>Today</MenuItem>
               <MenuItem value={1}>Yesterday</MenuItem>
-              <MenuItem value={2}>Before Yesterday</MenuItem>
+              <MenuItem value={2}>Day Before Yesterday</MenuItem>
               <MenuItem value={3} disabled>
                 Choose Date [Not Available]
               </MenuItem>
@@ -646,7 +706,7 @@ function TimeLineGraph() {
           </FormControl>
         </Box>
       </Box>
-      <TimeAdmittedPatients />
+      <TimeAdmittedPatients whatTimeOfDayMorning={statsDay === 0} data={statsData} />
     </SectionContainer>
   );
 }
@@ -707,7 +767,7 @@ export function OverViewTab({ changeTabTo, broadcastAlert }) {
           </Box>
           <Box sx={{ display: "flex", width: "100%", minHeight: " 550px" }}>
             {/* TODO TIME LINE GRAPH */}
-            <TimeLineGraph />
+            <TimeLineGraph broadcastAlert={broadcastAlert} />
           </Box>
         </Box>
       )}

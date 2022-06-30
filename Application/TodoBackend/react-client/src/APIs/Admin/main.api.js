@@ -56,10 +56,8 @@ export const CheckInPatient = (patientID) =>
 export const AssignDoctor = (patientID, doctorID) =>
   axios.post("/entity/assignPatient", { patientID, doctorID });
 
-export const Discharge = (patientID) => {
-  console.log(patientID);
+export const Discharge = (patientID) =>
   axios.post("/entity/checkOutPatient", { patientID });
-};
 export const PatientDataStatsCheckInCheckOut = (fromRange, toRange) =>
   axios.get("/entity/getPatientCheckInCheckOutStats", {
     params: {
@@ -83,3 +81,12 @@ export const acceptExternalDoctorRequest = (selectedEMR, data, notifObj) => {
 export const denyExternalDoctorRequest = (data, note, notifObj) => {
   return axios.post("/entity/denyExternalDoctorRequest", { data, note, notifObj });
 };
+
+export const getPatientDataStatsTimeLine = (fromRange, toRange, time) =>
+  axios.get("/entity/getPatientDataStatsTimeLine", {
+    params: {
+      fromRange,
+      toRange,
+      time
+    }
+  });

@@ -6,6 +6,7 @@ import {
   createEntity,
   deleteAdminEntity,
   dischargeORCheckOutPatient,
+  getPatientDataStatsTimeLine,
   getPatientDetails,
   patientCheckInCheckOutStats,
   retriveAllDoctors,
@@ -13,7 +14,7 @@ import {
 } from "../controllers/Entity.controller.js";
 import { RegisterUser } from "../controllers/register.js";
 import { CreateNotificationModelObject } from "../controllers/RequestData.controller.js";
-import { getHashedUserID, GetHashOf, HospitalEntity } from "../models/Entity.model.js";
+import { GetHashOf, HospitalEntity } from "../models/Entity.model.js";
 import { Organizations } from "../models/Network.model.js";
 import { Notification, RequestModel } from "../models/NotificationModel.js";
 import { log } from "../models/Utilities.model.js";
@@ -58,12 +59,14 @@ router.post("/login", (req, res) => {
         throw new Error();
       }
       //TODO : LINE 41 in notebook
-      if (!user.password)
+      if (user.password === null) {
+        console.log("hello");
         return res.status(200).json({
           isOnBehalf: 1,
           org: user.organization,
           user: userID
         });
+      }
 
       const LoginHelp = loginHelper({
         _id: user._id,
@@ -82,9 +85,9 @@ router.post("/login", (req, res) => {
             "success"
           );
           return res.status(200).json({
-            ...session,
+            isOnBehalf: -1,
             org: user.organization,
-            isOnBehalf: -1
+            session
           });
         })
         .catch((err) => {
@@ -139,7 +142,7 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
       console.log(" check 1");
       if (u.password) return res.status(200).json({ isOnBehalf: -1 });
       // If not then update alternate to null and add new real password
-      var results = await GetHashOf(`${password}@${u.type}`)
+      var results = await GetHashOf(`${password}@patient`)
         .then((hash) => {
           console.log(" check 2");
           newType = hash;
@@ -155,7 +158,7 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
         });
 
       if (results) return results;
-      throw new Error();
+      throw new Error("Unexpected Error Occured");
     })
     .then(() => {
       console.log(" check 4");
@@ -191,6 +194,7 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
       return res.status(err.status).json(new response.errorResponse(err));
     });
 });
+
 router.post("/addNewPatient/onBehalf", (req, res) => {
   const { loginDetails, personalDetails, address, contactDetails } = req.body.payloadData;
   // As In doctor's signup --> Organization is in the format of "NAME - SHORTFORMID"
@@ -281,15 +285,7 @@ router.get("/getAllDoctors", authenticateUser, (req, res) => {
 });
 
 router.post("/checkInPatient", authenticateUser, (req, res) => {
-  HospitalEntity.findOne({ userID: req.body.patientID })
-    .exec()
-    .then((user) => {
-      if (!user?.password)
-        throw errors.patient_not_logged.withDetails(
-          "Patient cannot be checked in before the patient doesn't change his password provided by hospital organization"
-        );
-      else return checkIn(req.user.org, req.user.username, req.body.patientID);
-    })
+  checkIn(req.user.org, req.user.username, req.body.patientID)
     .then(() => {
       log(
         `${req.user.username}`,
@@ -334,8 +330,21 @@ router.post("/assignPatient", authenticateUser, (req, res) => {
 });
 
 router.post("/checkOutPatient", authenticateUser, (req, res) => {
-  console.log("LOL --->", req.body.patientID);
-  dischargeORCheckOutPatient(req.user.org, req.user.username, req.body.patientID)
+  HospitalEntity.findOne({ userID: req.body.patientID })
+    .exec()
+    .then((user) => {
+      if (user.password === null)
+        throw errors.patient_not_logged.withDetails(
+          "Patient cannot be checked out before the patient doesn't change his password provided by hospital organization"
+        );
+      else {
+        return dischargeORCheckOutPatient(
+          req.user.org,
+          req.user.username,
+          req.body.patientID
+        );
+      }
+    })
     .then(() => {
       log(
         `${req.user.username}`,
@@ -358,7 +367,8 @@ router.post("/checkOutPatient", authenticateUser, (req, res) => {
         `Existing Patient Dischargement for userID: ${req.body.patientID} failed with error 500`,
         "removecircle"
       );
-      return res.status(err.status).json(new response.errorResponse(err));
+      console.log(err);
+      return res.status(500).json(new response.errorResponse(err));
     });
 });
 
@@ -380,7 +390,26 @@ router.get("/getPatientCheckInCheckOutStats", authenticateUser, (req, res) => {
       res.status(err.status).json(new response.errorResponse(err));
     });
 });
-
+getPatientDataStatsTimeLine;
+router.get("/getPatientDataStatsTimeLine", authenticateUser, (req, res) => {
+  getPatientDataStatsTimeLine(
+    req.user.org,
+    req.user.username,
+    req.query.fromRange,
+    req.query.toRange,
+    req.query.time
+  )
+    .then((data) => res.status(200).json(data))
+    .catch((err) => {
+      if (!(err instanceof ApiError))
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
+      res.status(err.status).json(new response.errorResponse(err));
+    });
+});
 router.get("/getPatientDetails", authenticateUser, (req, res) => {
   console.log(req.query.ID);
   getPatientDetails(req.user.org, req.user.username, req.query.ID)

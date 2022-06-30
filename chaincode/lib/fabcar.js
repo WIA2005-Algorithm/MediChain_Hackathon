@@ -542,6 +542,45 @@ class FabCar extends Contract {
 
     return JSON.stringify(returnedData);
   }
-}
 
+  async getPatientDataStatsTimeLine(ctx, fromDayRange, toDayRange, time) {
+    const data = JSON.parse(await this.getAllPatients(ctx));
+    const returnedData = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    data.forEach((patient) => {
+      patient.checkIn.forEach((t) => {
+        if (
+          parseInt(t) >= parseInt(fromDayRange) &&
+          parseInt(t) <= parseInt(toDayRange)
+        ) {
+          console.log("TRUEEEELOL");
+          const hour = new Date(parseInt(t)).getHours();
+          console.log(hour);
+          if (time === "morning") returnedData[0][hour - 7]++;
+          else {
+            if (hour >= 19 && hour <= 23) returnedData[0][hour - 19]++;
+            else returnedData[0][hour + 5]++;
+          }
+          console.log(returnedData);
+        }
+      });
+      patient.checkOut.forEach((t) => {
+        if (
+          parseInt(t) >= parseInt(fromDayRange) &&
+          parseInt(t) <= parseInt(toDayRange)
+        ) {
+          const hour = new Date(parseInt(t)).getHours();
+          if (time === "morning") returnedData[1][hour - 7]++;
+          else if (hour >= 19 && hour <= 23) returnedData[1][hour - 19]++;
+          else returnedData[1][hour + 5]++;
+        }
+      });
+
+      console.log(returnedData);
+    });
+    return JSON.stringify(returnedData);
+  }
+}
 module.exports = FabCar;

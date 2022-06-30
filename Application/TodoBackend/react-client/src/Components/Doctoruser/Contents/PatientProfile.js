@@ -103,7 +103,7 @@ function GetDialog({ isOpen, setDialog, patient, doctor, nav, broadcastAlert }) 
           `Please note that patient with ID : ${patient.details.passport} has been successfully discharged from your side (doctor's side)`
         )
       ]);
-      nav("../");
+      nav("/doctor/my_patients");
       setDialog();
     } catch (error) {
       broadcastAlert((prev) => [

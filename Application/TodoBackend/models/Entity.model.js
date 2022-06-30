@@ -47,5 +47,3 @@ EntityType.methods.compareAlternate = function (EAlternate) {
 };
 
 export const HospitalEntity = mongoose.model("HospitalEntity", EntityType);
-export const getHashedUserID = async (userID) =>
-  await bcrypt.hash(userID, SALT_WORK_FACTOR);

@@ -182,7 +182,7 @@ router.post("/login", (req, res) => {
             "Successfully Logged In [SuperAdmin]",
             "success"
           );
-          return res.status(200).json(session);
+          return res.status(200).json({ isOnBehalf: -1, org: null, session });
         })
         .catch(() => res.status(500));
     });

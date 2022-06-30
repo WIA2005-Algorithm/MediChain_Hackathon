@@ -120,11 +120,12 @@ export default function Login({ setLogin, pathname, message, loginType }) {
     const data = new FormData(event.currentTarget);
     login(data.get("username").trim(), data.get("password").trim(), loginType)
       .then((r) => {
-        console.log(r);
         if (r.data) {
           if (r.data.isOnBehalf === -1 || loginType !== "patient") {
-            setLogin(r.data);
-            navigate(pathname, { state: { org: r.data.org } });
+            console.log(r.data.org);
+            const { isOnBehalf, org, session } = r.data;
+            setLogin(session);
+            navigate(pathname, { state: { org } });
           } else {
             setOpenDialog(true);
             r.data.password = data.get("password").trim();
