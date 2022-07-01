@@ -390,7 +390,6 @@ router.get("/getPatientCheckInCheckOutStats", authenticateUser, (req, res) => {
       res.status(err.status).json(new response.errorResponse(err));
     });
 });
-getPatientDataStatsTimeLine;
 router.get("/getPatientDataStatsTimeLine", authenticateUser, (req, res) => {
   getPatientDataStatsTimeLine(
     req.user.org,
@@ -494,8 +493,7 @@ router.post("/denyExternalDoctorRequest", authenticateUser, (req, res) => {
       Status: "Not Active",
       CommentToAccessOrDeny:
         "Your request to access the external patient data was denied by the admin with a reason mentioned below",
-      Note: note,
-      Data: null
+      Note: note
     }
   )
     .exec()

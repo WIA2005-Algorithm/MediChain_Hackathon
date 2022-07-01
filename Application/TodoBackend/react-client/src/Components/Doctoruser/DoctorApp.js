@@ -5,6 +5,7 @@ import { getDoctorInfo } from "../../APIs/doctor/doctor.api";
 import { getAlertValues } from "../StyledComponents";
 import ActivityLogs from "../Superuser/activity_logs";
 import DoctorDashBoard from "./Contents/DoctorDashBoard";
+import ExternalPatient from "./Contents/ExternalPatientRecord";
 import PatientProfile from "./Contents/PatientProfile";
 import AppHeader from "./DoctorAppBar";
 
@@ -93,6 +94,10 @@ export default function DoctorApp({
                 }
               />
 
+              <Route
+                path="/external_patients"
+                element={<ExternalPatient broadcastAlert={broadcastAlert} />}
+              />
               <Route path="/activity" element={<ActivityLogs />} />
 
               <Route path="/" element={<Navigate to="/my_patients" replace />} />

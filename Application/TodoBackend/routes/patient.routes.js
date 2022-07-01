@@ -67,18 +67,15 @@ router.post("/acceptRequestToFromDoctors", authenticateUser, (req, res) => {
         Data: JSON.stringify(req.body.data)
       });
     })
-    .then(() => {
-      return RequestModel.findOne({ RID: `${FromOrg}#doctor#${FromDoc}` });
-    })
-    .then(async (R) => {
-      console.log("LOLOLOLOLOLOLOL");
+    .then(async () => {
       return RequestModel.findOneAndUpdate(
-        { RID: R.RID },
+        { RID: `${FromOrg}#doctor#${FromDoc}` },
         {
           Status: "Accepted",
           CommentToAccessOrDeny:
             "All the stages of requests have been fulfilled and approved by external hospital. Please click the link to open the record",
-          Note: "Open the record to access"
+          Note: "The patient along with the associated doctors are ready to share the records. Please click to open the record",
+          Data: JSON.stringify(req.body.data)
         }
       );
     })
@@ -142,8 +139,7 @@ router.post("/denyRequestToFromDoctors", authenticateUser, (req, res) => {
           CommentToAccessOrDeny:
             "Your request to access the external patient data was denied by the patient themselves. Note this was the last stage of request acceptance",
           Note: note,
-          EMRRequested: "null",
-          Data: null
+          EMRRequested: "null"
         }
       );
     })

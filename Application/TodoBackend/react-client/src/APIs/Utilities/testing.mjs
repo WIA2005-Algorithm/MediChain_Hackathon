@@ -35,6 +35,38 @@ const payloads = [
       other: ""
     }
   },
+  {
+    loginDetails: {
+      org: "Univeristy of Malaya Medical Center - UMMC",
+      ID: "QDOC2UMMC",
+      password: "Kamal@2001",
+      TYPE: "doctor"
+    },
+    personalDetails: {
+      firstName: "Stephen",
+      middleName: "Steve",
+      lastName: "Peterson",
+      email: "steve200120011@gmail.com",
+      DOB: new Date(1989, 6, 23),
+      gender: "Male",
+      maritalStatus: "Married",
+      department: "Psychology",
+      passport: "QDOCUMMC"
+    },
+    address: {
+      street1: "7 Bloka1 Pusat Dagang Setia Jaya Jln Lama",
+      street2: "Pusat Dagang Setia Jaya Petaling Jaya",
+      postcode: "47300",
+      country: "Malaysia",
+      state: "Selangor",
+      city: "Petaling Jaya"
+    },
+    contactDetails: {
+      mobile: "+60378771724",
+      whatsapp: "+60378771724",
+      other: ""
+    }
+  },
   // PATIENTS
   {
     loginDetails: {
@@ -85,6 +117,38 @@ const payloads = [
       gender: "Male",
       maritalStatus: "Married",
       department: "Neurology",
+      passport: "QDOCPPUM"
+    },
+    address: {
+      street1: "7 Bloka1 Pusat Dagang Setia Jaya Jln Lama",
+      street2: "Pusat Dagang Setia Jaya Petaling Jaya",
+      postcode: "47300",
+      country: "Malaysia",
+      state: "Selangor",
+      city: "Petaling Jaya"
+    },
+    contactDetails: {
+      mobile: "+60378771724",
+      whatsapp: "+60378771724",
+      other: ""
+    }
+  },
+  {
+    loginDetails: {
+      org: "Perpeskuatuan - PPUM",
+      ID: "QDOCPPUM",
+      password: "Kamal@2001",
+      TYPE: "doctor"
+    },
+    personalDetails: {
+      firstName: "Jeffrey",
+      middleName: "Harrison",
+      lastName: "Rollins",
+      email: "jeff200120011@gmail.com",
+      DOB: new Date(1990, 6, 23),
+      gender: "Male",
+      maritalStatus: "Married",
+      department: "Ophthalmology",
       passport: "QDOCPPUM"
     },
     address: {

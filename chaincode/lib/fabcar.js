@@ -140,15 +140,13 @@ class FabCar extends Contract {
     let isTotalDischarge = true;
 
     patient.associatedDoctors[DOCID].dischargeOk = true;
-
-    Object.keys(patient.associatedDoctors).every((doc) => {
+    for (const doc of Object.keys(patient.associatedDoctors)) {
       const ele = patient.associatedDoctors[doc];
       if (ele.dischargeOk === null) {
         isTotalDischarge = false;
-        return false;
+        break;
       }
-      return true;
-    });
+    }
     if (isTotalDischarge) patient.active = "Waiting For Discharge";
     const temp = patient.associatedDoctors[DOCID];
     temp.active[1] = "Done";
@@ -179,14 +177,13 @@ class FabCar extends Contract {
       );
 
     let isTotalDischarge = true;
-    Object.keys(patient.associatedDoctors).every((doc) => {
+    for (const doc of Object.keys(patient.associatedDoctors)) {
       const ele = patient.associatedDoctors[doc];
       if (ele.dischargeOk === null) {
         isTotalDischarge = false;
-        return false;
+        break;
       }
-      return true;
-    });
+    }
     if (!isTotalDischarge)
       throw new Error(
         "Please make sure patient has no associated doctors currently reviewing them"
@@ -272,6 +269,43 @@ class FabCar extends Contract {
   async getPatientDetails(ctx, PID) {
     const [type, patient] = await this.getMemberType(ctx, PID);
     return patient.toString();
+  }
+
+  async getDataForExternal(ctx, PID, FromDOCID, UID) {
+    let [type, _] = await this.getMemberType(ctx, FromDOCID);
+    if (type !== "Doctor") throw new Error("Invalid Host Request...");
+    let patient = await ctx.stub.getState(PID);
+    patient = JSON.parse(patient.toString());
+    if (String(patient.secretSharingPair[FromDOCID]) !== String(UID))
+      throw new Error("Make sure the patient has accepted your request...");
+    console.log("CAME HERE BRUH");
+
+    const newAssociate = {};
+    for (const doc of Object.keys(patient.associatedDoctors)) {
+      const doctor = JSON.parse((await ctx.stub.getState(doc)).toString());
+      console.log("PID:-", PID);
+      console.log("FromDOCID:-", FromDOCID);
+      console.log("Sharing Pair", doctor.secretSharingPair);
+      console.log("Sharing Pair PID", doctor.secretSharingPair[PID]);
+      console.log(
+        "Sharing Pair PID FromDOCID UID",
+        doctor.secretSharingPair[PID][FromDOCID]
+      );
+      console.log("UID", UID);
+      console.log(String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID));
+      if (String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID)) {
+        newAssociate[doc] = {
+          name: `${doctor.details.firstName} ${doctor.details.middleName} ${doctor.details.lastName}`,
+          department: doctor.details.department,
+          assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
+          EMRID: -500,
+          email: doctor.details.email
+        };
+      }
+    }
+    patient.associatedDoctors = newAssociate;
+    console.log(patient);
+    return JSON.stringify(patient);
   }
 
   // TODO ::
@@ -544,41 +578,54 @@ class FabCar extends Contract {
   }
 
   async getPatientDataStatsTimeLine(ctx, fromDayRange, toDayRange, time) {
+    console.log("Range Recieved :-", [fromDayRange, toDayRange]);
+    console.log("Time Recieved :-", time);
     const data = JSON.parse(await this.getAllPatients(ctx));
-    const returnedData = [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    ];
+    const returnedData = [];
     data.forEach((patient) => {
+      console.log("Entered CheckIn");
+      const checkInArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       patient.checkIn.forEach((t) => {
-        if (
-          parseInt(t) >= parseInt(fromDayRange) &&
-          parseInt(t) <= parseInt(toDayRange)
-        ) {
-          console.log("TRUEEEELOL");
-          const hour = new Date(parseInt(t)).getHours();
-          console.log(hour);
-          if (time === "morning") returnedData[0][hour - 7]++;
+        const timeT = new Date(t);
+        timeT.setHours(timeT.getHours() + 8);
+        if (t >= parseInt(fromDayRange) && t <= parseInt(toDayRange)) {
+          console.log(
+            "For Time =",
+            t,
+            "It is in the range with hour = ",
+            timeT.getHours()
+          );
+          const hour = timeT.getHours();
+          console.log("Time Hour =", hour);
+          if (time === "morning") checkInArray[hour] += 1;
           else {
-            if (hour >= 19 && hour <= 23) returnedData[0][hour - 19]++;
-            else returnedData[0][hour + 5]++;
+            if (hour >= 13 && hour <= 23) checkInArray[hour - 11] += 1;
+            else checkInArray[hour] += 1;
           }
-          console.log(returnedData);
         }
+        console.log(checkInArray);
       });
+      returnedData.push(checkInArray);
+      console.log("TOTOL CHECKIN DATA -", returnedData);
+      const checkOutArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       patient.checkOut.forEach((t) => {
-        if (
-          parseInt(t) >= parseInt(fromDayRange) &&
-          parseInt(t) <= parseInt(toDayRange)
-        ) {
-          const hour = new Date(parseInt(t)).getHours();
-          if (time === "morning") returnedData[1][hour - 7]++;
-          else if (hour >= 19 && hour <= 23) returnedData[1][hour - 19]++;
-          else returnedData[1][hour + 5]++;
+        const timeT = new Date(t);
+        timeT.setHours(timeT.getHours() + 8);
+        if (t >= parseInt(fromDayRange) && t <= parseInt(toDayRange)) {
+          const hour = timeT.getHours();
+          console.log(
+            "For Time =",
+            t,
+            "It is in the range with hour = ",
+            timeT.getHours()
+          );
+          if (time === "morning") checkOutArray[hour - 7]++;
+          else if (hour >= 19 && hour <= 23) checkOutArray[hour - 19]++;
+          else checkOutArray[hour + 5]++;
         }
       });
-
-      console.log(returnedData);
+      returnedData.push(checkOutArray);
+      console.log("TOTOL CHECKOUT DATA -", returnedData);
     });
     return JSON.stringify(returnedData);
   }

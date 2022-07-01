@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   acceptRequestToFromAdmin,
   dischargePatientForDoctor,
+  getDataForExternal,
   getDotorDetails,
   getPatientDetails
 } from "../controllers/doctor.controller.js";
@@ -88,7 +89,6 @@ router.post("/requestExternalPatient", authenticateUser, (req, res) => {
     .exec()
     .then(async (R) => {
       if (R && R.Status === "Active") {
-        console.log("HELLOO");
         return res
           .status(500)
           .json(
@@ -100,7 +100,7 @@ router.post("/requestExternalPatient", authenticateUser, (req, res) => {
           RID: `${docOrg}#doctor#${docID}`,
           Status: "Active",
           CommentToAccessOrDeny: `The request to get access to external patient record is pending. Details:- Hospital: ${PTORG}, Patient: ${PTID}`,
-          Data: JSON.stringify(Data)
+          Data: null
         })
           .then(() => {
             return Organizations.findOne({ Name: PTORG }).exec();
@@ -150,8 +150,6 @@ router.post("/acceptRequestToFromAdmin", authenticateUser, (req, res) => {
   const doctor = req.body.doctor;
   const notifObj = req.body.notifObj;
   const UID = String(JSON.parse(notifObj.Data).UID);
-  console.log(UID);
-  console.log(" HERE 1");
   acceptRequestToFromAdmin(
     req.user.org,
     req.user.username,
@@ -205,8 +203,6 @@ router.post("/acceptRequestToFromAdmin", authenticateUser, (req, res) => {
     });
 });
 
-// EMRREQUESTED - 1
-// So When EMRRequested === EMRAccepted then forward....
 router.post("/denyRequestToFromAdmin", authenticateUser, (req, res) => {
   const { PatientOrg, FromDoc, FromOrg } = req.body.data;
   const note = req.body.note;
@@ -252,8 +248,7 @@ router.post("/denyRequestToFromAdmin", authenticateUser, (req, res) => {
               CommentToAccessOrDeny:
                 "Your request to get access to external patient record was declined by all the doctors associated to the patient",
               Note: note,
-              EMRRequested: JSON.stringify(requestedD),
-              Data: null
+              EMRRequested: JSON.stringify(requestedD)
             }
           : { EMRRequested: JSON.stringify(requestedD) }
       );
@@ -289,6 +284,17 @@ router.post("/denyRequestToFromAdmin", authenticateUser, (req, res) => {
       return res.status(500).json("An unexpected error occured");
     });
 });
-// TODO
-router.post("/uploadPatientFile", authenticateUser, (req, res) => {});
+
+router.post("/getDataForExternal", authenticateUser, (req, res) => {
+  const { PatientID, PatientOrg, UID } = req.body.data;
+  console.log("RECIEVED : ", PatientID, PatientOrg, UID);
+  getDataForExternal(req.user.org, req.user.username, PatientID, UID)
+    .then((data) => {
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.sendStatus(500);
+    });
+});
 export default router;

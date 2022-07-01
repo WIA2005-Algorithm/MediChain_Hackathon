@@ -44,3 +44,7 @@ export const denyRequestToFromAdmin = (data, note, others, notifObj) => {
   console.log("HELLO1---", data, note, others, notifObj);
   return axios.post("/doctor/denyRequestToFromAdmin", { data, note, others, notifObj });
 };
+
+export const getDataForExternal = (data) => {
+  return axios.post("/doctor/getDataForExternal", { data });
+};

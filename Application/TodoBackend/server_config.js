@@ -129,7 +129,6 @@ app.get("/api/getNotificationData", authenticateUser, (req, res) => {
     .sort({ createdAt: -1 })
     .exec()
     .then((data) => {
-      console.log("HELLOOOOO----HELLOOOO", data);
       return res.status(200).json(data);
     })
     .catch((err) => {
@@ -139,13 +138,11 @@ app.get("/api/getNotificationData", authenticateUser, (req, res) => {
 });
 
 app.get("/api/getRequestData", authenticateUser, (req, res) => {
-  console.log("HELLOOO-------HELLOOO");
   const ToString = `${req.user.org}#${req.user.role}#${req.user.username}`;
   RequestModel.find({ RID: ToString })
     .sort({ createdAt: -1 })
     .exec()
     .then((data) => {
-      console.log("HELLOOOOO----HELLOOOO", data);
       return res.status(200).json(data);
     })
     .catch((err) => {

@@ -22,7 +22,6 @@ export async function addMember(orgName, userID, details, transactionType) {
       JSON.stringify(details.address),
       JSON.stringify(details.contactDetails)
     );
-    console.log(result.toString());
   } catch (e) {
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
@@ -112,6 +111,7 @@ export async function patientCheckInCheckOutStats(orgName, issuerID, fromRange, 
     console.log(result.toString());
     return JSON.parse(result.toString());
   } catch (e) {
+    console.log(e);
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
         ? e.toString().split("Error:")[2]
@@ -163,8 +163,6 @@ export async function getPatientDataStatsTimeLine(
 ) {
   const { contract, gateway } = await getContract(orgName, issuerID);
   try {
-    if (toRange < fromRange)
-      throw errors.contract_error.withDetails("The range input provided is wrong");
     const result = await contract.evaluateTransaction(
       "getPatientDataStatsTimeLine",
       fromRange,

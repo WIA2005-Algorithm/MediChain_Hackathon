@@ -99,9 +99,7 @@ const getDesignTokens = (mode) => ({
 });
 
 const GoToLogin = ({ logged, user, logout, type = "superuser" }) => {
-  console.log(1, user);
   const { pathname } = useLocation();
-  console.log(2, pathname);
   const wasLogged = logged;
   useEffect(() => {
     if (user && user.role !== type) logout();

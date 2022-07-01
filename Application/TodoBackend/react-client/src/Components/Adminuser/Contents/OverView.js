@@ -518,10 +518,21 @@ const optionsForTimeAdmitted = {
 };
 
 const morningLabels = [
-  "7 am",
-  "8 am",
-  "9 am",
-  "10 am",
+  "12 am",
+  "1 am",
+  "2 am",
+  "3 am",
+  "4 am",
+  "5 pm",
+  "6 pm",
+  "7 pm",
+  "8 pm",
+  "9 pm",
+  "10 pm",
+  "11 pm",
+  "12 pm"
+];
+const nightLabels = [
   "11 am",
   "12 pm",
   "1 pm",
@@ -530,22 +541,11 @@ const morningLabels = [
   "4 pm",
   "5 pm",
   "6 pm",
-  "7 pm"
-];
-const nightLabels = [
   "7 pm",
   "8 pm",
   "9 pm",
   "10 pm",
-  "11 pm",
-  "12 am",
-  "1 am",
-  "2 am",
-  "3 am",
-  "4 am",
-  "5 am",
-  "6 am",
-  "7 am"
+  "11 pm"
 ];
 
 const getDataForLineGraph = (data1 = [], data2 = [], morning = true) => {
@@ -581,27 +581,28 @@ function getRangeUsingStatsDayForTimeLine(Day, time) {
   const today = new Date();
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
   const dayBeforeYesterday = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+  let to;
   switch (Day) {
     case 0:
-      today.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
-      let to = new Date();
-      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      today.setHours(time === "morning" ? 0 : 11, 0, 0, 0);
+      to = new Date();
+      to.setHours(time === "morning" ? 12 : 23, 0, 0, 0);
       console.log(today, to);
       return [today.getTime(), to.getTime()];
     case 1:
-      yesterday.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
-      to = new Date();
-      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      yesterday.setHours(time === "morning" ? 0 : 11, 0, 0, 0);
+      to = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      to.setHours(time === "morning" ? 12 : 23, 0, 0, 0);
       return [yesterday.getTime(), to.getTime()];
     case 2:
-      dayBeforeYesterday.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
-      to = new Date();
-      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      dayBeforeYesterday.setHours(time === "morning" ? 0 : 11, 0, 0, 0);
+      to = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+      to.setHours(time === "morning" ? 12 : 23, 0, 0, 0);
       return [dayBeforeYesterday.getTime(), to.getTime()];
     default:
-      today.setHours(time === "morning" ? 7 : 19, 0, 0, 0);
+      today.setHours(time === "morning" ? 0 : 11, 0, 0, 0);
       to = new Date();
-      to.setHours(time === "morning" ? 19 : 7, 0, 0, 0);
+      to.setHours(time === "morning" ? 12 : 23, 0, 0, 0);
       console.log(today, to);
       return [today.getTime(), to.getTime()];
   }
@@ -610,7 +611,7 @@ function getRangeUsingStatsDayForTimeLine(Day, time) {
 function TimeLineGraph({ broadcastAlert }) {
   const [statsDate, setstatsDate] = useState(0);
   const [statsDay, setstatsDay] = useState(0);
-  const [statsData, setStatsData] = useState([]);
+  const [statsData, setStatsData] = useState([[], []]);
   const handleChangeDate = (e) => {
     setstatsDate(e.target.value);
   };
@@ -621,9 +622,10 @@ function TimeLineGraph({ broadcastAlert }) {
 
   useEffect(() => {
     const handleCall = async () => {
+      console.log("CALLED ME");
       const time = statsDay === 0 ? "morning" : "night";
       const range = getRangeUsingStatsDayForTimeLine(statsDate, time);
-      console.log(range);
+      console.log(range, time);
       try {
         const results = await getPatientDataStatsTimeLine(range[0], range[1], time);
         console.log(results.data);
@@ -700,13 +702,15 @@ function TimeLineGraph({ broadcastAlert }) {
               // TODO: HANDLE ON CHANGE
               onChange={handleChangeDay}
               label="Date">
-              <MenuItem value={0}>Morning [7am-7pm]</MenuItem>
-              <MenuItem value={1}>Night [7pm-7am]</MenuItem>
+              <MenuItem value={0}>Morning-Afternoon [12am-12pm]</MenuItem>
+              <MenuItem value={1}>Afternoon-Night [11am-11pm]</MenuItem>
             </Select>
           </FormControl>
         </Box>
       </Box>
-      <TimeAdmittedPatients whatTimeOfDayMorning={statsDay === 0} data={statsData} />
+      {statsData && (
+        <TimeAdmittedPatients whatTimeOfDayMorning={statsDay === 0} data={statsData} />
+      )}
     </SectionContainer>
   );
 }

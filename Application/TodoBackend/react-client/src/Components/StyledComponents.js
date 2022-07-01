@@ -442,7 +442,7 @@ const AlertNotification = ({ item, setRefresh, onClickProps, handleClose }) => {
                   sx={{ color: "primary.main", display: "inline-block" }}
                   component="div">
                   <b>
-                    <u>Read More</u>
+                    <u>Click to Open More</u>
                   </b>
                 </Box>
               ) : (
@@ -632,13 +632,14 @@ export function AlertNotifications({ anchorEl, handleClose, onClickProps }) {
   );
 }
 
-const RequestNotification = ({ item, handleClose }) => {
+const RequestNotification = ({ item }) => {
+  const nav = useNavigate();
   const handleRequestClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (item.Status === "Accepted") nav("/doctor/external_patients", { state: item });
   };
-  console.log(item.Data);
-  const requestExists = item.Data !== "null";
+  const dataExists = item.Data !== "null";
   return (
     <div>
       <MenuItem
@@ -662,24 +663,25 @@ const RequestNotification = ({ item, handleClose }) => {
               )}
               <Typography component="div" sx={{ fontSize: "14px" }}>
                 {item.Status === "Active" ? (
-                  item.CommentToAccessOrDeny
-                ) : (
                   <b>{item.CommentToAccessOrDeny}</b>
+                ) : (
+                  item.CommentToAccessOrDeny
                 )}{" "}
-                {requestExists ? (
+                {item.Status === "Accepted" ? (
                   <Box
                     sx={{ color: "primary.main", display: "inline-block" }}
                     component="div">
                     <b>
-                      <u>Read More</u>
+                      <u>Click to Open More</u>
                     </b>
                   </Box>
                 ) : (
                   ""
                 )}
-                {item.Status === "Active" && (
+                {item.Status !== "Active" && (
                   <Typography sx={{ color: "text.secondary", fontSize: "13px", mt: 0.5 }}>
-                    {requestExists ? "Acceptance" : "Denial"} Note : {item.Note}
+                    {item.Status === "Accepted" ? "Acceptance" : "Denial"} Note :{" "}
+                    {item.Note}
                   </Typography>
                 )}
                 <Typography sx={{ color: "text.secondary", fontSize: "13px", mt: 0.5 }}>
@@ -813,9 +815,7 @@ export function RequestNotifications({ anchorEl, handleClose }) {
           <CircularProgress size={"30px"} />
         </Container>
       ) : data.length !== 0 ? (
-        data.map((item) => (
-          <RequestNotification key={item._id} item={item} handleClose={handleClose} />
-        ))
+        data.map((item) => <RequestNotification key={item._id} item={item} />)
       ) : (
         <MenuItem>
           <Box

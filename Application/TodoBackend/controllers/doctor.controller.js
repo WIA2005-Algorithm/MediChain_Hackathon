@@ -50,7 +50,6 @@ export async function dischargePatientForDoctor(orgName, issuerID, PTID, note) {
 
 export async function acceptRequestToFromAdmin(orgName, issuerID, PTID, UID, FromDoc) {
   const { contract, gateway } = await getContract(orgName, issuerID);
-  console.log(" HERE 2");
   try {
     await contract.submitTransaction(
       "acceptRequestToFromAdmin",
@@ -59,10 +58,8 @@ export async function acceptRequestToFromAdmin(orgName, issuerID, PTID, UID, Fro
       UID,
       FromDoc
     );
-    console.log(" HERE 3");
   } catch (e) {
     console.log(e);
-    console.log(" HERE 2.1");
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
         ? e.toString().split("Error:")[2]
@@ -70,5 +67,24 @@ export async function acceptRequestToFromAdmin(orgName, issuerID, PTID, UID, Fro
     );
   } finally {
     gateway.disconnect();
+  }
+}
+
+export async function getDataForExternal(orgName, issuerID, PTID, UID) {
+  const { contract, gateway } = await getContract(orgName, issuerID);
+  try {
+    const results = await contract.evaluateTransaction(
+      "getDataForExternal",
+      PTID,
+      issuerID,
+      UID
+    );
+    return JSON.parse(Buffer.from(results, "base64").toString("ascii"));
+  } catch (e) {
+    throw errors.contract_error.withDetails(
+      e.toString().includes("No valid responses from any peers")
+        ? e.toString().split("Error:")[2]
+        : "An unexpected error"
+    );
   }
 }

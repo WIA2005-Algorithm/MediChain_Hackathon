@@ -1,7 +1,7 @@
 /home/kamal/MediChain/ApplicationNetwork /home/kamal/MediChain/Application
 [0;34mStopping network[0m
 Removing network Medi_Chain
-error while removing network: network Medi_Chain id 4086ba361bc1db29b7e26af1e01264c9e5ab726a85724041ef9e6b6ef5e1a356 has active endpoints
+error while removing network: network Medi_Chain id 605ff6a80298b646983abf636fef440e42b0ca78de380cd9d7b09a46ce57c770 has active endpoints
 Removing network fabric_test
 Network fabric_test not found.
 Removing volume docker_peer0.org3.example.com
@@ -9,11 +9,11 @@ Volume docker_peer0.org3.example.com not found.
 [0;34mNo containers available for deletion[0m
 [0;34mNo images available for deletion[0m
 Deleted Volumes:
-docker_peer0.ppum.um.edu.my
 docker_peer0.ummc.um.edu.my
+docker_peer0.ppum.um.edu.my
 docker_orderer.um.edu.my
 
-Total reclaimed space: 256.8MB
+Total reclaimed space: 256.9MB
 Total reclaimed space: 0B
 [0;34mCreating channel 'mychannel'.[0m
 [0;34mIf network is not up, starting nodes with CLI timeout of '5' tries and CLI delay of '3' seconds and using database 'couchdb with crypto from 'Certificate Authorities'[0m
@@ -27,273 +27,275 @@ Total reclaimed space: 0B
 Creating ca_ppum ... 
 Creating ca_ummc ... 
 Creating ca_orderer ... 
-Creating ca_ppum    ... done
-Creating ca_ummc    ... done
 Creating ca_orderer ... done
+Creating ca_ummc    ... done
+Creating ca_ppum    ... done
 [0;34mCreating UMMC Identities[0m
 [0;34mEnrolling the CA admin[0m
 + fabric-ca-client enroll -u https://Admin:Kamal@2001@localhost:7054 --caname ca-ummc --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:02 [INFO] Created a default configuration file at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:02 [INFO] TLS Enabled
-2022/06/30 14:59:02 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:02 [INFO] encoded CSR
-2022/06/30 14:59:02 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:02 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
-2022/06/30 14:59:02 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:02 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:41 [INFO] Created a default configuration file at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:41 [INFO] encoded CSR
+2022/07/02 02:33:41 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:41 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
+2022/07/02 02:33:41 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:41 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mRegistering peer0[0m
 + fabric-ca-client register --caname ca-ummc --id.name peer0 --id.secret peer0pw --id.type peer --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:02 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:02 [INFO] TLS Enabled
-2022/06/30 14:59:02 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] TLS Enabled
 Password: peer0pw
 [0;34mRegistering user[0m
 + fabric-ca-client register --caname ca-ummc --id.name user1 --id.secret user1pw --id.type client --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:02 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:02 [INFO] TLS Enabled
-2022/06/30 14:59:02 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] TLS Enabled
 Password: user1pw
 [0;34mRegistering the org admin[0m
 + fabric-ca-client register --caname ca-ummc --id.name Adminadmin --id.secret Kamal@2001adminpw --id.type admin --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:02 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:02 [INFO] TLS Enabled
-2022/06/30 14:59:02 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] TLS Enabled
 Password: Kamal@2001adminpw
 [0;34mGenerating the peer0 msp[0m
 + fabric-ca-client enroll -u https://peer0:peer0pw@localhost:7054 --caname ca-ummc -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp --csr.hosts peer0.ummc.um.edu.my --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:02 [INFO] TLS Enabled
-2022/06/30 14:59:02 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:02 [INFO] encoded CSR
-2022/06/30 14:59:02 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:02 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
-2022/06/30 14:59:02 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:02 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:41 [INFO] encoded CSR
+2022/07/02 02:33:41 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:41 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
+2022/07/02 02:33:41 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:41 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mGenerating the peer0-tls certificates[0m
 + fabric-ca-client enroll -u https://peer0:peer0pw@localhost:7054 --caname ca-ummc -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls --enrollment.profile tls --csr.hosts peer0.ummc.um.edu.my --csr.hosts localhost --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:02 [INFO] TLS Enabled
-2022/06/30 14:59:02 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:02 [INFO] encoded CSR
-2022/06/30 14:59:03 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/signcerts/cert.pem
-2022/06/30 14:59:03 [INFO] Stored TLS root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/tlscacerts/tls-localhost-7054-ca-ummc.pem
-2022/06/30 14:59:03 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/IssuerPublicKey
-2022/06/30 14:59:03 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/IssuerRevocationPublicKey
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:41 [INFO] encoded CSR
+2022/07/02 02:33:41 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/signcerts/cert.pem
+2022/07/02 02:33:41 [INFO] Stored TLS root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/tlscacerts/tls-localhost-7054-ca-ummc.pem
+2022/07/02 02:33:41 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/IssuerPublicKey
+2022/07/02 02:33:41 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/IssuerRevocationPublicKey
 [0;34mGenerating the user msp[0m
 + fabric-ca-client enroll -u https://user1:user1pw@localhost:7054 --caname ca-ummc -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:03 [INFO] TLS Enabled
-2022/06/30 14:59:03 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:03 [INFO] encoded CSR
-2022/06/30 14:59:03 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:03 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
-2022/06/30 14:59:03 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:03 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:41 [INFO] encoded CSR
+2022/07/02 02:33:41 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:41 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
+2022/07/02 02:33:41 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:41 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/User1@ummc.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mGenerating the org admin msp[0m
 + fabric-ca-client enroll -u https://Adminadmin:Kamal@2001adminpw@localhost:7054 --caname ca-ummc -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ummc/tls-cert.pem
-2022/06/30 14:59:03 [INFO] TLS Enabled
-2022/06/30 14:59:03 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:03 [INFO] encoded CSR
-2022/06/30 14:59:03 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:03 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
-2022/06/30 14:59:03 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:03 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:41 [INFO] TLS Enabled
+2022/07/02 02:33:41 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:41 [INFO] encoded CSR
+2022/07/02 02:33:41 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:41 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/cacerts/localhost-7054-ca-ummc.pem
+2022/07/02 02:33:41 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:41 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/users/Admin@ummc.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mCreating PPUM Identities[0m
 [0;34mEnrolling the CA admin[0m
 + fabric-ca-client enroll -u https://BAdmin:Kamal@2001@localhost:8054 --caname ca-ppum --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:03 [INFO] Created a default configuration file at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:03 [INFO] TLS Enabled
-2022/06/30 14:59:03 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:03 [INFO] encoded CSR
-2022/06/30 14:59:03 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:03 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
-2022/06/30 14:59:03 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:03 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:42 [INFO] Created a default configuration file at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:42 [INFO] encoded CSR
+2022/07/02 02:33:42 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:42 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
+2022/07/02 02:33:42 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:42 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mRegistering peer0[0m
 + fabric-ca-client register --caname ca-ppum --id.name peer0 --id.secret peer0pw --id.type peer --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:03 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:03 [INFO] TLS Enabled
-2022/06/30 14:59:03 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] TLS Enabled
 Password: peer0pw
 [0;34mRegistering user[0m
 + fabric-ca-client register --caname ca-ppum --id.name user1 --id.secret user1pw --id.type client --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:03 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:03 [INFO] TLS Enabled
-2022/06/30 14:59:03 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] TLS Enabled
 Password: user1pw
 [0;34mRegistering the org admin[0m
 + fabric-ca-client register --caname ca-ppum --id.name BAdminadmin --id.secret Kamal@2001adminpw --id.type admin --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:03 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:03 [INFO] TLS Enabled
-2022/06/30 14:59:03 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] TLS Enabled
 Password: Kamal@2001adminpw
 [0;34mGenerating the peer0 msp[0m
 + fabric-ca-client enroll -u https://peer0:peer0pw@localhost:8054 --caname ca-ppum -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp --csr.hosts peer0.ppum.um.edu.my --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:04 [INFO] TLS Enabled
-2022/06/30 14:59:04 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:04 [INFO] encoded CSR
-2022/06/30 14:59:04 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:04 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
-2022/06/30 14:59:04 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:04 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:42 [INFO] encoded CSR
+2022/07/02 02:33:42 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:42 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
+2022/07/02 02:33:42 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:42 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mGenerating the peer0-tls certificates[0m
 + fabric-ca-client enroll -u https://peer0:peer0pw@localhost:8054 --caname ca-ppum -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls --enrollment.profile tls --csr.hosts peer0.ppum.um.edu.my --csr.hosts localhost --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:04 [INFO] TLS Enabled
-2022/06/30 14:59:04 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:04 [INFO] encoded CSR
-2022/06/30 14:59:04 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/signcerts/cert.pem
-2022/06/30 14:59:04 [INFO] Stored TLS root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/tlscacerts/tls-localhost-8054-ca-ppum.pem
-2022/06/30 14:59:04 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/IssuerPublicKey
-2022/06/30 14:59:04 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/IssuerRevocationPublicKey
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:42 [INFO] encoded CSR
+2022/07/02 02:33:42 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/signcerts/cert.pem
+2022/07/02 02:33:42 [INFO] Stored TLS root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/tlscacerts/tls-localhost-8054-ca-ppum.pem
+2022/07/02 02:33:42 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/IssuerPublicKey
+2022/07/02 02:33:42 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/IssuerRevocationPublicKey
 [0;34mGenerating the user msp[0m
 + fabric-ca-client enroll -u https://user1:user1pw@localhost:8054 --caname ca-ppum -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:04 [INFO] TLS Enabled
-2022/06/30 14:59:04 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:04 [INFO] encoded CSR
-2022/06/30 14:59:04 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:04 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
-2022/06/30 14:59:04 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:04 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:42 [INFO] encoded CSR
+2022/07/02 02:33:42 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:42 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
+2022/07/02 02:33:42 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:42 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/User1@ppum.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mGenerating the org admin msp[0m
 + fabric-ca-client enroll -u https://BAdminadmin:Kamal@2001adminpw@localhost:8054 --caname ca-ppum -M /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ppum/tls-cert.pem
-2022/06/30 14:59:04 [INFO] TLS Enabled
-2022/06/30 14:59:04 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:04 [INFO] encoded CSR
-2022/06/30 14:59:04 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:04 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
-2022/06/30 14:59:04 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:04 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:42 [INFO] encoded CSR
+2022/07/02 02:33:42 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:42 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/cacerts/localhost-8054-ca-ppum.pem
+2022/07/02 02:33:42 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:42 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/users/Admin@ppum.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mCreating Orderer Org Identities[0m
 [0;34mEnrolling the CA admin[0m
 + fabric-ca-client enroll -u https://admin:adminpw@localhost:9054 --caname ca-orderer --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ordererOrg/tls-cert.pem
-2022/06/30 14:59:04 [INFO] Created a default configuration file at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:04 [INFO] TLS Enabled
-2022/06/30 14:59:04 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:04 [INFO] encoded CSR
-2022/06/30 14:59:04 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:04 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/cacerts/localhost-9054-ca-orderer.pem
-2022/06/30 14:59:04 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:04 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:42 [INFO] Created a default configuration file at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:42 [INFO] encoded CSR
+2022/07/02 02:33:42 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:42 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/cacerts/localhost-9054-ca-orderer.pem
+2022/07/02 02:33:42 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:42 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mRegistering orderer[0m
 + fabric-ca-client register --caname ca-orderer --id.name orderer --id.secret ordererpw --id.type orderer --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ordererOrg/tls-cert.pem
-2022/06/30 14:59:05 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:05 [INFO] TLS Enabled
-2022/06/30 14:59:05 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:42 [INFO] TLS Enabled
+2022/07/02 02:33:42 [INFO] TLS Enabled
 Password: ordererpw
 [0;34mRegistering the orderer admin[0m
 + fabric-ca-client register --caname ca-orderer --id.name ordererAdmin --id.secret ordererAdminpw --id.type admin --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ordererOrg/tls-cert.pem
-2022/06/30 14:59:05 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/fabric-ca-client-config.yaml
-2022/06/30 14:59:05 [INFO] TLS Enabled
-2022/06/30 14:59:05 [INFO] TLS Enabled
+2022/07/02 02:33:43 [INFO] Configuration file location: /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/fabric-ca-client-config.yaml
+2022/07/02 02:33:43 [INFO] TLS Enabled
+2022/07/02 02:33:43 [INFO] TLS Enabled
 Password: ordererAdminpw
 [0;34mGenerating the orderer msp[0m
 + fabric-ca-client enroll -u https://orderer:ordererpw@localhost:9054 --caname ca-orderer -M /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp --csr.hosts orderer.um.edu.my --csr.hosts localhost --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ordererOrg/tls-cert.pem
-2022/06/30 14:59:05 [INFO] TLS Enabled
-2022/06/30 14:59:05 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:05 [INFO] encoded CSR
-2022/06/30 14:59:05 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:05 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/cacerts/localhost-9054-ca-orderer.pem
-2022/06/30 14:59:05 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:05 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:43 [INFO] TLS Enabled
+2022/07/02 02:33:43 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:43 [INFO] encoded CSR
+2022/07/02 02:33:43 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:43 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/cacerts/localhost-9054-ca-orderer.pem
+2022/07/02 02:33:43 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:43 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mGenerating the orderer-tls certificates[0m
 + fabric-ca-client enroll -u https://orderer:ordererpw@localhost:9054 --caname ca-orderer -M /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls --enrollment.profile tls --csr.hosts orderer.um.edu.my --csr.hosts localhost --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ordererOrg/tls-cert.pem
-2022/06/30 14:59:05 [INFO] TLS Enabled
-2022/06/30 14:59:05 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:05 [INFO] encoded CSR
-2022/06/30 14:59:05 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/signcerts/cert.pem
-2022/06/30 14:59:05 [INFO] Stored TLS root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/tlscacerts/tls-localhost-9054-ca-orderer.pem
-2022/06/30 14:59:05 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/IssuerPublicKey
-2022/06/30 14:59:05 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/IssuerRevocationPublicKey
+2022/07/02 02:33:43 [INFO] TLS Enabled
+2022/07/02 02:33:43 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:43 [INFO] encoded CSR
+2022/07/02 02:33:43 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/signcerts/cert.pem
+2022/07/02 02:33:43 [INFO] Stored TLS root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/tlscacerts/tls-localhost-9054-ca-orderer.pem
+2022/07/02 02:33:43 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/IssuerPublicKey
+2022/07/02 02:33:43 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/tls/IssuerRevocationPublicKey
 [0;34mGenerating the admin msp[0m
 + fabric-ca-client enroll -u https://ordererAdmin:ordererAdminpw@localhost:9054 --caname ca-orderer -M /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp --tls.certfiles /home/kamal/MediChain/ApplicationNetwork/organizations/fabric-ca/ordererOrg/tls-cert.pem
-2022/06/30 14:59:05 [INFO] TLS Enabled
-2022/06/30 14:59:05 [INFO] generating key: &{A:ecdsa S:256}
-2022/06/30 14:59:05 [INFO] encoded CSR
-2022/06/30 14:59:05 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/signcerts/cert.pem
-2022/06/30 14:59:05 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/cacerts/localhost-9054-ca-orderer.pem
-2022/06/30 14:59:05 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/IssuerPublicKey
-2022/06/30 14:59:05 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/IssuerRevocationPublicKey
+2022/07/02 02:33:43 [INFO] TLS Enabled
+2022/07/02 02:33:43 [INFO] generating key: &{A:ecdsa S:256}
+2022/07/02 02:33:43 [INFO] encoded CSR
+2022/07/02 02:33:43 [INFO] Stored client certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/signcerts/cert.pem
+2022/07/02 02:33:43 [INFO] Stored root CA certificate at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/cacerts/localhost-9054-ca-orderer.pem
+2022/07/02 02:33:43 [INFO] Stored Issuer public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/IssuerPublicKey
+2022/07/02 02:33:43 [INFO] Stored Issuer revocation public key at /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/users/Admin@um.edu.my/msp/IssuerRevocationPublicKey
 [0;34mGenerating CCP files for organisations[0m
 /home/kamal/MediChain/ApplicationNetwork/../bin/configtxgen
 [0;34mGenerating Orderer Genesis block[0m
 + configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
-[34m2022-06-30 14:59:05.840 +08 [common.tools.configtxgen] main -> INFO 001[0m Loading configuration
-[34m2022-06-30 14:59:05.860 +08 [common.tools.configtxgen.localconfig] completeInitialization -> INFO 002[0m orderer type: etcdraft
-[34m2022-06-30 14:59:05.860 +08 [common.tools.configtxgen.localconfig] completeInitialization -> INFO 003[0m Orderer.EtcdRaft.Options unset, setting to tick_interval:"500ms" election_tick:10 heartbeat_tick:1 max_inflight_blocks:5 snapshot_interval_size:16777216 
-[34m2022-06-30 14:59:05.860 +08 [common.tools.configtxgen.localconfig] Load -> INFO 004[0m Loaded configuration: /home/kamal/MediChain/ApplicationNetwork/configtx/configtx.yaml
-[34m2022-06-30 14:59:05.861 +08 [common.tools.configtxgen] doOutputBlock -> INFO 005[0m Generating genesis block
-[34m2022-06-30 14:59:05.862 +08 [common.tools.configtxgen] doOutputBlock -> INFO 006[0m Writing genesis block
+[34m2022-07-02 02:33:43.521 +08 [common.tools.configtxgen] main -> INFO 001[0m Loading configuration
+[34m2022-07-02 02:33:43.533 +08 [common.tools.configtxgen.localconfig] completeInitialization -> INFO 002[0m orderer type: etcdraft
+[34m2022-07-02 02:33:43.533 +08 [common.tools.configtxgen.localconfig] completeInitialization -> INFO 003[0m Orderer.EtcdRaft.Options unset, setting to tick_interval:"500ms" election_tick:10 heartbeat_tick:1 max_inflight_blocks:5 snapshot_interval_size:16777216 
+[34m2022-07-02 02:33:43.533 +08 [common.tools.configtxgen.localconfig] Load -> INFO 004[0m Loaded configuration: /home/kamal/MediChain/ApplicationNetwork/configtx/configtx.yaml
+[34m2022-07-02 02:33:43.534 +08 [common.tools.configtxgen] doOutputBlock -> INFO 005[0m Generating genesis block
+[34m2022-07-02 02:33:43.535 +08 [common.tools.configtxgen] doOutputBlock -> INFO 006[0m Writing genesis block
 + res=0
 Creating volume "docker_orderer.um.edu.my" with default driver
 Creating volume "docker_peer0.ummc.um.edu.my" with default driver
 Creating volume "docker_peer0.ppum.um.edu.my" with default driver
-Found orphan containers (ca_orderer, ca_ppum, ca_ummc) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up.
-Creating couchdb0 ... 
-Creating couchdb1 ... 
+Found orphan containers (ca_ppum, ca_ummc, ca_orderer) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up.
 Creating orderer.um.edu.my ... 
+Creating couchdb1          ... 
+Creating couchdb0          ... 
 Creating couchdb1          ... done
+Creating orderer.um.edu.my ... done
+Creating couchdb0          ... done
 Creating peer0.ppum.um.edu.my ... 
-Creating couchdb0             ... done
 Creating peer0.ummc.um.edu.my ... 
-Creating orderer.um.edu.my    ... done
-Creating peer0.ummc.um.edu.my ... done
 Creating peer0.ppum.um.edu.my ... done
+Creating peer0.ummc.um.edu.my ... done
 Creating cli                  ... 
 Creating cli                  ... done
-CONTAINER ID   IMAGE                               COMMAND                  CREATED          STATUS                  PORTS                                                                                                NAMES
-402576d20509   hyperledger/fabric-tools:latest     "/bin/bash"              1 second ago     Up Less than a second                                                                                                        cli
-be9c8460f6cc   hyperledger/fabric-peer:latest      "peer node start"        2 seconds ago    Up 1 second             0.0.0.0:7051->7051/tcp, :::7051->7051/tcp, 0.0.0.0:17051->17051/tcp, :::17051->17051/tcp             peer0.ummc.um.edu.my
-6a8e35bc599b   hyperledger/fabric-peer:latest      "peer node start"        2 seconds ago    Up 1 second             0.0.0.0:9051->9051/tcp, :::9051->9051/tcp, 7051/tcp, 0.0.0.0:19051->19051/tcp, :::19051->19051/tcp   peer0.ppum.um.edu.my
-6ca09cd7f874   couchdb:3.1.1                       "tini -- /docker-ent…"   3 seconds ago    Up 2 seconds            4369/tcp, 9100/tcp, 0.0.0.0:7984->5984/tcp, :::7984->5984/tcp                                        couchdb1
-d627f25c9d45   hyperledger/fabric-orderer:latest   "orderer"                3 seconds ago    Up 1 second             0.0.0.0:7050->7050/tcp, :::7050->7050/tcp, 0.0.0.0:17050->17050/tcp, :::17050->17050/tcp             orderer.um.edu.my
-fd9e7978ce65   couchdb:3.1.1                       "tini -- /docker-ent…"   3 seconds ago    Up 2 seconds            4369/tcp, 9100/tcp, 0.0.0.0:5984->5984/tcp, :::5984->5984/tcp                                        couchdb0
-de65defadfc9   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   10 seconds ago   Up 8 seconds            0.0.0.0:7054->7054/tcp, :::7054->7054/tcp, 0.0.0.0:17054->17054/tcp, :::17054->17054/tcp             ca_ummc
-290f9e9f8120   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   10 seconds ago   Up 8 seconds            0.0.0.0:9054->9054/tcp, :::9054->9054/tcp, 7054/tcp, 0.0.0.0:19054->19054/tcp, :::19054->19054/tcp   ca_orderer
-e05487a2b5e5   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   10 seconds ago   Up 9 seconds            0.0.0.0:8054->8054/tcp, :::8054->8054/tcp, 7054/tcp, 0.0.0.0:18054->18054/tcp, :::18054->18054/tcp   ca_ppum
-5a2e67bed3ef   gliderlabs/logspout                 "/bin/logspout"          48 minutes ago   Up 48 minutes           127.0.0.1:8000->80/tcp                                                                               logspout
+CONTAINER ID   IMAGE                               COMMAND                  CREATED         STATUS                  PORTS                                                                                                NAMES
+93a15e783e24   hyperledger/fabric-tools:latest     "/bin/bash"              1 second ago    Up Less than a second                                                                                                        cli
+a9a3ef29a0dc   hyperledger/fabric-peer:latest      "peer node start"        1 second ago    Up Less than a second   0.0.0.0:7051->7051/tcp, :::7051->7051/tcp, 0.0.0.0:17051->17051/tcp, :::17051->17051/tcp             peer0.ummc.um.edu.my
+c22796424fbe   hyperledger/fabric-peer:latest      "peer node start"        1 second ago    Up Less than a second   0.0.0.0:9051->9051/tcp, :::9051->9051/tcp, 7051/tcp, 0.0.0.0:19051->19051/tcp, :::19051->19051/tcp   peer0.ppum.um.edu.my
+0e6bab8e13e3   couchdb:3.1.1                       "tini -- /docker-ent…"   2 seconds ago   Up 1 second             4369/tcp, 9100/tcp, 0.0.0.0:5984->5984/tcp, :::5984->5984/tcp                                        couchdb0
+397489a12133   couchdb:3.1.1                       "tini -- /docker-ent…"   2 seconds ago   Up 1 second             4369/tcp, 9100/tcp, 0.0.0.0:7984->5984/tcp, :::7984->5984/tcp                                        couchdb1
+752e20cd0f87   hyperledger/fabric-orderer:latest   "orderer"                2 seconds ago   Up 1 second             0.0.0.0:7050->7050/tcp, :::7050->7050/tcp, 0.0.0.0:17050->17050/tcp, :::17050->17050/tcp             orderer.um.edu.my
+539b10ff191e   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   7 seconds ago   Up 6 seconds            0.0.0.0:7054->7054/tcp, :::7054->7054/tcp, 0.0.0.0:17054->17054/tcp, :::17054->17054/tcp             ca_ummc
+05bcfc250796   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   7 seconds ago   Up 6 seconds            0.0.0.0:9054->9054/tcp, :::9054->9054/tcp, 7054/tcp, 0.0.0.0:19054->19054/tcp, :::19054->19054/tcp   ca_orderer
+811603e834a3   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   7 seconds ago   Up 6 seconds            0.0.0.0:8054->8054/tcp, :::8054->8054/tcp, 7054/tcp, 0.0.0.0:18054->18054/tcp, :::18054->18054/tcp   ca_ppum
+03b498e81bd3   gliderlabs/logspout                 "/bin/logspout"          2 hours ago     Up 2 hours              127.0.0.1:8000->80/tcp                                                                               logspout
 [0;34mGenerating channel create transaction 'mychannel.tx'[0m
 + configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/mychannel.tx -channelID mychannel
-[34m2022-06-30 14:59:09.860 +08 [common.tools.configtxgen] main -> INFO 001[0m Loading configuration
-[34m2022-06-30 14:59:09.895 +08 [common.tools.configtxgen.localconfig] Load -> INFO 002[0m Loaded configuration: /home/kamal/MediChain/ApplicationNetwork/configtx/configtx.yaml
-[34m2022-06-30 14:59:09.895 +08 [common.tools.configtxgen] doOutputChannelCreateTx -> INFO 003[0m Generating new channel configtx
-[34m2022-06-30 14:59:09.900 +08 [common.tools.configtxgen] doOutputChannelCreateTx -> INFO 004[0m Writing new channel tx
+[34m2022-07-02 02:33:46.603 +08 [common.tools.configtxgen] main -> INFO 001[0m Loading configuration
+[34m2022-07-02 02:33:46.615 +08 [common.tools.configtxgen.localconfig] Load -> INFO 002[0m Loaded configuration: /home/kamal/MediChain/ApplicationNetwork/configtx/configtx.yaml
+[34m2022-07-02 02:33:46.615 +08 [common.tools.configtxgen] doOutputChannelCreateTx -> INFO 003[0m Generating new channel configtx
+[34m2022-07-02 02:33:46.617 +08 [common.tools.configtxgen] doOutputChannelCreateTx -> INFO 004[0m Writing new channel tx
 + res=0
 [0;34mCreating channel mychannel[0m
 [0;34mUsing organization UMMC[0m
 + peer channel create -o localhost:7050 -c mychannel --ordererTLSHostnameOverride orderer.um.edu.my -f ./channel-artifacts/mychannel.tx --outputBlock ./channel-artifacts/mychannel.block --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem
 + res=0
-[34m2022-06-30 14:59:12.978 +08 [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:12.998 +08 [cli.common] readBlock -> INFO 002[0m Expect block, but got status: &{NOT_FOUND}
-[34m2022-06-30 14:59:13.002 +08 [channelCmd] InitCmdFactory -> INFO 003[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:13.206 +08 [cli.common] readBlock -> INFO 004[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
-[34m2022-06-30 14:59:13.213 +08 [channelCmd] InitCmdFactory -> INFO 005[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:13.415 +08 [cli.common] readBlock -> INFO 006[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
-[34m2022-06-30 14:59:13.421 +08 [channelCmd] InitCmdFactory -> INFO 007[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:13.624 +08 [cli.common] readBlock -> INFO 008[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
-[34m2022-06-30 14:59:13.630 +08 [channelCmd] InitCmdFactory -> INFO 009[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:13.833 +08 [cli.common] readBlock -> INFO 00a[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
-[34m2022-06-30 14:59:13.840 +08 [channelCmd] InitCmdFactory -> INFO 00b[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:14.047 +08 [cli.common] readBlock -> INFO 00c[0m Received block: 0
+[34m2022-07-02 02:33:49.654 +08 [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:49.663 +08 [cli.common] readBlock -> INFO 002[0m Expect block, but got status: &{NOT_FOUND}
+[34m2022-07-02 02:33:49.666 +08 [channelCmd] InitCmdFactory -> INFO 003[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:49.868 +08 [cli.common] readBlock -> INFO 004[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
+[34m2022-07-02 02:33:49.870 +08 [channelCmd] InitCmdFactory -> INFO 005[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:50.071 +08 [cli.common] readBlock -> INFO 006[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
+[34m2022-07-02 02:33:50.073 +08 [channelCmd] InitCmdFactory -> INFO 007[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:50.275 +08 [cli.common] readBlock -> INFO 008[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
+[34m2022-07-02 02:33:50.279 +08 [channelCmd] InitCmdFactory -> INFO 009[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:50.480 +08 [cli.common] readBlock -> INFO 00a[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
+[34m2022-07-02 02:33:50.482 +08 [channelCmd] InitCmdFactory -> INFO 00b[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:50.684 +08 [cli.common] readBlock -> INFO 00c[0m Expect block, but got status: &{SERVICE_UNAVAILABLE}
+[34m2022-07-02 02:33:50.688 +08 [channelCmd] InitCmdFactory -> INFO 00d[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:50.892 +08 [cli.common] readBlock -> INFO 00e[0m Received block: 0
 [0;32mChannel 'mychannel' created[0m
 [0;34mJoining UMMC peer to the channel...[0m
 [0;34mUsing organization UMMC[0m
 + peer channel join -b ./channel-artifacts/mychannel.block
 + res=0
-[34m2022-06-30 14:59:17.138 +08 [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:17.484 +08 [channelCmd] executeJoin -> INFO 002[0m Successfully submitted proposal to join channel
+[34m2022-07-02 02:33:53.931 +08 [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:54.160 +08 [channelCmd] executeJoin -> INFO 002[0m Successfully submitted proposal to join channel
 [0;34mJoining PPUM peer to the channel...[0m
 [0;34mUsing organization PPUM[0m
 + peer channel join -b ./channel-artifacts/mychannel.block
 + res=0
-[34m2022-06-30 14:59:20.568 +08 [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 14:59:20.950 +08 [channelCmd] executeJoin -> INFO 002[0m Successfully submitted proposal to join channel
+[34m2022-07-02 02:33:57.204 +08 [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-02 02:33:57.461 +08 [channelCmd] executeJoin -> INFO 002[0m Successfully submitted proposal to join channel
 [0;34mSetting anchor peer for  UMMC ...[0m
 [0;34mUsing organization UMMC[0m
 [0;34mFetching channel config for channel mychannel[0m
 [0;34mUsing organization UMMC[0m
-+ peer channel fetch config config_block.pb -o orderer.um.edu.my:7050 --ordererTLSHostnameOverride orderer.um.edu.my -c mychannel --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem
 [0;34mFetching the most recent configuration block for the channel[0m
-[34m2022-06-30 06:59:21.202 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 06:59:21.206 UTC [cli.common] readBlock -> INFO 002[0m Received block: 0
-[34m2022-06-30 06:59:21.206 UTC [channelCmd] fetch -> INFO 003[0m Retrieving last config block: 0
-[34m2022-06-30 06:59:21.208 UTC [cli.common] readBlock -> INFO 004[0m Received block: 0
++ peer channel fetch config config_block.pb -o orderer.um.edu.my:7050 --ordererTLSHostnameOverride orderer.um.edu.my -c mychannel --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem
+[34m2022-07-01 18:33:57.621 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-01 18:33:57.623 UTC [cli.common] readBlock -> INFO 002[0m Received block: 0
+[34m2022-07-01 18:33:57.623 UTC [channelCmd] fetch -> INFO 003[0m Retrieving last config block: 0
+[34m2022-07-01 18:33:57.625 UTC [cli.common] readBlock -> INFO 004[0m Received block: 0
 [0;34mDecoding config block to JSON and isolating config to UMMCMSPconfig.json[0m
 + configtxlator proto_decode --input config_block.pb --type common.Block
 + jq '.data.data[0].payload.data.config'
@@ -307,8 +309,8 @@ e05487a2b5e5   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   10
 ++ cat config_update.json
 + echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":{' '"channel_id":' '"mychannel",' '"isolated_data":' '{},' '"read_set":' '{' '"groups":' '{' '"Application":' '{' '"groups":' '{' '"UMMCMSP":' '{' '"groups":' '{},' '"mod_policy":' '"",' '"policies":' '{' '"Admins":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Endorsement":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Readers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Writers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '}' '},' '"values":' '{' '"MSP":' '{' '"mod_policy":' '"",' '"value":' null, '"version":' '"0"' '}' '},' '"version":' '"0"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"1"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"0"' '},' '"write_set":' '{' '"groups":' '{' '"Application":' '{' '"groups":' '{' '"UMMCMSP":' '{' '"groups":' '{},' '"mod_policy":' '"Admins",' '"policies":' '{' '"Admins":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Endorsement":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Readers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Writers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '}' '},' '"values":' '{' '"AnchorPeers":' '{' '"mod_policy":' '"Admins",' '"value":' '{' '"anchor_peers":' '[' '{' '"host":' '"peer0.ummc.um.edu.my",' '"port":' 7051 '}' ']' '},' '"version":' '"0"' '},' '"MSP":' '{' '"mod_policy":' '"",' '"value":' null, '"version":' '"0"' '}' '},' '"version":' '"1"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"1"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"0"' '}' '}}}}'
 + configtxlator proto_encode --input config_update_in_envelope.json --type common.Envelope
-[34m2022-06-30 06:59:21.458 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 06:59:21.470 UTC [channelCmd] update -> INFO 002[0m Successfully submitted channel update
+[34m2022-07-01 18:33:57.776 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-01 18:33:57.784 UTC [channelCmd] update -> INFO 002[0m Successfully submitted channel update
 [0;32mAnchor peer set for org 'UMMCMSP' on channel 'mychannel'[0m
 [0;34mSetting anchor peer for  PPUM ...[0m
 [0;34mUsing organization PPUM[0m
@@ -316,10 +318,10 @@ e05487a2b5e5   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   10
 [0;34mUsing organization PPUM[0m
 [0;34mFetching the most recent configuration block for the channel[0m
 + peer channel fetch config config_block.pb -o orderer.um.edu.my:7050 --ordererTLSHostnameOverride orderer.um.edu.my -c mychannel --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem
-[34m2022-06-30 06:59:21.733 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 06:59:21.741 UTC [cli.common] readBlock -> INFO 002[0m Received block: 1
-[34m2022-06-30 06:59:21.741 UTC [channelCmd] fetch -> INFO 003[0m Retrieving last config block: 1
-[34m2022-06-30 06:59:21.743 UTC [cli.common] readBlock -> INFO 004[0m Received block: 1
+[34m2022-07-01 18:33:57.991 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-01 18:33:57.994 UTC [cli.common] readBlock -> INFO 002[0m Received block: 1
+[34m2022-07-01 18:33:57.994 UTC [channelCmd] fetch -> INFO 003[0m Retrieving last config block: 1
+[34m2022-07-01 18:33:57.996 UTC [cli.common] readBlock -> INFO 004[0m Received block: 1
 [0;34mDecoding config block to JSON and isolating config to PPUMMSPconfig.json[0m
 + configtxlator proto_decode --input config_block.pb --type common.Block
 + jq '.data.data[0].payload.data.config'
@@ -333,8 +335,8 @@ e05487a2b5e5   hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-se…"   10
 ++ cat config_update.json
 + echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":{' '"channel_id":' '"mychannel",' '"isolated_data":' '{},' '"read_set":' '{' '"groups":' '{' '"Application":' '{' '"groups":' '{' '"PPUMMSP":' '{' '"groups":' '{},' '"mod_policy":' '"",' '"policies":' '{' '"Admins":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Endorsement":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Readers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Writers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '}' '},' '"values":' '{' '"MSP":' '{' '"mod_policy":' '"",' '"value":' null, '"version":' '"0"' '}' '},' '"version":' '"0"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"1"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"0"' '},' '"write_set":' '{' '"groups":' '{' '"Application":' '{' '"groups":' '{' '"PPUMMSP":' '{' '"groups":' '{},' '"mod_policy":' '"Admins",' '"policies":' '{' '"Admins":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Endorsement":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Readers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '},' '"Writers":' '{' '"mod_policy":' '"",' '"policy":' null, '"version":' '"0"' '}' '},' '"values":' '{' '"AnchorPeers":' '{' '"mod_policy":' '"Admins",' '"value":' '{' '"anchor_peers":' '[' '{' '"host":' '"peer0.ppum.um.edu.my",' '"port":' 9051 '}' ']' '},' '"version":' '"0"' '},' '"MSP":' '{' '"mod_policy":' '"",' '"value":' null, '"version":' '"0"' '}' '},' '"version":' '"1"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"1"' '}' '},' '"mod_policy":' '"",' '"policies":' '{},' '"values":' '{},' '"version":' '"0"' '}' '}}}}'
 + configtxlator proto_encode --input config_update_in_envelope.json --type common.Envelope
-[34m2022-06-30 06:59:21.994 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
-[34m2022-06-30 06:59:22.006 UTC [channelCmd] update -> INFO 002[0m Successfully submitted channel update
+[34m2022-07-01 18:33:58.148 UTC [channelCmd] InitCmdFactory -> INFO 001[0m Endorser and orderer connections initialized
+[34m2022-07-01 18:33:58.157 UTC [channelCmd] update -> INFO 002[0m Successfully submitted channel update
 [0;32mAnchor peer set for org 'PPUMMSP' on channel 'mychannel'[0m
 [0;32mChannel 'mychannel' joined[0m
 [0;34mdeploying chaincode on channel 'mychannel'[0m
@@ -358,26 +360,26 @@ executing with the following
 [0;34mUsing organization UMMC[0m
 + peer lifecycle chaincode install medichain.tar.gz
 + res=0
-[34m2022-06-30 14:59:33.659 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 001[0m Installed remotely: response:<status:200 payload:"\nLmedichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58\022\013medichain_1" > 
-[34m2022-06-30 14:59:33.659 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 002[0m Chaincode code package identifier: medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58
+[34m2022-07-02 02:34:05.594 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 001[0m Installed remotely: response:<status:200 payload:"\nLmedichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f\022\013medichain_1" > 
+[34m2022-07-02 02:34:05.595 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 002[0m Chaincode code package identifier: medichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f
 [0;32mChaincode is installed on peer0.ummc[0m
 [0;34mInstalling chaincode on peer0.ppum...[0m
 [0;34mUsing organization PPUM[0m
 + peer lifecycle chaincode install medichain.tar.gz
 + res=0
-[34m2022-06-30 14:59:42.749 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 001[0m Installed remotely: response:<status:200 payload:"\nLmedichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58\022\013medichain_1" > 
-[34m2022-06-30 14:59:42.749 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 002[0m Chaincode code package identifier: medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58
+[34m2022-07-02 02:34:12.504 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 001[0m Installed remotely: response:<status:200 payload:"\nLmedichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f\022\013medichain_1" > 
+[34m2022-07-02 02:34:12.504 +08 [cli.lifecycle.chaincode] submitInstallProposal -> INFO 002[0m Chaincode code package identifier: medichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f
 [0;32mChaincode is installed on peer0.ppum[0m
 [0;34mUsing organization UMMC[0m
 + peer lifecycle chaincode queryinstalled
 + res=0
 Installed chaincodes on peer:
-Package ID: medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58, Label: medichain_1
+Package ID: medichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f, Label: medichain_1
 [0;32mQuery installed successful on peer0.ummc on channel[0m
 [0;34mUsing organization UMMC[0m
-+ peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.um.edu.my --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem --channelID mychannel --name medichain --version 1 --package-id medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58 --sequence 1 --init-required
++ peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.um.edu.my --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem --channelID mychannel --name medichain --version 1 --package-id medichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f --sequence 1 --init-required
 + res=0
-[34m2022-06-30 14:59:45.310 +08 [chaincodeCmd] ClientWait -> INFO 001[0m txid [88e37cf47674ebd4ff3b298c571cbb4ce864620fa1a4b503a4b14e8d8763799b] committed with status (VALID) at 
+[34m2022-07-02 02:34:14.838 +08 [chaincodeCmd] ClientWait -> INFO 001[0m txid [202f0cb2b14282567df0b0f4e1fc7ead90461562d039c9785e26001d6258bcb2] committed with status (VALID) at 
 [0;32mChaincode definition approved on peer0.ummc on channel 'mychannel'[0m
 [0;34mUsing organization UMMC[0m
 [0;34mChecking the commit readiness of the chaincode definition on peer0.orgummc on channel 'mychannel'...[0m
@@ -404,9 +406,9 @@ Package ID: medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2
 }
 [0;34mChecking the commit readiness of the chaincode definition successful on peer0.ppum on channel 'mychannel'[0m
 [0;34mUsing organization PPUM[0m
-+ peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.um.edu.my --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem --channelID mychannel --name medichain --version 1 --package-id medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2bcef1b58 --sequence 1 --init-required
++ peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.um.edu.my --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem --channelID mychannel --name medichain --version 1 --package-id medichain_1:742fc1b5bba784e580308f0a02cd39b7461feb6a7d231c4c7616bd068283983f --sequence 1 --init-required
 + res=0
-[34m2022-06-30 14:59:54.004 +08 [chaincodeCmd] ClientWait -> INFO 001[0m txid [76122d9c61565b2ce466279fe890fbd127cf662f0c7ffde4965c046f47436d05] committed with status (VALID) at 
+[34m2022-07-02 02:34:23.224 +08 [chaincodeCmd] ClientWait -> INFO 001[0m txid [d289aa17a3718e3b6e434985e6e21b97f064c96e97ce94bfcce463fdf91106da] committed with status (VALID) at 
 [0;32mChaincode definition approved on peer0.ppum on channel 'mychannel'[0m
 [0;34mUsing organization UMMC[0m
 [0;34mChecking the commit readiness of the chaincode definition on peer0.orgummc on channel 'mychannel'...[0m
@@ -436,8 +438,8 @@ Package ID: medichain_1:14a370495073ffcadf4f90845b62f46490ff64419fa5545080681ed2
 [0;34mUsing organization PPUM[0m
 + peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.um.edu.my --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem --channelID mychannel --name medichain --peerAddresses localhost:7051 --tlsRootCertFiles /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/ca.crt --peerAddresses localhost:9051 --tlsRootCertFiles /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/ca.crt --version 1 --sequence 1 --init-required
 + res=0
-[34m2022-06-30 15:00:02.490 +08 [chaincodeCmd] ClientWait -> INFO 001[0m txid [d7ecc2623f81c50f94f52f2b39fd4a5509982b697e1d0390dec4f9e8857c2631] committed with status (VALID) at localhost:9051
-[34m2022-06-30 15:00:02.495 +08 [chaincodeCmd] ClientWait -> INFO 002[0m txid [d7ecc2623f81c50f94f52f2b39fd4a5509982b697e1d0390dec4f9e8857c2631] committed with status (VALID) at localhost:7051
+[34m2022-07-02 02:34:31.495 +08 [chaincodeCmd] ClientWait -> INFO 001[0m txid [fbc7ab7af7ed73f91e054274857b9593f1a7b294cab13fbc424c13fb17b9b570] committed with status (VALID) at localhost:7051
+[34m2022-07-02 02:34:31.495 +08 [chaincodeCmd] ClientWait -> INFO 002[0m txid [fbc7ab7af7ed73f91e054274857b9593f1a7b294cab13fbc424c13fb17b9b570] committed with status (VALID) at localhost:9051
 [0;32mChaincode definition committed on channel 'mychannel'[0m
 [0;34mUsing organization UMMC[0m
 [0;34mQuerying chaincode definition on peer0.orgummc on channel 'mychannel'...[0m
@@ -464,11 +466,11 @@ Version: 1, Sequence: 1, Endorsement Plugin: escc, Validation Plugin: vscc, Appr
 [0;34minvoke fcn call:{"function":"initLedger","Args":[]}[0m
 + peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.um.edu.my --tls --cafile /home/kamal/MediChain/ApplicationNetwork/organizations/ordererOrganizations/um.edu.my/orderers/orderer.um.edu.my/msp/tlscacerts/tlsca.um.edu.my-cert.pem -C mychannel -n medichain --peerAddresses localhost:7051 --tlsRootCertFiles /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ummc.um.edu.my/peers/peer0.ummc.um.edu.my/tls/ca.crt --peerAddresses localhost:9051 --tlsRootCertFiles /home/kamal/MediChain/ApplicationNetwork/organizations/peerOrganizations/ppum.um.edu.my/peers/peer0.ppum.um.edu.my/tls/ca.crt --isInit -c '{"function":"initLedger","Args":[]}'
 + res=0
-[34m2022-06-30 15:00:08.948 +08 [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 001[0m Chaincode invoke successful. result: status:200 
+[34m2022-07-02 02:34:37.726 +08 [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 001[0m Chaincode invoke successful. result: status:200 
 [0;32mInvoke transaction successful on peer0.ummc peer0.ppum on channel 'mychannel'[0m
 /home/kamal/MediChain/Application
 
-Total setup execution time : 78 secs ...
+Total setup execution time : 67 secs ...
 
 Next, use the FabCar applications to interact with the deployed FabCar contract.
 The FabCar applications are available in multiple programming languages.
