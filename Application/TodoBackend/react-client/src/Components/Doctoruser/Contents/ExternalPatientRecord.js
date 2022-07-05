@@ -124,8 +124,9 @@ export default function ExternalPatient({ broadcastAlert }) {
             Patient Profile
             <Typography variant="h6" sx={{ color: "text.primary", mt: -1 }}>
               <small>
-                {item.details.firstName} {item.details.middleName} {item.details.lastName}{" "}
-                - {item.details.passport}
+                {item.details.firstName}{" "}
+                {item.details.middleName !== "UNDEFINED" ? item.details.middleName : ""}{" "}
+                {item.details.lastName} - {item.details.passport}
               </small>
             </Typography>
           </div>
@@ -173,7 +174,11 @@ export default function ExternalPatient({ broadcastAlert }) {
                 <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
                   <Person />
                   <Typography component="div">
-                    {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}{" "}
+                    {`${item.details.firstName} ${
+                      item.details.middleName !== "UNDEFINED"
+                        ? item.details.middleName
+                        : ""
+                    } ${item.details.lastName}`}{" "}
                     - {item.details.passport}
                     <Typography className="secondary">
                       {item.checkIn.length === 0

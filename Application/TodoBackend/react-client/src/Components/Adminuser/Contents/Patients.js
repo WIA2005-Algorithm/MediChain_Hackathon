@@ -282,7 +282,9 @@ function ItemForTab({
             <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
               <Person />
               <Typography component="div">
-                {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}
+                {`${item.details.firstName} ${
+                  item.details.middleName !== "UNDEFINED" ? item.details.middleName : ""
+                } ${item.details.lastName}`}
                 <Typography className="secondary">
                   {item.checkIn.length === 0
                     ? "This patient has never been admitted to this hospital before"

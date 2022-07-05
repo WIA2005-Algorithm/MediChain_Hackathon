@@ -237,13 +237,17 @@ class FabCar extends Contract {
       );
     // Update the details
     const ptObj = {
-      name: `${patient.details.firstName} ${patient.details.middleName} ${patient.details.lastName}`,
+      name: `${patient.details.firstName} ${
+        patient.details.middleName !== "UNDEFINED" ? patient.details.middleName : ""
+      } ${patient.details.lastName}`,
       active: "Actively Watched",
       assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
       dischargeOk: null
     };
     const docObj = {
-      name: `${doctor.details.firstName} ${doctor.details.middleName} ${doctor.details.lastName}`,
+      name: `${doctor.details.firstName} ${
+        doctor.details.middleName !== "UNDEFINED" ? doctor.details.middleName : ""
+      } ${doctor.details.lastName}`,
       department: doctor.details.department,
       assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
       active: ["Verified", "In-progress"],
@@ -300,7 +304,9 @@ class FabCar extends Contract {
       console.log(String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID));
       if (String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID)) {
         newAssociate[doc] = {
-          name: `${doctor.details.firstName} ${doctor.details.middleName} ${doctor.details.lastName}`,
+          name: `${doctor.details.firstName} ${
+            doctor.details.middleName !== "UNDEFINED" ? doctor.details.middleName : ""
+          } ${doctor.details.lastName}`,
           department: doctor.details.department,
           assignedOn: patient.associatedDoctors[doc].assignedOn,
           EMRID: -500,

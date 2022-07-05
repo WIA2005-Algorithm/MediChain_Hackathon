@@ -111,7 +111,9 @@ function ItemForTab({ item, collapse, setCollapse }) {
             <Person />
             <Typography component="div">
               Dr.{" "}
-              {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}
+              {`${item.details.firstName} ${
+                item.details.middleName !== "UNDEFINED" ? item.details.middleName : ""
+              } ${item.details.lastName}`}
               <Typography className="secondary">
                 {patientLength === 0
                   ? "This doctor has no active patients"

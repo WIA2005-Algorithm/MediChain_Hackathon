@@ -118,8 +118,9 @@ export default function Profile({
               Associated to {moreUserDetails.fullOrg}
             </small>
             <small style={{ display: "block" }}>
-              {item.details.firstName} {item.details.middleName} {item.details.lastName} -{" "}
-              {item.details.passport}
+              {item.details.firstName}{" "}
+              {item.details.middleName !== "UNDEFINED" ? item.details.middleName : ""}{" "}
+              {item.details.lastName} - {item.details.passport}
             </small>
           </Typography>
         </div>
@@ -166,7 +167,9 @@ export default function Profile({
               <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
                 <Person />
                 <Typography component="div">
-                  {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}{" "}
+                  {`${item.details.firstName} ${
+                    item.details.middleName !== "UNDEFINED" ? item.details.middleName : ""
+                  } ${item.details.lastName}`}{" "}
                   - {item.details.passport}
                   <Typography className="secondary">
                     {item.checkIn.length === 0

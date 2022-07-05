@@ -133,9 +133,13 @@ function GetDialog({ isOpen, setDialog, patient, doctor, nav, broadcastAlert }) 
       <DialogContent>
         <DialogContentText sx={{ mb: 2 }}>
           The following below button will discharge the patient{" "}
-          {`${patient.details.firstName} ${patient.details.middleName} ${patient.details.lastName}`}{" "}
+          {`${patient.details.firstName} ${
+            patient.details.middleName !== "UNDEFINED" ? patient.details.middleName : ""
+          } ${patient.details.lastName}`}{" "}
           with ID: {patient.details.passport} associated with you [
-          {`Dr. ${doctor.details.firstName} ${doctor.details.middleName} ${doctor.details.lastName}`}
+          {`Dr. ${doctor.details.firstName} ${
+            doctor.details.middleName !== "UNDEFINED" ? doctor.details.middleName : ""
+          } ${doctor.details.lastName}`}
           ]
         </DialogContentText>
         <TextField
@@ -343,8 +347,9 @@ export default function PatientProfile({ user, moreUserDetails, broadcastAlert }
             Patient Profile
             <Typography variant="h6" sx={{ color: "text.primary", mt: -1 }}>
               <small>
-                {item.details.firstName} {item.details.middleName} {item.details.lastName}{" "}
-                - {item.details.passport}
+                {item.details.firstName}{" "}
+                {item.details.middleName !== "UNDEFINED" ? item.details.middleName : ""}{" "}
+                {item.details.lastName} - {item.details.passport}
               </small>
             </Typography>
           </div>
@@ -403,7 +408,11 @@ export default function PatientProfile({ user, moreUserDetails, broadcastAlert }
                 <Box component="div" sx={{ display: "flex", alignItems: "center" }}>
                   <Person />
                   <Typography component="div">
-                    {`${item.details.firstName} ${item.details.middleName} ${item.details.lastName}`}{" "}
+                    {`${item.details.firstName} ${
+                      item.details.middleName !== "UNDEFINED"
+                        ? item.details.middleName
+                        : ""
+                    } ${item.details.lastName}`}{" "}
                     - {item.details.passport}
                     <Typography className="secondary">
                       {item.checkIn.length === 0
