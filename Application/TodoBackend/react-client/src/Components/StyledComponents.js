@@ -357,14 +357,14 @@ export const ButtonMailto = ({ mailto, label }) => {
 };
 
 export const getFormattedDate = (d) => {
-  const date = new Date(d);
+  const date = new Date(parseInt(d));
   return `${date.toLocaleString("default", {
     month: "long"
   })} ${date.getDate()}, ${date.getFullYear()}`;
 };
 
 export const getTime = (d) => {
-  return new Date(d).toLocaleTimeString([], {
+  return new Date(parseInt(d)).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true

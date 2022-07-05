@@ -37,14 +37,8 @@ router.post("/create/network", authenticateUser, (req, res) => {
     });
 });
 router.post("/create/organization", authenticateUser, (req, res) => {
-  createEntity({
-    userID: req.body.adminID,
-    password: req.body.password,
-    FullOrganization: req.body.fullName,
-    organization: req.body.id,
-    type: "admin"
-  })
-    .then(() => Block_Network.findOne({ Name: req.body.networkName }).exec())
+  Block_Network.findOne({ Name: req.body.networkName })
+    .exec()
     .then((doc) => {
       const NetworkID = doc._id;
       return createOrganization(NetworkID, {
@@ -55,6 +49,16 @@ router.post("/create/organization", authenticateUser, (req, res) => {
         Country: req.body.country,
         State: req.body.state,
         Location: req.body.location
+      });
+    })
+    .then(() => {
+      createEntity({
+        userID: req.body.adminID,
+        password: req.body.password,
+        FullOrganization: req.body.fullName,
+        organization: req.body.id,
+        type: "admin",
+        IsAdmin: true
       });
     })
     .then(() =>

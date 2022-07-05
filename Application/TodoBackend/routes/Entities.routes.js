@@ -285,7 +285,12 @@ router.get("/getAllDoctors", authenticateUser, (req, res) => {
 });
 
 router.post("/checkInPatient", authenticateUser, (req, res) => {
-  checkIn(req.user.org, req.user.username, req.body.patientID)
+  checkIn(
+    req.user.org,
+    req.user.username,
+    req.body.patientID,
+    req.body.timeStamp ? req.body.timeStamp : 0
+  )
     .then(() => {
       log(
         `${req.user.username}`,
@@ -302,7 +307,6 @@ router.post("/checkInPatient", authenticateUser, (req, res) => {
         `New Patient Check In for userID: ${req.body.patientID} failed`,
         "error"
       );
-      console.log(err);
       return res.status(err.status).json(new response.errorResponse(err));
     });
 });
@@ -341,7 +345,8 @@ router.post("/checkOutPatient", authenticateUser, (req, res) => {
         return dischargeORCheckOutPatient(
           req.user.org,
           req.user.username,
-          req.body.patientID
+          req.body.patientID,
+          req.body.timeStamp ? req.body.timeStamp : 0
         );
       }
     })

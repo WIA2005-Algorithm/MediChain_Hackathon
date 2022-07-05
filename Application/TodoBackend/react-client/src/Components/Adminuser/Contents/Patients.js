@@ -67,7 +67,12 @@ function DoctorItem({ data }) {
       <Box component="div" sx={{ flexGrow: 1, display: "flex", alignItems: "top" }}>
         <CallMissedOutgoing sx={{ transform: "rotate(45deg)" }} />
         <Typography sx={{ flexGrow: 1 }} component="div">
-          Dr. {data.name}
+          <span>Dr. {data.name}</span>
+          {data?.deAssigned && (
+            <Box component={"span"} sx={{ color: "primary.main", ml: 0.5 }}>
+              (Discharged Patient)
+            </Box>
+          )}
           <Typography className="secondary">
             Assigned to patient on {getFormattedDate(data.assignedOn)}
           </Typography>

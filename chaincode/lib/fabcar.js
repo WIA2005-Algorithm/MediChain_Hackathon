@@ -101,7 +101,7 @@ class FabCar extends Contract {
     return JSON.stringify(content);
   }
 
-  async checkInPatient(ctx, PID) {
+  async checkInPatient(ctx, PID, timeStamp) {
     let [type, patient] = await this.getMemberType(ctx, PID);
     if (
       type !== "Admin" ||
@@ -112,7 +112,9 @@ class FabCar extends Contract {
       );
     patient = JSON.parse(patient);
     if (patient.checkIn.length === patient.checkOut.length) {
-      patient.checkIn.push(this.toDate(ctx.stub.getTxTimestamp()));
+      patient.checkIn.push(
+        parseInt(timeStamp) !== 0 ? timeStamp : this.toDate(ctx.stub.getTxTimestamp())
+      );
       patient.active = this.getStatus(
         patient.checkIn,
         patient.checkOut,
@@ -153,14 +155,15 @@ class FabCar extends Contract {
     temp["deAssigned"] = this.toDate(ctx.stub.getTxTimestamp());
     temp.note = Note;
     patient.associatedDoctors[DOCID] = temp;
-    doctor.active = ["Active", "Unoccupied"];
     if (doctor.associatedPatients.hasOwnProperty(PID))
       delete doctor.associatedPatients[PID];
+    const l = Object.keys(doctor.associatedPatients).length;
+    doctor.active = ["Active", l === 0 ? "Unoccupied" : "Occupied"];
     await ctx.stub.putState(DOCID, Buffer.from(stringify(doctor)));
     await ctx.stub.putState(PID, Buffer.from(stringify(patient)));
   }
 
-  async dischargeORCheckOutPatient(ctx, PID) {
+  async dischargeORCheckOutPatient(ctx, PID, timeStamp) {
     let [type, patient] = await this.getMemberType(ctx, PID);
     if (
       type !== "Admin" ||
@@ -189,7 +192,9 @@ class FabCar extends Contract {
         "Please make sure patient has no associated doctors currently reviewing them"
       );
     patient.associatedDoctors = {};
-    patient.checkOut.push(this.toDate(ctx.stub.getTxTimestamp()));
+    patient.checkOut.push(
+      parseInt(timeStamp) !== 0 ? timeStamp : this.toDate(ctx.stub.getTxTimestamp())
+    );
     patient.active = this.getStatus(
       patient.checkIn,
       patient.checkOut,
@@ -297,7 +302,7 @@ class FabCar extends Contract {
         newAssociate[doc] = {
           name: `${doctor.details.firstName} ${doctor.details.middleName} ${doctor.details.lastName}`,
           department: doctor.details.department,
-          assignedOn: this.toDate(ctx.stub.getTxTimestamp()),
+          assignedOn: patient.associatedDoctors[doc].assignedOn,
           EMRID: -500,
           email: doctor.details.email
         };
@@ -581,11 +586,16 @@ class FabCar extends Contract {
     console.log("Range Recieved :-", [fromDayRange, toDayRange]);
     console.log("Time Recieved :-", time);
     const data = JSON.parse(await this.getAllPatients(ctx));
-    const returnedData = [];
+    const returnedData = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
     data.forEach((patient) => {
       console.log("Entered CheckIn");
-      const checkInArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const checkInArray = returnedData[0];
       patient.checkIn.forEach((t) => {
+        console.log(t);
+        t = parseInt(t);
         const timeT = new Date(t);
         timeT.setHours(timeT.getHours() + 8);
         if (t >= parseInt(fromDayRange) && t <= parseInt(toDayRange)) {
@@ -605,26 +615,25 @@ class FabCar extends Contract {
         }
         console.log(checkInArray);
       });
-      returnedData.push(checkInArray);
+      returnedData[0] = checkInArray;
       console.log("TOTOL CHECKIN DATA -", returnedData);
-      const checkOutArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const checkOutArray = returnedData[1];
       patient.checkOut.forEach((t) => {
+        console.log(t);
+        t = parseInt(t);
         const timeT = new Date(t);
         timeT.setHours(timeT.getHours() + 8);
         if (t >= parseInt(fromDayRange) && t <= parseInt(toDayRange)) {
           const hour = timeT.getHours();
-          console.log(
-            "For Time =",
-            t,
-            "It is in the range with hour = ",
-            timeT.getHours()
-          );
-          if (time === "morning") checkOutArray[hour - 7]++;
-          else if (hour >= 19 && hour <= 23) checkOutArray[hour - 19]++;
-          else checkOutArray[hour + 5]++;
+          console.log("For Time =", t, "It is in the range with hour = ", hour);
+          if (time === "morning") checkOutArray[hour] += 1;
+          else {
+            if (hour >= 13 && hour <= 23) checkOutArray[hour - 11] += 1;
+            else checkOutArray[hour] += 1;
+          }
         }
       });
-      returnedData.push(checkOutArray);
+      returnedData[1] = checkOutArray;
       console.log("TOTOL CHECKOUT DATA -", returnedData);
     });
     return JSON.stringify(returnedData);

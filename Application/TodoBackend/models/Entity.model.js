@@ -14,7 +14,8 @@ const EntityType = new Schema(
     FullOrganization: { type: String, required: true },
     type: { type: String, required: true },
     alternateKey: { type: Array, default: null },
-    refreshToken: { type: String }
+    refreshToken: { type: String },
+    IsAdmin: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

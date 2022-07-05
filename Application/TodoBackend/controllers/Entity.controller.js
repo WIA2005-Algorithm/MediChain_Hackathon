@@ -68,10 +68,10 @@ export async function retriveAllDoctors(orgName, issuerID) {
   }
 }
 
-export async function checkIn(orgName, issuerID, PtID) {
+export async function checkIn(orgName, issuerID, PtID, timeStamp) {
   const { contract, gateway } = await getContract(orgName, issuerID);
   try {
-    await contract.submitTransaction("checkInPatient", PtID);
+    await contract.submitTransaction("checkInPatient", PtID, timeStamp);
   } catch (e) {
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
@@ -121,10 +121,10 @@ export async function patientCheckInCheckOutStats(orgName, issuerID, fromRange, 
     gateway.disconnect();
   }
 }
-export async function dischargeORCheckOutPatient(orgName, issuerID, PtID) {
+export async function dischargeORCheckOutPatient(orgName, issuerID, PtID, timeStamp) {
   const { contract, gateway } = await getContract(orgName, issuerID);
   try {
-    await contract.submitTransaction("dischargeORCheckOutPatient", PtID);
+    await contract.submitTransaction("dischargeORCheckOutPatient", PtID, timeStamp);
   } catch (e) {
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
