@@ -25,14 +25,13 @@ class FabCar extends Contract {
    * USE SubmitTransaction for this rather than evaluate
    */
 
-  // TODO FOR DIALOG IN ADMIN
   async checkIfPatientExists(ctx, PID, org) {
     const member = await ctx.stub.getState(PID);
-    const pt = JSON.parse(member.toString());
     if (!member || member.length === 0)
       throw new Error(`The patient with given ID does not exists`);
+    const pt = JSON.parse(member.toString());
     if (pt.orgDetails.org !== `${org.toUpperCase()}MSP`)
-      throw new Error(`The patient with given ID is associated to different hospital`);
+      throw new Error(`The patient with given ID is not associated to given hospital`);
   }
 
   async addPatientEHR(ctx, PID, ptDetails, address, contact) {
@@ -113,7 +112,9 @@ class FabCar extends Contract {
     patient = JSON.parse(patient);
     if (patient.checkIn.length === patient.checkOut.length) {
       patient.checkIn.push(
-        parseInt(timeStamp) !== 0 ? timeStamp : this.toDate(ctx.stub.getTxTimestamp())
+        parseInt(timeStamp) !== 0
+          ? parseInt(timeStamp)
+          : this.toDate(ctx.stub.getTxTimestamp())
       );
       patient.active = this.getStatus(
         patient.checkIn,
@@ -193,7 +194,9 @@ class FabCar extends Contract {
       );
     patient.associatedDoctors = {};
     patient.checkOut.push(
-      parseInt(timeStamp) !== 0 ? timeStamp : this.toDate(ctx.stub.getTxTimestamp())
+      parseInt(timeStamp) !== 0
+        ? parseInt(timeStamp)
+        : this.toDate(ctx.stub.getTxTimestamp())
     );
     patient.active = this.getStatus(
       patient.checkIn,
@@ -281,6 +284,7 @@ class FabCar extends Contract {
   }
 
   async getDataForExternal(ctx, PID, FromDOCID, UID) {
+    // ERROR HERE....
     let [type, _] = await this.getMemberType(ctx, FromDOCID);
     if (type !== "Doctor") throw new Error("Invalid Host Request...");
     let patient = await ctx.stub.getState(PID);
@@ -296,19 +300,21 @@ class FabCar extends Contract {
       console.log("FromDOCID:-", FromDOCID);
       console.log("Sharing Pair", doctor.secretSharingPair);
       console.log("Sharing Pair PID", doctor.secretSharingPair[PID]);
-      console.log(
-        "Sharing Pair PID FromDOCID UID",
-        doctor.secretSharingPair[PID][FromDOCID]
-      );
       console.log("UID", UID);
-      console.log(String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID));
-      if (String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID)) {
+      if (
+        doctor.secretSharingPair.hasOwnProperty(PID) &&
+        String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID)
+      ) {
+        console.log(String(doctor.secretSharingPair[PID][FromDOCID]) === String(UID));
         newAssociate[doc] = {
           name: `${doctor.details.firstName} ${
             doctor.details.middleName !== "UNDEFINED" ? doctor.details.middleName : ""
           } ${doctor.details.lastName}`,
           department: doctor.details.department,
           assignedOn: patient.associatedDoctors[doc].assignedOn,
+          deAssigned: patient.associatedDoctors[doc].deAssigned
+            ? patient.associatedDoctors[doc].deAssigned
+            : "null",
           EMRID: -500,
           email: doctor.details.email
         };
