@@ -225,7 +225,9 @@ export default function DoctorDashBoard({
     const dataFilter = items;
     const newData = [];
     dataFilter.forEach((ele) => {
-      const name = `${ele.details.firstName} ${ele.details.middleName} ${ele.details.lastName}`;
+      const name = `${ele.details.firstName} ${
+        ele.details.middleName === "UNDEFINED" ? "" : ele.details.middleName
+      } ${ele.details.lastName}`;
       const passport = ele.details.passport;
       if (
         name.toUpperCase().indexOf(filter) > -1 ||

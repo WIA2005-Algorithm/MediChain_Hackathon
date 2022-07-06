@@ -130,7 +130,6 @@ export function AppNavSideBar({ optSelected, changeTabTo, navItems }) {
             <div key={item.id}>
               <ListItemButton
                 selected={optSelected === item.id}
-                // TODO: Onclick item
                 onClick={() => changeTabTo(item.id)}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.name} />

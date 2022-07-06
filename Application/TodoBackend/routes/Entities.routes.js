@@ -29,7 +29,6 @@ const loginHelper = (data) => {
     session: newSession,
     next: () =>
       HospitalEntity.findByIdAndUpdate(data._id, {
-        //TODO: Add remove alternate and add new password key
         refreshToken: newSession.refreshToken
       })
   };
@@ -58,7 +57,6 @@ router.post("/login", (req, res) => {
       if (!isMatch) {
         throw new Error();
       }
-      //TODO : LINE 41 in notebook
       if (user.password === null) {
         console.log("hello");
         return res.status(200).json({
@@ -441,8 +439,8 @@ router.post("/acceptExternalDoctorRequest", authenticateUser, (req, res) => {
   )
     .exec()
     .then(() => {
+      req.body.data.UID = UID();
       return doctors.forEach(async (ele) => {
-        req.body.data.UID = UID();
         const ID = JSON.parse(ele).ID;
         await CreateNotificationModelObject({
           To: `${req.user.org}#doctor#${ID}`,

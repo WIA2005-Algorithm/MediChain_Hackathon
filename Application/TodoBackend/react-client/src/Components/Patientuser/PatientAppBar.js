@@ -193,12 +193,11 @@ function GetDialogForRequesting({
           <CircularProgress size="24px" sx={{ mr: 2.5, mb: 1.5 }} />
         ) : (
           <>
-            {/* // TODO: */}
-            <Button onClick={handleProcess}>
-              <b>Process Request</b>
-            </Button>
             <Button onClick={handleClose}>
               <b>Close</b>
+            </Button>
+            <Button onClick={handleProcess}>
+              <b>Process Request</b>
             </Button>
           </>
         )}
@@ -307,15 +306,19 @@ export default function PatientAppBar({
                 <div>
                   Name :{" "}
                   {`${user?.details?.firstName || ""} ${
-                    user?.details?.middleName || ""
+                    user?.details?.middleName === "UNDEFINED"
+                      ? ""
+                      : user.details.middleName
                   } ${user?.details?.lastName || ""}`}
                 </div>
                 <div>PatientID : {moreUserDetails.username}</div>
                 <div>Hospital : {moreUserDetails.org}</div>
                 <div>
                   Status :{" "}
-                  {user.active !== "Waiting To Be Assigned"
+                  {user.active === "Waiting To Be Assigned"
                     ? "In-Active"
+                    : user.active === "Not Patients"
+                    ? "Not Patient"
                     : "Active Patient"}
                 </div>
               </Typography>

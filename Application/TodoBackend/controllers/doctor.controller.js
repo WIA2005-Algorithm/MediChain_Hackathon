@@ -81,10 +81,29 @@ export async function getDataForExternal(orgName, issuerID, PTID, UID) {
     );
     return JSON.parse(Buffer.from(results, "base64").toString("ascii"));
   } catch (e) {
+    console.log(e);
     throw errors.contract_error.withDetails(
       e.toString().includes("No valid responses from any peers")
         ? e.toString().split("Error:")[2]
         : "An unexpected error"
     );
+  } finally {
+    gateway.disconnect();
+  }
+}
+
+export async function checkIfPatientExists(orgName, issuerID, PTID, ORG) {
+  const { contract, gateway } = await getContract(orgName, issuerID);
+  try {
+    await contract.evaluateTransaction("checkIfPatientExists", PTID, ORG);
+  } catch (e) {
+    throw errors.contract_error.withDetails(
+      e.toString().includes("No valid responses from any peers") ||
+        e.toString().includes("error in simulation")
+        ? e.toString().split("Error:")[2]
+        : "An unexpected error has occured while transacting your request. Please try again"
+    );
+  } finally {
+    gateway.disconnect();
   }
 }

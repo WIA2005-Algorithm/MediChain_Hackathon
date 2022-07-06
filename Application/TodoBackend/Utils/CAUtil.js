@@ -126,6 +126,7 @@ export async function getContract(orgName, userID) {
     const contract = (await gateway.getNetwork(channelName)).getContract(chaincodeName);
     return { contract, gateway };
   } catch (e) {
+    console.log(e);
     throw errors.not_reachable.withDetails(e.message);
   }
 }

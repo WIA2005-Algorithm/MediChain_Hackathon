@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   acceptRequestToFromAdmin,
+  checkIfPatientExists,
   dischargePatientForDoctor,
   getDataForExternal,
   getDotorDetails,
@@ -79,21 +80,30 @@ router.post("/requestExternalPatient", authenticateUser, (req, res) => {
     FromOrg: docOrg,
     FromName: docName
   };
-  if (docOrg === PTORG)
-    return res
-      .status(500)
-      .json(
-        "Please note that patient from the same organization can be requested simply by contacting the admin of hospital"
-      );
-  RequestModel.findOne({ RID: `${docOrg}#doctor#${docID}` })
-    .exec()
+  if (docOrg === PTORG) {
+    err = new ApiError(
+      401,
+      "Validity Error",
+      "There is an unexpected error in the contract.."
+    ).withDetails(
+      "Please note that patient from the same organization can be requested simply by contacting the admin of hospital"
+    );
+    return res.status(err.status).json(new response.errorResponse(err));
+  }
+  checkIfPatientExists(req.user.org, req.user.username, PTID, PTORG)
+    .then(() => {
+      return RequestModel.findOne({ RID: `${docOrg}#doctor#${docID}` }).exec();
+    })
     .then(async (R) => {
       if (R && R.Status === "Active") {
-        return res
-          .status(500)
-          .json(
-            "Please note your previous request is still in processing, you cannot start new until previous is completed. Please check the requests panel for more"
-          );
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(
+          "Please note your previous request is still in processing, you cannot start new until previous is completed. Please check the requests panel for more"
+        );
+        return res.status(err.status).json(new response.errorResponse(err));
       } else {
         if (R) await RequestModel.deleteOne({ RID: `${docOrg}#doctor#${docID}` });
         CreateRequestModelObject({
@@ -134,14 +144,25 @@ router.post("/requestExternalPatient", authenticateUser, (req, res) => {
               );
           })
           .catch((err) => {
-            console.log(err);
-            return res.sendStatus(500);
+            if (!(err instanceof ApiError))
+              err = new ApiError(
+                401,
+                "Validity Error",
+                "There is an unexpected error in the contract.."
+              ).withDetails(err.message);
+            return res.status(err.status).json(new response.errorResponse(err));
           });
       }
     })
     .catch((err) => {
-      console.log(err);
-      return res.sendStatus(500);
+      if (!(err instanceof ApiError)) {
+        err = new ApiError(
+          401,
+          "Validity Error",
+          "There is an unexpected error in the contract.."
+        ).withDetails(err.message);
+      }
+      return res.status(err.status).json(new response.errorResponse(err));
     });
 });
 
@@ -204,7 +225,7 @@ router.post("/acceptRequestToFromAdmin", authenticateUser, (req, res) => {
 });
 
 router.post("/denyRequestToFromAdmin", authenticateUser, (req, res) => {
-  const { PatientOrg, FromDoc, FromOrg } = req.body.data;
+  const { PatientOrg, FromDoc, FromOrg, PatientID } = req.body.data;
   const note = req.body.note;
   const others = req.body.others;
   const notifObj = req.body.notifObj;
@@ -276,7 +297,19 @@ router.post("/denyRequestToFromAdmin", authenticateUser, (req, res) => {
         NotificationDeny: "null"
       });
     })
-    .then(() => {
+    .then(async () => {
+      const R = await RequestModel.findOne({
+        RID: `${FromOrg}#doctor#${FromDoc}`
+      }).exec();
+      if (JSON.parse(R.EMRAccepted).length === JSON.parse(R.EMRRequested).length)
+        await CreateNotificationModelObject({
+          To: `${PatientOrg}#patient#${PatientID}`,
+          From: `Hospital Admin#${req.user.org}#admin#${req.user.username}`,
+          NotificationString: `An external doctor wants to access your patient record. A number of EMR records associated will be shared`,
+          NotificationAccept: "Accept",
+          NotificationDeny: "Deny",
+          Data: JSON.stringify(req.body.data)
+        });
       return res.sendStatus(200);
     })
     .catch((err) => {

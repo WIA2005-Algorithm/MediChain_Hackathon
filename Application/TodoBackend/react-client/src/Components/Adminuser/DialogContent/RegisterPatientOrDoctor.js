@@ -706,7 +706,7 @@ export default function RegisterPatient({ broadcastAlert, user, TYPE = "patient"
       org: (user && `${user.fullOrg} - ${user.org}`) || "",
       ID: "",
       password: "",
-      //TODO WHEN ADDING DOCTOR SIGNUP
+      //INFOR: WHEN ADDING DOCTOR SIGNUP
       TYPE
     },
     setRequiredError: { password: false }

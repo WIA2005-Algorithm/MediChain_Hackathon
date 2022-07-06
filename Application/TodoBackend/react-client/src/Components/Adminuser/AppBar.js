@@ -300,12 +300,11 @@ function GetDialogForRequesting({ open, handleClose, item, broadcastAlert }) {
               <CircularProgress size="24px" sx={{ mr: 2.5, mb: 1.5 }} />
             ) : (
               <>
-                {" "}
-                <Button onClick={handleProcess}>
-                  <b>Process Request</b>
-                </Button>
                 <Button onClick={handleClose}>
                   <b>Close</b>
+                </Button>
+                <Button onClick={handleProcess}>
+                  <b>Process Request</b>
                 </Button>
               </>
             )}
@@ -408,7 +407,6 @@ export function AppContentBar({ mode, newMode, logout, user, broadcastAlert }) {
             }}
             transformOrigin={{ horizontal: "right", vertical: "top" }}
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
-            {/* TODO: ADD ANOTHER ITEM */}
             <MenuItem onClick={() => setAnchorEl(null)}>
               <Avatar sx={{ bgcolor: "primary.main" }}>H</Avatar>
               <Typography component="span" sx={{ fontSize: "13px", ml: 0.5 }}>

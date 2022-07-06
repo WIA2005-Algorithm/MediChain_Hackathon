@@ -262,9 +262,7 @@ function DivisionStats({ changeTabTo, patients }) {
                   backgroundColor: "primary.sectionContainer"
                 }}>
                 <Tip title="Go to Patients Section">
-                  <IconButton
-                    //TODO: add a navlink
-                    onClick={() => changeTabTo(1)}>
+                  <IconButton onClick={() => changeTabTo(1)}>
                     <Link />
                   </IconButton>
                 </Tip>
@@ -470,7 +468,6 @@ function StatsSection({ broadcastAlert }) {
                 labelId="stats-select-doughnut-and-polar-graph"
                 id="stats-select-doughnut-and-polar-graph-standard"
                 value={statsDay}
-                // TODO: HANDLE ON CHANGE
                 onChange={handleChange}
                 label="Show For">
                 <MenuItem value={0}>Today</MenuItem>
@@ -682,7 +679,6 @@ function TimeLineGraph({ broadcastAlert }) {
               labelId="stats-select-for-time-date-line-graph"
               id="stats-select-for-time-date-line-graph-standard"
               value={statsDate}
-              // TODO: HANDLE ON CHANGE
               onChange={handleChangeDate}
               label="Date">
               <MenuItem value={0}>Today</MenuItem>
@@ -699,7 +695,6 @@ function TimeLineGraph({ broadcastAlert }) {
               labelId="stats-select-for-time-day-line-graph"
               id="stats-select-for-time-day-line-graph-standard"
               value={statsDay}
-              // TODO: HANDLE ON CHANGE
               onChange={handleChangeDay}
               label="Date">
               <MenuItem value={0}>Morning-Afternoon [12am-12pm]</MenuItem>
@@ -766,11 +761,9 @@ export function OverViewTab({ changeTabTo, broadcastAlert }) {
           </Box>
           <Box sx={{ display: "flex", width: "100%" }}>
             <DivisionStats changeTabTo={changeTabTo} patients={patients} />
-            {/* TODO STATS SECTION */}
             <StatsSection broadcastAlert={broadcastAlert} />
           </Box>
           <Box sx={{ display: "flex", width: "100%", minHeight: " 550px" }}>
-            {/* TODO TIME LINE GRAPH */}
             <TimeLineGraph broadcastAlert={broadcastAlert} />
           </Box>
         </Box>

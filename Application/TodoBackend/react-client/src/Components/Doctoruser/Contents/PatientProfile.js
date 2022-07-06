@@ -50,7 +50,11 @@ function DoctorItem({ data, currentDoc }) {
         <Typography sx={{ flexGrow: 1 }} component="div">
           Dr. {data.name}{" "}
           {data.name ===
-            `${currentDoc.details.firstName} ${currentDoc.details.middleName} ${currentDoc.details.lastName}` && (
+            `${currentDoc.details.firstName} ${
+              currentDoc.details.middleName === "UNDEFINED"
+                ? ""
+                : currentDoc.details.middleName
+            } ${currentDoc.details.lastName}` && (
             <Box component={"span"} sx={{ color: "primary.main" }}>
               (YOU)
             </Box>

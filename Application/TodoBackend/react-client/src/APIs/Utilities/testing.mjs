@@ -3,6 +3,7 @@ axios.defaults.baseURL = "http://localhost:8080/api";
 const payloads = [
   /* UMMC */
   // DOCTORS
+  // Jay Zachery Peterson (QDOCUMMMC)
   {
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
@@ -35,6 +36,7 @@ const payloads = [
       other: ""
     }
   },
+  // Stephen Steve Peterson (QDOC2UMMMC)
   {
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
@@ -67,6 +69,7 @@ const payloads = [
       other: ""
     }
   },
+  // Stephenie Trevor Peterson (QDOC3UMMMC)
   {
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
@@ -100,6 +103,7 @@ const payloads = [
     }
   },
   // PATIENTS
+  // Kaiya Sew Yu (QPTUMMMC)
   {
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
@@ -131,6 +135,7 @@ const payloads = [
       other: ""
     }
   },
+  // Kay Yang Yu (QPT2UMMMC)
   {
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
@@ -162,6 +167,7 @@ const payloads = [
       other: ""
     }
   },
+  // Jamilla Tranny Yu (QPT3UMMMC)
   {
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
@@ -193,8 +199,41 @@ const payloads = [
       other: ""
     }
   },
+  // Tranny Yu (QPT4UMMMC)
+  {
+    loginDetails: {
+      org: "Univeristy of Malaya Medical Center - UMMC",
+      ID: "QPT4UMMC",
+      password: "Kamal@2001",
+      TYPE: "patient"
+    },
+    personalDetails: {
+      firstName: "Tranny",
+      middleName: "",
+      lastName: "Yu",
+      email: "tranpolo2011@hotmail.com",
+      DOB: new Date(2008, 12, 23),
+      gender: "Female",
+      maritalStatus: "Single",
+      passport: "QPT4UMMC"
+    },
+    address: {
+      street1: "8th Floor, Plaza Magnum, Kuala Lumpur",
+      street2: "Wilayah Persekutuan",
+      postcode: "47300",
+      country: "Malaysia",
+      state: "Wilayah Persekutuan",
+      city: "Kuala Lumpur"
+    },
+    contactDetails: {
+      mobile: "+60378771724",
+      whatsapp: "+60378771724",
+      other: ""
+    }
+  },
   /* PPUM */
   // DOCTORS
+  // Shellby Zachery Rollins (QDOCPPUM)
   {
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
@@ -227,6 +266,7 @@ const payloads = [
       other: ""
     }
   },
+  // Jaffery Harrison (QDOC2PPUM)
   {
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
@@ -259,6 +299,7 @@ const payloads = [
       other: ""
     }
   },
+  // Raymond Harrison (QDOCPPUM)
   {
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
@@ -292,6 +333,7 @@ const payloads = [
     }
   },
   // PATIENTS
+  // Jacob Zachery (QPTPPUM)
   {
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
@@ -323,6 +365,7 @@ const payloads = [
       other: ""
     }
   },
+  // Rinki Saviour (QPT2PPUM)
   {
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
@@ -354,6 +397,7 @@ const payloads = [
       other: ""
     }
   },
+  // Jacklin Tyler (QPT3PPUM)
   {
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
@@ -370,6 +414,38 @@ const payloads = [
       gender: "Other",
       maritalStatus: "Single",
       passport: "QPT3PPUM"
+    },
+    address: {
+      street1: "7 Bloka1 Pusat Dagang Setia Jaya Jln Lama",
+      street2: "Pusat Dagang Setia Jaya Petaling Jaya",
+      postcode: "47300",
+      country: "Malaysia",
+      state: "Selangor",
+      city: "Petaling Jaya"
+    },
+    contactDetails: {
+      mobile: "+60378771724",
+      whatsapp: "+60378771724",
+      other: ""
+    }
+  },
+  // Queen Tyler (QPT4PPUM)
+  {
+    loginDetails: {
+      org: "Perpeskuatuan - PPUM",
+      ID: "QPT4PPUM",
+      password: "Kamal@2001",
+      TYPE: "patient"
+    },
+    personalDetails: {
+      firstName: "Queen",
+      middleName: "",
+      lastName: "Tyler",
+      email: "qt200120011@gmail.com",
+      DOB: new Date(1999, 6, 23),
+      gender: "Female",
+      maritalStatus: "Single",
+      passport: "QPT4PPUM"
     },
     address: {
       street1: "7 Bloka1 Pusat Dagang Setia Jaya Jln Lama",
@@ -451,6 +527,11 @@ async function FinalPPUM(t, noDischarge = true) {
     "QPT3PPUM",
     new Date(new Date().getTime() - (t - 2) * 60 * 60 * 1000).getTime()
   );
+  console.log("CheckIn Patient : QPT4PPUM");
+  await checkInPatients(
+    "QPT4PPUM",
+    new Date(new Date().getTime() - (t - 3) * 60 * 60 * 1000).getTime()
+  );
   console.log("Assign Patient : QPTPPUM to Doctor : QDOCPPUM");
   await assignPatients("QPTPPUM", "QDOCPPUM");
   console.log("Assign Patient : QPTPPUM to Doctor : QDOC2PPUM");
@@ -461,6 +542,8 @@ async function FinalPPUM(t, noDischarge = true) {
   await assignPatients("QPT3PPUM", "QDOC2PPUM");
   console.log("Assign Patient : QPT3PPUM to Doctor : QDOC3PPUM");
   await assignPatients("QPT3PPUM", "QDOC3PPUM");
+  console.log("Assign Patient : QPT4PPUM to Doctor : QDOC3PPUM");
+  await assignPatients("QPT4PPUM", "QDOC3PPUM");
   if (noDischarge) {
     console.log("Assign Patient : QPT2PPUM to Doctor : QDOCPPUM");
     await assignPatients("QPT2PPUM", "QDOCPPUM");
@@ -483,12 +566,13 @@ async function FinalPPUM(t, noDischarge = true) {
   await dischargePTForDoctor("QPTPPUM", "QDOC2PPUM");
   console.log("Discharge Patient : QPT3PPUM from Doctor : QDOC2PPUM");
   await dischargePTForDoctor("QPT3PPUM", "QDOC2PPUM");
-
+  console.log("Login as Doctor : QDOC3PPUM");
+  await loginSetAuthorization("QDOC3PPUM", "Kamal@2001", "doctor");
+  console.log("Discharge Patient : QPT4PPUM from Doctor : QDOC3PPUM");
+  await dischargePTForDoctor("QPT4PPUM", "QDOC3PPUM");
   if (noDischarge) {
-    console.log("Login as Doctor : QDOC3PPUM");
-    await loginSetAuthorization("QDOC3PPUM", "Kamal@2001", "doctor");
+    console.log("Discharge Patient : QPT2PPUM from Doctor : QDOC3PPUM");
     await dischargePTForDoctor("QPT2PPUM", "QDOC3PPUM");
-
     console.log("Discharge Patient : QPT3PPUM from Doctor : QDOC3PPUM");
     await dischargePTForDoctor("QPT3PPUM", "QDOC3PPUM");
   }
@@ -497,7 +581,8 @@ async function FinalPPUM(t, noDischarge = true) {
   await loginSetAuthorization("BAdmin", "Kamal@2001", "admin");
   console.log("CheckOut Patient QPTPPUM");
   await checkOutPatient("QPTPPUM", new Date().getTime());
-
+  console.log("CheckOut Patient QPT4PPUM");
+  await checkOutPatient("QPT4PPUM", new Date().getTime());
   if (noDischarge) {
     console.log("CheckOut Patient QPT2PPUM");
     await checkOutPatient(
@@ -527,6 +612,11 @@ async function FinalUMMC(t, noDischarge = true) {
     "QPT3UMMC",
     new Date(new Date().getTime() - (t - 2) * 60 * 60 * 1000).getTime()
   );
+  console.log("CheckIn Patient : QPT4UMMC");
+  await checkInPatients(
+    "QPT4UMMC",
+    new Date(new Date().getTime() - (t - 3) * 60 * 60 * 1000).getTime()
+  );
   console.log("Assign Patient : QPTUMMC to Doctor : QDOCUMMC");
   await assignPatients("QPTUMMC", "QDOCUMMC");
   console.log("Assign Patient : QPTUMMC to Doctor : QDOC2UMMC");
@@ -543,7 +633,8 @@ async function FinalUMMC(t, noDischarge = true) {
   await assignPatients("QPT3UMMC", "QDOC2UMMC");
   console.log("Assign Patient : QPT3UMMC to Doctor : QDOC3UMMC");
   await assignPatients("QPT3UMMC", "QDOC3UMMC");
-
+  console.log("Assign Patient : QPT4UMMC to Doctor : QDOC3UMMC");
+  await assignPatients("QPT4UMMC", "QDOC3UMMC");
   console.log("Login as Doctor : QDOCUMMC");
   await loginSetAuthorization("QDOCUMMC", "Kamal@2001", "doctor");
   console.log("Discharge Patient : QPTUMMC from Doctor : QDOCUMMC");
@@ -559,9 +650,10 @@ async function FinalUMMC(t, noDischarge = true) {
   console.log("Discharge Patient : QPTUMMC from Doctor : QDOC2UMMC");
   await dischargePTForDoctor("QPTUMMC", "QDOC2UMMC");
   await dischargePTForDoctor("QPT3UMMC", "QDOC2UMMC");
+  console.log("Logging in as QDOC3UMMC");
+  await loginSetAuthorization("QDOC3UMMC", "Kamal@2001", "doctor");
+  await dischargePTForDoctor("QPT4UMMC", "QDOC3UMMC");
   if (noDischarge) {
-    console.log("Logging in as QDOC3UMMC");
-    await loginSetAuthorization("QDOC3UMMC", "Kamal@2001", "doctor");
     console.log("Discharge Patient : QPT2UMMC from Doctor : QDOC3UMMC");
     await dischargePTForDoctor("QPT2UMMC", "QDOC3UMMC");
     console.log("Discharge Patient : QPT3UMMC from Doctor : QDOC3UMMC");
@@ -582,6 +674,10 @@ async function FinalUMMC(t, noDischarge = true) {
       "QPT3UMMC",
       new Date(new Date().getTime() - (t + 0.4) * 60 * 60 * 1000).getTime()
     );
+    await checkOutPatient(
+      "QPT4UMMC",
+      new Date(new Date().getTime() - (t + 0.5) * 60 * 60 * 1000).getTime()
+    );
   }
 }
 
@@ -590,10 +686,10 @@ async function runTestingScripts() {
   await FinalUMMC(4);
   console.log("Running FINAL PPUM - 4 HOURS");
   await FinalPPUM(4);
-  await FinalUMMC(14);
-  await FinalPPUM(14);
-  await FinalUMMC(24);
-  await FinalPPUM(24);
+  // await FinalUMMC(14);
+  // await FinalPPUM(14);
+  // await FinalUMMC(24);
+  // await FinalPPUM(24);
   console.log("Running FINAL UMMC - 36 HOURS");
   await FinalUMMC(36, false, false);
   console.log("Running FINAL PPUM - 36 HOURS");

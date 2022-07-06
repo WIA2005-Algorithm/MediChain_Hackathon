@@ -91,7 +91,9 @@ function GetDiolog({
     setLoadingDialogSubmit(true);
     try {
       const r = await requestExternalPatient(
-        `${user.details.firstName} ${user.details.middleName} ${user.details.lastName}`,
+        `${user.details.firstName} ${
+          user.details.middleName === "UNDEFINED" ? "" : user.details.middleName
+        } ${user.details.lastName}`,
         ID,
         org
       );
@@ -101,12 +103,13 @@ function GetDiolog({
       ]);
       setDialog();
     } catch (error) {
+      console.log(error?.response);
       broadcastAlert((prev) => [
         ...prev,
         getAlertValues(
           "error",
           "External Patient Request",
-          error?.response?.data || "An unexpected Error Occurred"
+          error?.response?.data.DETAILS || "An unexpected Error Occurred"
         )
       ]);
       setLoadingDialogSubmit(false);
@@ -292,7 +295,6 @@ function GetDialogForRequesting({
         setPromiseForProcess(false);
         handleClose();
       } catch (err) {
-        console.log(err.message);
         broadcastAlert((prev) => [
           ...prev,
           getAlertValues(
@@ -402,12 +404,11 @@ function GetDialogForRequesting({
               <CircularProgress size="24px" sx={{ mr: 2.5, mb: 1.5 }} />
             ) : (
               <>
-                {/* // TODO: */}
-                <Button onClick={handleProcess}>
-                  <b>Process Request</b>
-                </Button>
                 <Button onClick={handleClose}>
                   <b>Close</b>
+                </Button>
+                <Button onClick={handleProcess}>
+                  <b>Process Request</b>
                 </Button>
               </>
             )}

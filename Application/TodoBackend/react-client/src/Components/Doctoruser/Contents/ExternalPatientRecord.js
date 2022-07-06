@@ -61,11 +61,17 @@ function DoctorItem({ data }) {
         <Divider orientation="vertical" sx={{ height: "40px", mr: 2, ml: 1 }} />
         <Typography sx={{ flexGrow: 1 }} component="div">
           <Box component="div" sx={{ display: "flex" }}>
-            <span style={{ marginRight: "4px" }}>Status - Active</span>
-            <Loop sx={{ color: "error.main" }} />
+            <span style={{ marginRight: "4px" }}>
+              Status - {data.deAssigned === "null" ? "Active" : "Discharged Patient"}
+            </span>
+            {data.deAssigned === "null" ? (
+              <CheckCircle sx={{ color: "success.main" }} fontSize="small" />
+            ) : (
+              <Loop sx={{ color: "error.main" }} />
+            )}
           </Box>
           <Typography className="secondary">
-            The doctor note is not yet visible
+            The doctor note will not be visible to you
           </Typography>
         </Typography>
       </Box>

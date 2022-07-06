@@ -357,14 +357,14 @@ export const ButtonMailto = ({ mailto, label }) => {
 };
 
 export const getFormattedDate = (d) => {
-  const date = new Date(parseInt(d));
+  const date = new Date(d);
   return `${date.toLocaleString("default", {
     month: "long"
   })} ${date.getDate()}, ${date.getFullYear()}`;
 };
 
 export const getTime = (d) => {
-  return new Date(parseInt(d)).toLocaleTimeString([], {
+  return new Date(d).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true
@@ -480,7 +480,8 @@ export function AlertNotifications({ anchorEl, handleClose, onClickProps }) {
     setProcess(true);
     try {
       const r = await getNotificationData();
-      setData(() => r.data);
+      setData(r.data);
+      console.log(r.data);
     } catch (err) {
       console.log(err);
     } finally {
