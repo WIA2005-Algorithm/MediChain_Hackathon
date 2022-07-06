@@ -1,5 +1,4 @@
 # MediChain Using Blockchain
-## NOTE: THIS REPOSITORY IS IN DEVELOPMENT
 ## Introduction
 ### Blockchain
 A blockchain, in general, is an immutable transaction record that is maintained within a distributed network of peer nodes. These nodes keep a copy of the ledger by applying transactions that have been validated by a consensus process and are organised into blocks with a hash that links each block to the one before it.
