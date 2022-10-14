@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
+import '../../../constants.dart';
 
 class ApiConstants {
   // Login details constants
@@ -8,7 +8,7 @@ class ApiConstants {
   static String accessToken = '';
   static String refreshToken = '';
 
-  static String baseURL = "http://172.27.237.56:8080/api";
+  static String baseURL = kApibaseURL;
   static Map<String, String> getHeaders() {
     return <String, String>{
       "content-type": "application/json",

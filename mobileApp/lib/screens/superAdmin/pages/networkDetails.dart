@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:medichain/constants.dart';
-import 'package:medichain/screens/superAdmin/models/framework.dart';
-import 'package:medichain/screens/superAdmin/models/network_info.dart';
 import 'package:medichain/screens/superAdmin/pages/networkCard.dart';
 import 'package:medichain/screens/superAdmin/pages/networkPage.dart';
+
+import '../../../constants.dart';
+import '../models/network_info.dart';
 
 class NetworkDetails extends StatefulWidget {
   const NetworkDetails({super.key});
