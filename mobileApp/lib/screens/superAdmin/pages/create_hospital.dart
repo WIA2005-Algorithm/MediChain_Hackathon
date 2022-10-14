@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:medichain/screens/admin/models/framework.dart';
-import 'package:medichain/screens/admin/pages/overview.dart';
+import 'package:medichain/screens/superAdmin/models/framework.dart';
+import 'package:medichain/screens/superAdmin/pages/overview.dart';
 
 import '../../../constants.dart';
 import 'networkDetails.dart';
@@ -236,40 +236,41 @@ class CreateHospital extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // getNetworkDetails();
-                  String snackBarString = 'Failed to create network';
-                  final snackBar = SnackBar(content: Text(snackBarString));
+                  // String snackBarString = 'Fill in the required details';
+                  // var snackBar = SnackBar(content: Text(snackBarString));
 
                   SuperAdminConstants.sendPOST(
                       SuperAdminConstants.createOrganisation, <String, String>{
-                    "name": hospNameController.text,
-                    "netID": hospIDController.text,
-                    "address": adminIDController.text,
-                    "name": adminPassController.text,
-                    "netID": countryController.text,
-                    "address": stateController.text,
-                    "name": locationController.text,
+                    "networkName": "First_Network",
+                    "fullName": hospNameController.text,
+                    "id": hospIDController.text,
+                    "adminID": adminIDController.text,
+                    "password": adminPassController.text,
+                    "country": countryController.text,
+                    "state": stateController.text,
+                    "location": locationController.text,
                   }).then((response) async {
                     print("Response code: ${response.statusCode}");
 
                     if (response.statusCode == 200) {
-                      // LoginAccess.fromJson(jsonDecode(response.body));
-                      await CircularProgressIndicator();
-                      Future.delayed(Duration(seconds: 4));
-
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Organisation created successfully')));
                       Navigator.pop(context);
-                      snackBarString = 'Network created successfully';
                     } else {
-                      throw Exception('Failed to create network');
+                      throw Exception('Failed to create organization');
                     }
                   }).catchError((onError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(onError.toString())));
                     print('Error : ${onError.toString()}');
                   });
-                  // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  // ScaffoldMessenger.of(context)
+                  //     .showSnackBar(SnackBar(content: Text(snackBarString)));
                 },
                 style: ElevatedButton.styleFrom(
                     primary: kSecondaryColor, elevation: 0),
                 child: Text(
-                  "Create Network".toUpperCase(),
+                  "Create organization".toUpperCase(),
                   style: TextStyle(color: Colors.black),
                 ),
               ),

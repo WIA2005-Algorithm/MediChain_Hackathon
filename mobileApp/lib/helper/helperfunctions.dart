@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
-import 'package:medichain/screens/admin/models/framework.dart';
+import 'package:medichain/screens/superAdmin/models/framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';

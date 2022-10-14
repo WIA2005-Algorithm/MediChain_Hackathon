@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:medichain/constants.dart';
-import 'package:medichain/screens/admin/models/network_info.dart';
-import 'package:medichain/screens/admin/pages/networkDetails.dart';
+import 'package:medichain/screens/superAdmin/models/network_info.dart';
+import 'package:medichain/screens/superAdmin/pages/networkDetails.dart';
 
 class NetworkCard extends StatelessWidget {
   const NetworkCard({super.key});

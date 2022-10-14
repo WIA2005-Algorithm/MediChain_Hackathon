@@ -17,11 +17,11 @@ class ApiConstants {
   }
 
   static Future sendPOST(String URL, Map<String, String> body) {
-    // print("Sending Post request to : $URL");
+    print("Sending Post request to : $URL");
     Map<String, String> headers = getHeaders();
-    // print("Sending POST request to : $URL");
-    // print("With headers ${headers.toString()}");
-    // print("With body ${body.toString()}");
+    print("Sending POST request to : $URL");
+    print("With headers ${headers.toString()}");
+    print("With body ${body.toString()}");
     return http.post(Uri.parse("$URL"),
         headers: headers, body: jsonEncode(body));
   }
@@ -55,7 +55,7 @@ class SuperAdminConstants {
   static String SuperAdminBase = "${ApiConstants.baseURL}/superuser/";
   static String loginAuth = "login";
   static String createNetwork = "create/network";
-  static String createOrganisation = "create/organisation";
+  static String createOrganisation = "create/organization";
   static String startNetwork = "network/start";
   static String stopNetwork = "network/stop";
   static String NetworkCount = "network/count";

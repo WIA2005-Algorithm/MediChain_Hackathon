@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medichain/constants.dart';
-import 'package:medichain/screens/admin/models/framework.dart';
-import 'package:medichain/screens/admin/models/network_info.dart';
-import 'package:medichain/screens/admin/pages/networkCard.dart';
-import 'package:medichain/screens/admin/pages/networkPage.dart';
+import 'package:medichain/screens/superAdmin/models/framework.dart';
+import 'package:medichain/screens/superAdmin/models/network_info.dart';
+import 'package:medichain/screens/superAdmin/pages/networkCard.dart';
+import 'package:medichain/screens/superAdmin/pages/networkPage.dart';
 
 class NetworkDetails extends StatefulWidget {
   const NetworkDetails({super.key});
@@ -57,7 +57,6 @@ class _NetworkDetailsState extends State<NetworkDetails> {
   void initState() {
     // TODO: implement initState
     getNetworkDetails();
-
     super.initState();
   }
 
@@ -65,7 +64,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 10)).then((value) => getNetworkDetails());
+    // Future.delayed(Duration(seconds: 10)).then((value) => getNetworkDetails());
 
     // print("Boolean ${NetworkInfo.networkCount != currentCount}");
 

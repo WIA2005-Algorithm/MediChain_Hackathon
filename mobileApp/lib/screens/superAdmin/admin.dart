@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:medichain/constants.dart';
-import 'package:medichain/screens/admin/models/framework.dart';
-import 'package:medichain/screens/admin/pages/overview.dart';
+import 'package:medichain/screens/superAdmin/models/framework.dart';
+import 'package:medichain/screens/superAdmin/pages/overview.dart';
 
-class AdminScreen extends StatefulWidget {
-  const AdminScreen({super.key});
+class SuperAdminScreen extends StatefulWidget {
+  const SuperAdminScreen({super.key});
 
   @override
-  State<AdminScreen> createState() => _AdminScreenState();
+  State<SuperAdminScreen> createState() => _SuperAdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> {
+class _SuperAdminScreenState extends State<SuperAdminScreen> {
   @override
   int _selectedIndex = 0;
   List _widgetOptions = [];
@@ -28,7 +28,7 @@ class _AdminScreenState extends State<AdminScreen> {
   void initState() {
     // TODO: implement initState
     _widgetOptions = [
-      AdminOverview(),
+      SuperAdminOverview(),
       Text(
         'Index 1: Task',
         style: optionStyle,

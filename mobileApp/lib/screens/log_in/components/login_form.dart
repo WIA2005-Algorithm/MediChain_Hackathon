@@ -1,15 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:medichain/screens/admin/admin.dart';
-import 'package:medichain/screens/admin/pages/overview.dart';
+import 'package:medichain/screens/superAdmin/admin.dart';
+import 'package:medichain/screens/superAdmin/pages/overview.dart';
 import '../../../../components/already_have_an_account_acheck.dart';
 import '../../../../constants.dart';
 import '../../../helper/helperfunctions.dart';
+import '../../SuperAdmin/models/framework.dart';
 import '../../log_in/login_screen.dart';
 import '../../sign_up/signup_screen.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
-import '../../admin/models/framework.dart';
+
+import '../../superAdmin/pages/overview.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({
@@ -30,6 +32,38 @@ class _LoginFormState extends State<LoginForm> {
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  void userLoginFunction() {
+    if (value == 0) {
+      // SuperAdmin Login
+      print('Attempt to load network');
+      SuperAdminConstants.sendPOST(
+          SuperAdminConstants.loginAuth, <String, String>{
+        "username": emailTextEditingController.text,
+        "password": passwordTextEditingController.text
+      }).then((response) {
+        if (response.statusCode == 200) {
+          print('Attempt successful');
+
+          LoginAccess.fromJson(jsonDecode(response.body));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SuperAdminOverview()));
+        } else {
+          throw Exception('Failed to login');
+        }
+      }).catchError((onError) {
+        print('Error : ${onError.toString()}');
+      });
+    } else if (value == 1) {
+      // Admin Login
+
+    } else if (value == 2) {
+      // Dcotor Login
+
+    } else if (value == 3) {
+      // Patient Login
+    }
   }
 
   @override
@@ -115,26 +149,7 @@ class _LoginFormState extends State<LoginForm> {
                 backgroundColor: kSecondaryColor,
               ),
               onPressed: () {
-                print('Attempt to load network');
-                SuperAdminConstants.sendPOST(
-                    SuperAdminConstants.loginAuth, <String, String>{
-                  "username": emailTextEditingController.text,
-                  "password": passwordTextEditingController.text
-                }).then((response) {
-                  if (response.statusCode == 200) {
-                    print('Attempt successful');
-
-                    LoginAccess.fromJson(jsonDecode(response.body));
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AdminOverview()));
-                  } else {
-                    throw Exception('Failed to login');
-                  }
-                }).catchError((onError) {
-                  print('Error : ${onError.toString()}');
-                });
+                userLoginFunction();
               },
               child: Text(
                 "Login".toUpperCase(),
