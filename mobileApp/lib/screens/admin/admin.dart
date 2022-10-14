@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medichain/constants.dart';
 import 'package:medichain/screens/admin/models/framework.dart';
 import 'package:medichain/screens/admin/pages/overview.dart';
 
@@ -28,10 +29,6 @@ class _AdminScreenState extends State<AdminScreen> {
     // TODO: implement initState
     _widgetOptions = [
       AdminOverview(),
-      // Text(
-      //   'Index 0: Task',
-      //   style: optionStyle,
-      // ),
       Text(
         'Index 1: Task',
         style: optionStyle,
@@ -58,7 +55,7 @@ class _AdminScreenState extends State<AdminScreen> {
             bottomNavigationBar: Theme(
                 data: Theme.of(context).copyWith(
                     // sets the background color of the `BottomNavigationBar`
-                    canvasColor: Colors.deepPurple,
+                    canvasColor: kPrimaryColor,
                     // sets the active color of the `BottomNavigationBar` if `Brightness` is light
                     primaryColor: Colors.red,
                     textTheme: Theme.of(context).textTheme.copyWith(
@@ -67,18 +64,18 @@ class _AdminScreenState extends State<AdminScreen> {
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       icon: Icon(Icons.home),
-                      label: 'Home',
+                      label: 'Overview',
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.chat),
-                      label: 'Task',
+                      icon: Icon(Icons.medication),
+                      label: 'Doctor',
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.map),
-                      label: 'Notification',
+                      icon: Icon(Icons.people),
+                      label: 'Patient',
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.pending_actions),
+                      icon: Icon(Icons.history),
                       label: 'History',
                     ),
                   ],

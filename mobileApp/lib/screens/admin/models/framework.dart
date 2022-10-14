@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConstants {
   // Login details constants
@@ -10,20 +8,20 @@ class ApiConstants {
   static String accessToken = '';
   static String refreshToken = '';
 
-  static String baseURL = "http://172.27.238.53:8080/api";
+  static String baseURL = "http://172.27.237.56:8080/api";
   static Map<String, String> getHeaders() {
     return <String, String>{
       "content-type": "application/json",
-      "Authorization": "" // GET Authorization token from the local d
+      "Authorization": accessToken // GET Authorization token from the local d
     };
   }
 
   static Future sendPOST(String URL, Map<String, String> body) {
-    print("Sending Post request to : $URL");
+    // print("Sending Post request to : $URL");
     Map<String, String> headers = getHeaders();
-    print("Sending POST request to : $URL");
-    print("With headers ${headers.toString()}");
-    print("With body ${body.toString()}");
+    // print("Sending POST request to : $URL");
+    // print("With headers ${headers.toString()}");
+    // print("With body ${body.toString()}");
     return http.post(Uri.parse("$URL"),
         headers: headers, body: jsonEncode(body));
   }
@@ -35,32 +33,22 @@ class ApiConstants {
         params += "$key=$value";
       });
     }
-    print("Sending GET request to : $URL");
+    // print("Sending GET request to : $URL");
     Map<String, String> headers = ApiConstants.getHeaders();
-    print("Sending GET request to : $URL");
-    print("With headers ${headers.toString()}");
-    print("With Query Parameters ${queryParams.toString()}");
+    // print("Sending GET request to : $URL");
+    // print("With headers ${headers.toString()}");
+    // print("With Query Parameters ${queryParams.toString()}");
     return http.get(Uri.parse("$URL${queryParams.keys.isEmpty ? "" : params}"),
         headers: headers);
   }
 
   static Future sendDELETE(String URL) {
-    print("Sending DELETE request to : $URL");
+    //   print("Sending DELETE request to : $URL");
     Map<String, String> headers = ApiConstants.getHeaders();
-    print("Sending DELETE request to : $URL");
-    print("With headers ${headers.toString()}");
+    //   print("Sending DELETE request to : $URL");
+    //   print("With headers ${headers.toString()}");
     return http.delete(Uri.parse("$URL"), headers: headers);
   }
-
-  // static Future addSharedValue(String key, String value) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.setString(key, value);
-  // }
-
-  // static Future<String?> getSharedValue(String key) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   return prefs.getString(key);
-  // }
 }
 
 class SuperAdminConstants {

@@ -82,6 +82,12 @@ class SignUpForm extends StatelessWidget {
           ),
           const SizedBox(height: defaultPadding / 2),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                primary: kPrimaryLightColor,
+                elevation: 0),
             onPressed: () async {
               Map<String, String> userInfoMap = {
                 'userName': nameController.text,
@@ -102,7 +108,10 @@ class SignUpForm extends StatelessWidget {
               //   print("Error: ${error.toString()}");
               // });
             },
-            child: Text("Sign Up".toUpperCase()),
+            child: Text(
+              "Sign Up".toUpperCase(),
+              style: TextStyle(color: kPrimaryTextColor),
+            ),
           ),
           const SizedBox(height: defaultPadding),
           AlreadyHaveAnAccountCheck(

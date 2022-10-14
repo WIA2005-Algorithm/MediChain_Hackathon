@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:medichain/screens/welcome/welcome_screen.dart';
 import 'constants.dart';
+import 'screens/welcome/welcome_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,10 +15,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Medi Chain',
+      title: 'MediChain',
       theme: ThemeData(
           primaryColor: kPrimaryColor,
-          scaffoldBackgroundColor: Colors.white,
+          scaffoldBackgroundColor: kBackgroundColor,
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               elevation: 0,

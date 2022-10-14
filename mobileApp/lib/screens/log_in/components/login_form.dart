@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/admin.dart';
+import 'package:medichain/screens/admin/pages/overview.dart';
 import '../../../../components/already_have_an_account_acheck.dart';
 import '../../../../constants.dart';
 import '../../../helper/helperfunctions.dart';
@@ -21,7 +22,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   int value = 0;
-  List<String> users = ["S-Admin", "Admin", "Doctor", "Patient"];
+  List<String> users = ["SuAdmin", "Admin", "Doctor", "Patient"];
   List<String> userType = ["superuser", "user", "doctor", "patient"];
   Future? _futureVariable;
 
@@ -44,17 +45,19 @@ class _LoginFormState extends State<LoginForm> {
             indicatorSize: Size.fromWidth(100),
             selectedIconSize: Size.square(20),
             iconSize: Size.square(20),
-            colorBuilder: (i) => i.isEven ? Colors.purple : Colors.deepPurple,
+            colorBuilder: (i) => kSecondaryColor,
             onChanged: (i) => setState(() => value = i),
             borderRadius: BorderRadius.circular(30),
-            borderColor: Colors.purple,
+            borderColor: kSecondaryColor,
             textDirection: TextDirection.ltr,
             customIconBuilder: (context, local, global) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('${users[local.value]}'),
-                  // alternativeIconBuilder(context, local, global),
+                  Text(
+                    '${users[local.value]}',
+                    style: TextStyle(color: kTextColor),
+                  ),
                 ],
               );
             },
@@ -65,10 +68,15 @@ class _LoginFormState extends State<LoginForm> {
             textInputAction: TextInputAction.next,
             cursorColor: kPrimaryColor,
             controller: emailTextEditingController,
-            onSaved: (email) {},
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               hintText: "Your username",
-              prefixIcon: Padding(
+              prefixIcon: const Padding(
                 padding: EdgeInsets.all(defaultPadding),
                 child: Icon(Icons.person),
               ),
@@ -81,7 +89,13 @@ class _LoginFormState extends State<LoginForm> {
               obscureText: true,
               cursorColor: kPrimaryColor,
               controller: passwordTextEditingController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 hintText: "Your password",
                 prefixIcon: Padding(
                   padding: EdgeInsets.all(defaultPadding),
@@ -94,18 +108,27 @@ class _LoginFormState extends State<LoginForm> {
           Hero(
             tag: "login_btn",
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor: kSecondaryColor,
+              ),
               onPressed: () {
                 print('Attempt to load network');
-
                 SuperAdminConstants.sendPOST(
                     SuperAdminConstants.loginAuth, <String, String>{
                   "username": emailTextEditingController.text,
                   "password": passwordTextEditingController.text
                 }).then((response) {
                   if (response.statusCode == 200) {
+                    print('Attempt successful');
+
                     LoginAccess.fromJson(jsonDecode(response.body));
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => AdminScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AdminOverview()));
                   } else {
                     throw Exception('Failed to login');
                   }
@@ -115,15 +138,22 @@ class _LoginFormState extends State<LoginForm> {
               },
               child: Text(
                 "Login".toUpperCase(),
+                style: TextStyle(
+                    color: kPrimaryTextColor, fontWeight: FontWeight.bold),
               ),
             ),
           ),
           const SizedBox(height: defaultPadding),
-          AlreadyHaveAnAccountCheck(
+          signUpButton(value),
+        ],
+      ),
+    );
+  }
+
+  Widget signUpButton(int userType) {
+    return userType == 2 || userType == 3
+        ? AlreadyHaveAnAccountCheck(
             press: () {
-              // FirebaseAuth.instance.signInWithEmailAndPassword(
-              //     email: emailTextEditingController.text,
-              //     password: passwordTextEditingController.text);
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -133,10 +163,15 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               );
             },
-          ),
-        ],
-      ),
-    );
+          )
+        : const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Please contact the blockchain developer if you have forgotten yourr password",
+              style: TextStyle(color: Colors.white54),
+              textAlign: TextAlign.center,
+            ),
+          );
   }
 
   Widget iconBuilder(int value, Size iconSize) {

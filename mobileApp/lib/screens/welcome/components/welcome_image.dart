@@ -12,9 +12,9 @@ class WelcomeImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
+        const Text(
           "Medichain",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: kTextStyle,
         ),
         SizedBox(height: defaultPadding * 2),
         Row(

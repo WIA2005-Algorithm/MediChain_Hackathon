@@ -1,72 +1,76 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-
-// network == 'Medi_Chain'
-Future<NetworkInfo> fetchNetwork(String network) async {
-  final response = await http.get(Uri.parse(
-      'http://localhost:8080/api/superuser/network/exists?networkName=${network}'));
-
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
-    return NetworkInfo.fromJson(jsonDecode(response.body), response);
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load network details');
-  }
-}
+import 'package:intl/intl.dart';
 
 class NetworkInfo {
-  final String id;
-  final String networkName;
-  final String networkID;
-  final String netAddress;
+  static String id = '';
+  static String networkName = '';
+  static String networkID = '';
+  static String netAddress = '';
+  static List organizations = [];
+  static int networkCount = 0;
 
-  final int networkCode;
-  final String networkMessage;
-  final String networkDescription;
+  static int networkCode = 0;
+  static String networkMessage = '';
+  static String createdAt = '';
+  static String networkDescription = '';
 
-  factory NetworkInfo.fromJson(Map<String, dynamic> json, Response response) {
-    return NetworkInfo(
-      id: json['_id'],
-      networkName: json['Name'],
-      networkID: json['NetID'],
-      netAddress: json['Address'],
-      // Find how to code the status json
-      networkCode: response.statusCode,
-      networkMessage: json['description'],
-      networkDescription: json['description'],
-    );
+  static int hospitalCount = 0;
+
+  static void getCount(Map<String, dynamic> json) {
+    networkCount = json['count'];
+    // print('Network count: $networkCount');
   }
 
-  NetworkInfo({
-    required this.id,
-    required this.networkName,
-    required this.networkID,
-    required this.netAddress,
-    required this.networkCode,
-    required this.networkMessage,
-    required this.networkDescription,
-  });
+  static void fromJson(Map<String, dynamic> json) {
+    final tempDate = DateTime.parse(json['createdAt']);
+    id = json['_id'];
+    networkName = json['Name'];
+    networkID = json['NetID'];
+    netAddress = json['Address'];
+    organizations = json['Organizations'];
+    networkCode = json['Status']['code'];
+    networkMessage = json['Status']['message'];
+    networkDescription = json['Status']['description'];
+    createdAt =
+        "${DateFormat.MMMM().format(tempDate)} ${tempDate.day}, ${tempDate.year}";
+    hospitalCount = organizations.length;
+  }
 }
 
 class Organisations {
-  final String orgId = '';
-  final String orgFullName = '';
-  final String orgName = '';
-  final String adminID = '';
-  final String adminpassword = '';
+  static String orgId = '';
+  static String orgFullName = '';
+  static String orgName = '';
+  static String adminID = '';
+  static String adminpassword = '';
 
-  final String country = '';
-  final String state = '';
-  final String location = '';
-  final String orgType = '';
-  final int enrolled = 0;
-  final String createdAt = '';
-  final String updatedAt = '';
-  final String POPORT = '';
-  final String CAPORT = '';
+  static String country = '';
+  static String state = '';
+  static String location = '';
+  static String orgType = '';
+  static int enrolled = 0;
+  static String createdAt = '';
+  static String updatedAt = '';
+  static String POPORT = '';
+  static String CAPORT = '';
+
+  //correct the variables for json organisation
+  static void fromJson(Map<String, dynamic> json) {
+    orgId = json['_id'];
+    orgFullName = json['Name'];
+    orgName = json['NetID'];
+    adminID = json['Address'];
+    adminpassword = json['Organizations'];
+
+    country = json['_id'];
+    state = json['Name'];
+    location = json['NetID'];
+    orgType = json['Address'];
+    enrolled = json['Organizations'];
+
+    createdAt = json['_id'];
+    updatedAt = json['Name'];
+    orgName = json['NetID'];
+    POPORT = json['Address'];
+    CAPORT = json['Organizations'];
+  }
 }
