@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -18,23 +19,24 @@ class NetworkDetails extends StatefulWidget {
 class _NetworkDetailsState extends State<NetworkDetails> {
   bool _inProgress = false;
   int currentCount = 0;
-
+  static Timer t = Timer(const Duration(seconds: 5), () {});
   Future getNetworkDetails() async {
     setState(() {
       _inProgress = true;
     });
     await SuperAdminConstants.sendGET(
         SuperAdminConstants.NetworkCount, <String, String>{}).then((response) {
-      currentCount = NetworkInfo.networkCount;
+      currentCount = AllBlockChainNetworksResponse.networkCount;
       if (response.statusCode == 200) {
-        NetworkInfo.getCount(jsonDecode(response.body));
-        // print("API Network Count: ${NetworkInfo.networkCount}");
-        if (NetworkInfo.networkCount > 0) {
+        AllBlockChainNetworksResponse.getCount(jsonDecode(response.body));
+        if (AllBlockChainNetworksResponse.networkCount > 0 &&
+            currentCount != AllBlockChainNetworksResponse.networkCount) {
           SuperAdminConstants.sendGET(
                   SuperAdminConstants.AllNetworks, <String, String>{})
               .then((response) {
             if (response.statusCode == 200) {
-              NetworkInfo.fromJson(jsonDecode(response.body));
+              AllBlockChainNetworksResponse.fromJson(jsonDecode(response.body));
+              print("Network Info:$AllBlockChainNetworksResponse");
             } else {
               throw Exception('Failed to GET all networks');
             }
@@ -57,6 +59,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
   void initState() {
     // TODO: implement initState
     getNetworkDetails();
+    t = Timer(const Duration(seconds: 5), getNetworkDetails);
     super.initState();
   }
 
@@ -68,21 +71,23 @@ class _NetworkDetailsState extends State<NetworkDetails> {
 
     // print("Boolean ${NetworkInfo.networkCount != currentCount}");
 
-    return _inProgress == true && currentCount != NetworkInfo.networkCount
+    return _inProgress == true &&
+            currentCount != AllBlockChainNetworksResponse.networkCount
         // ||
         // NetworkInfo.networkName == ''
         ? Center(child: CircularProgressIndicator())
-        : NetworkInfo.networkCount > 0
+        : AllBlockChainNetworksResponse.networkCount > 0
             ? SingleChildScrollView(
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: ScrollPhysics(),
-                  itemCount: NetworkInfo.networkCount,
+                  itemCount: AllBlockChainNetworksResponse.networkCount,
                   padding: const EdgeInsets.all(20.0),
                   itemBuilder: ((context, index) {
                     return GestureDetector(
                       child: NetworkCard(),
                       onTap: () {
+                        t.cancel();
                         Navigator.push(
                             context,
                             MaterialPageRoute(

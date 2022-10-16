@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:medichain/screens/superAdmin%20copy/admin.dart';
 import 'package:medichain/screens/superAdmin/pages/overview.dart';
 import '../../../../components/already_have_an_account_acheck.dart';
 import '../../../../constants.dart';
 import '../../../helper/helperfunctions.dart';
+import '../../admin/adminScreen.dart';
 import '../../log_in/login_screen.dart';
 import '../../sign_up/signup_screen.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
@@ -32,9 +32,10 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void userLoginFunction() {
+    print('Attempt to load network');
     if (value == 0) {
       // SuperAdmin Login
-      print('Attempt to load network');
+
       SuperAdminConstants.sendPOST(
           SuperAdminConstants.loginAuth, <String, String>{
         "username": emailTextEditingController.text,
@@ -54,13 +55,61 @@ class _LoginFormState extends State<LoginForm> {
       });
     } else if (value == 1) {
       // Admin Login
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => AdminScreen()));
+      AdminConstants.sendPOST(AdminConstants.loginAuth, <String, String>{
+        "userID": emailTextEditingController.text,
+        "password": passwordTextEditingController.text,
+        "type": "admin"
+      }).then((response) {
+        if (response.statusCode == 200) {
+          print('Attempt successful');
+
+          LoginAccess.fromJson(jsonDecode(response.body));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => AdminScreen()));
+        } else {
+          throw Exception('Failed to login');
+        }
+      }).catchError((onError) {
+        print('Error : ${onError.toString()}');
+      });
     } else if (value == 2) {
       // Dcotor Login
+      AdminConstants.sendPOST(AdminConstants.loginAuth, <String, String>{
+        "userID": emailTextEditingController.text,
+        "password": passwordTextEditingController.text,
+        "type": "doctor"
+      }).then((response) {
+        if (response.statusCode == 200) {
+          print('Attempt successful');
 
+          LoginAccess.fromJson(jsonDecode(response.body));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => AdminScreen()));
+        } else {
+          throw Exception('Failed to login');
+        }
+      }).catchError((onError) {
+        print('Error : ${onError.toString()}');
+      });
     } else if (value == 3) {
       // Patient Login
+      AdminConstants.sendPOST(AdminConstants.loginAuth, <String, String>{
+        "userID": emailTextEditingController.text,
+        "password": passwordTextEditingController.text,
+        "type": "patient"
+      }).then((response) {
+        if (response.statusCode == 200) {
+          print('Attempt successful');
+
+          LoginAccess.fromJson(jsonDecode(response.body));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => AdminScreen()));
+        } else {
+          throw Exception('Failed to login');
+        }
+      }).catchError((onError) {
+        print('Error : ${onError.toString()}');
+      });
     }
   }
 

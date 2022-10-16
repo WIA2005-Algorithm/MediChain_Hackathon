@@ -64,7 +64,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          NetworkInfo.networkName,
+          AllBlockChainNetworksResponse.networkName,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -82,7 +82,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          NetworkInfo.networkID,
+          AllBlockChainNetworksResponse.networkID,
           overflow: TextOverflow.fade,
           maxLines: 1,
           softWrap: false,
@@ -102,7 +102,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          NetworkInfo.netAddress,
+          AllBlockChainNetworksResponse.netAddress,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -120,7 +120,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          NetworkInfo.createdAt,
+          AllBlockChainNetworksResponse.createdAt,
           style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -137,7 +137,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          "${NetworkInfo.hospitalCount}",
+          "${AllBlockChainNetworksResponse.hospitalCount}",
           style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:medichain/constants.dart';
 import 'package:medichain/screens/Admin/pages/overview.dart';
-import 'package:medichain/screens/superAdmin/models/framework.dart';
-import 'package:medichain/screens/superAdmin/pages/overview.dart';
+import '../../constants.dart';
+import 'pages/patientPage.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -16,8 +15,6 @@ class _AdminScreenState extends State<AdminScreen> {
   int _selectedIndex = 0;
   List _widgetOptions = [];
   TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  // String hold = '';
-  // String? value = await ApiConstants.getSharedValue("accessToken");
 
   void _onItemTapped(int index) {
     setState(() {
@@ -30,10 +27,7 @@ class _AdminScreenState extends State<AdminScreen> {
     // TODO: implement initState
     _widgetOptions = [
       AdminOverview(),
-      Text(
-        'Index 1: Task',
-        style: optionStyle,
-      ),
+      DoctorPage(),
       Text(
         'Index 2: Notification',
         style: optionStyle,
@@ -47,8 +41,14 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return _widgetOptions.isNotEmpty
+    return _widgetOptions.isNotEmpty && ApiConstants.accessToken.isNotEmpty
         ? Scaffold(
             body: Center(
               child: _widgetOptions.elementAt(_selectedIndex),
@@ -69,11 +69,11 @@ class _AdminScreenState extends State<AdminScreen> {
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.medication),
-                      label: 'Doctor',
+                      label: 'Patient',
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.people),
-                      label: 'Patient',
+                      label: 'Doctor',
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.history),
@@ -85,8 +85,6 @@ class _AdminScreenState extends State<AdminScreen> {
                   onTap: _onItemTapped,
                 )),
           )
-        : Container(
-            decoration: BoxDecoration(color: Colors.white),
-            child: Center(child: CircularProgressIndicator()));
+        : Center(child: CircularProgressIndicator());
   }
 }
