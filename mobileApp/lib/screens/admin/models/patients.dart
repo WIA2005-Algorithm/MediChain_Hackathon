@@ -1,26 +1,33 @@
 import 'dart:convert';
 
 class Patient {
-  static String active = '';
-  static String associatedDoctors = '';
-  static String checkIn = '';
-  static String checkOut = '';
-  static String details = '';
-  static String orgDetails = '';
+  List<String> activeList = [
+    "Watched",
+    "Waiting For Discharge",
+    "Waiting To Be Assigned",
+    "Not Patient"
+  ];
+  String active = '';
+  Map<String, dynamic> associatedDoctors = {};
+  List checkIn = [];
+  List checkOut = [];
+  Map<String, dynamic> details = {};
+  Map<String, dynamic> orgDetails = {};
 
-  static String secretSharingPair = '';
-  static int patientCount = 0;
+  Map<String, dynamic> secretSharingPair = {};
+  int patientCount = 0;
 
-  static void fromJson(Map<String, dynamic> json) {
-    active = json['active'];
-    associatedDoctors = json['associatedDoctors'];
-    checkIn = json['checkIn'];
-    checkOut = json['Address'];
-    details = json['details'];
-    orgDetails = json['orgDetails'];
-    secretSharingPair = json['secretSharingPair'];
-    Details(jsonDecode(details));
-    OrgDetails(jsonDecode(orgDetails));
+  Patient(Map<String, dynamic> json) {
+    active = json['active'] ?? 'null';
+    associatedDoctors = json['associatedDoctors'] ?? 'null';
+    checkIn.add(json['checkIn'] ?? 'null');
+    checkOut.add(json['checkOut'] ?? 'null');
+    details = json['details'] ?? 'null';
+    orgDetails = json['orgDetails'] ?? 'null';
+
+    secretSharingPair = json['secretSharingPair'] ?? 'null';
+    Details(details);
+    OrgDetails(orgDetails);
   }
 }
 
@@ -46,9 +53,9 @@ class Details {
   String passport = '';
 
   Details(Map<String, dynamic> json) {
-    final tempDate = DateTime.parse(json['DOB']);
+    // final tempDate = DateTime.parse(json['DOB'].toString());
 
-    DOB = tempDate as int;
+    // DOB = tempDate as int;
     city = json['address']['city'] ?? 'null';
     country = json['address']['country'] ?? 'null';
     postcode = json['address']['postcode'] ?? 'null';
@@ -75,7 +82,7 @@ class OrgDetails {
   String role = '';
 
   OrgDetails(Map<String, dynamic> json) {
-    org = json['orgDetails']['org'] ?? 'null';
-    role = json['orgDetails']['role'] ?? 'null';
+    org = json['org'] ?? 'null';
+    role = json['role'] ?? 'null';
   }
 }

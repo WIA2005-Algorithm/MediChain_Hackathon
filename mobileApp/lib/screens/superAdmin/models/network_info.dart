@@ -39,11 +39,6 @@ class NetworkInfo {
     for (var hospital in orgs) {
       organizations.add(Organisations(hospital));
     }
-    // print(organizations.map((value) {
-    //   print("Value: $value");
-    //   Organisations.fromJson(value);
-    // }));
-    // print(Organisations.orgFullName);
   }
 }
 

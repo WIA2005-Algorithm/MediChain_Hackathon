@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -14,10 +15,19 @@ class DoctorPage extends StatefulWidget {
 }
 
 class _DoctorPageState extends State<DoctorPage> {
-  int catagoryButtonNumber = 1;
-  String category = 'Watc hed';
+  int categoryButtonNumber = 1;
+  String category = 'Watched';
+  List<String> activeList = [
+    "Watched",
+    "Waiting For Discharge",
+    "Waiting To Be Assigned",
+    "Not Patient"
+  ];
 
-  List<dynamic> patients = [];
+  List<Patient> patientsList = [];
+  List<Patient> currentList = [];
+
+  int listLength = 0;
 
   Future<void> runApplication() async {
     setState(() {});
@@ -25,11 +35,16 @@ class _DoctorPageState extends State<DoctorPage> {
         AdminConstants.getAllPatientData, <String, String>{}).then((response) {
       if (response.statusCode == 200) {
         List tempPatients = jsonDecode(response.body);
-        print(tempPatients[0]);
-        for (var i in tempPatients) {
-          Patient.fromJson(jsonDecode(tempPatients[i]));
-          print("Iterations $i : ${tempPatients[i]}");
-          // patients.add(Patient);
+        int i = 0;
+        currentList = [];
+        listLength = 0;
+        for (var iteration in tempPatients) {
+          patientsList.add(Patient(iteration));
+          if (patientsList[i].active == activeList[categoryButtonNumber]) {
+            currentList.add(patientsList[i]);
+            listLength++;
+          }
+          i++;
         }
 
         setState(() {});
@@ -61,7 +76,7 @@ class _DoctorPageState extends State<DoctorPage> {
             padding: EdgeInsets.all(defaultPadding),
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: 2,
+                itemCount: currentList.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: EdgeInsets.only(bottom: defaultPadding),
@@ -71,7 +86,7 @@ class _DoctorPageState extends State<DoctorPage> {
                         color: Colors.white70,
                       ),
                       child: ListTile(
-                        title: Text('Patient Name',
+                        title: Text("currentList[index].details",
                             style: TextStyle(color: kPrimaryColor)),
                         onTap: () {
                           Navigator.push(
@@ -103,10 +118,10 @@ class _DoctorPageState extends State<DoctorPage> {
                   const SizedBox(width: defaultPadding / 2),
                   InkWell(
                     child: Container(
-                      child: const Text('Watched'),
+                      child: Text(activeList[0]),
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        color: catagoryButtonNumber == 1
+                        color: categoryButtonNumber == 0
                             ? kSecondaryColor
                             : Colors.white70,
                         border: Border.all(color: Colors.black26),
@@ -115,7 +130,7 @@ class _DoctorPageState extends State<DoctorPage> {
                     ),
                     onTap: () {
                       setState(() {
-                        catagoryButtonNumber = 1;
+                        categoryButtonNumber = 0;
                         category = 'Watched';
                       });
                       runApplication();
@@ -124,10 +139,10 @@ class _DoctorPageState extends State<DoctorPage> {
                   const SizedBox(width: defaultPadding / 2),
                   InkWell(
                     child: Container(
-                      child: const Text('Waiting for discharge'),
+                      child: Text(activeList[1]),
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        color: catagoryButtonNumber == 2
+                        color: categoryButtonNumber == 1
                             ? kSecondaryColor
                             : Colors.white70,
                         border: Border.all(color: Colors.black26),
@@ -136,7 +151,7 @@ class _DoctorPageState extends State<DoctorPage> {
                     ),
                     onTap: () {
                       setState(() {
-                        catagoryButtonNumber = 2;
+                        categoryButtonNumber = 1;
                         category = 'waiting_discharge';
                       });
                       runApplication();
@@ -145,10 +160,10 @@ class _DoctorPageState extends State<DoctorPage> {
                   const SizedBox(width: defaultPadding / 2),
                   InkWell(
                     child: Container(
-                      child: const Text('Waiting to be assigned'),
+                      child: Text(activeList[2]),
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        color: catagoryButtonNumber == 3
+                        color: categoryButtonNumber == 2
                             ? kSecondaryColor
                             : Colors.white70,
                         border: Border.all(color: Colors.black26),
@@ -157,7 +172,7 @@ class _DoctorPageState extends State<DoctorPage> {
                     ),
                     onTap: () {
                       setState(() {
-                        catagoryButtonNumber = 3;
+                        categoryButtonNumber = 2;
                         category = 'waiting_assigned';
                       });
                       runApplication();
@@ -166,10 +181,10 @@ class _DoctorPageState extends State<DoctorPage> {
                   const SizedBox(width: defaultPadding / 2),
                   InkWell(
                     child: Container(
-                      child: const Text('Not Patient'),
+                      child: Text(activeList[3]),
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        color: catagoryButtonNumber == 4
+                        color: categoryButtonNumber == 3
                             ? kSecondaryColor
                             : Colors.white70,
                         border: Border.all(color: Colors.black26),
@@ -178,7 +193,7 @@ class _DoctorPageState extends State<DoctorPage> {
                     ),
                     onTap: () {
                       setState(() {
-                        catagoryButtonNumber = 4;
+                        categoryButtonNumber = 3;
                         category = 'not_patient';
                       });
                       runApplication();

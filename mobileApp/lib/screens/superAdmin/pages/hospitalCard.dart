@@ -14,6 +14,8 @@ class HospitalCard extends StatefulWidget {
 }
 
 class _HospitalCardState extends State<HospitalCard> {
+  bool _inProgress = true;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -22,30 +24,32 @@ class _HospitalCardState extends State<HospitalCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          // Change to hospital Name
-          NetworkInfo.organizations[widget.index].orgFullName,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 15,
-              fontFamily: 'Inter'),
-        ),
-        SizedBox(height: 10),
-        Text(
-          NetworkInfo.createdAt,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 13,
-              fontFamily: 'Inter'),
-        ),
-      ],
-    );
+    return NetworkInfo.id == ''
+        ? CircularProgressIndicator()
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                // Change to hospital Name
+                NetworkInfo.organizations[widget.index].orgFullName,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontFamily: 'Inter'),
+              ),
+              SizedBox(height: 10),
+              Text(
+                NetworkInfo.createdAt,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontFamily: 'Inter'),
+              ),
+            ],
+          );
   }
 }

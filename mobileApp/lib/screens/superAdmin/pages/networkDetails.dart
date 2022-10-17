@@ -19,7 +19,8 @@ class NetworkDetails extends StatefulWidget {
 class _NetworkDetailsState extends State<NetworkDetails> {
   bool _inProgress = false;
   int currentCount = 0;
-  static Timer t = Timer(const Duration(seconds: 5), () {});
+  // static Timer t = Timer(const Duration(seconds: 5), () {});
+
   Future getNetworkDetails() async {
     setState(() {
       _inProgress = true;
@@ -37,6 +38,9 @@ class _NetworkDetailsState extends State<NetworkDetails> {
             if (response.statusCode == 200) {
               AllBlockChainNetworksResponse.fromJson(jsonDecode(response.body));
               print("Network Info:$AllBlockChainNetworksResponse");
+              setState(() {
+                _inProgress = false;
+              });
             } else {
               throw Exception('Failed to GET all networks');
             }
@@ -59,7 +63,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
   void initState() {
     // TODO: implement initState
     getNetworkDetails();
-    t = Timer(const Duration(seconds: 5), getNetworkDetails);
+    // t = Timer(const Duration(seconds: 5), getNetworkDetails);
     super.initState();
   }
 
@@ -67,14 +71,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
 
   @override
   Widget build(BuildContext context) {
-    // Future.delayed(Duration(seconds: 10)).then((value) => getNetworkDetails());
-
-    // print("Boolean ${NetworkInfo.networkCount != currentCount}");
-
-    return _inProgress == true &&
-            currentCount != AllBlockChainNetworksResponse.networkCount
-        // ||
-        // NetworkInfo.networkName == ''
+    return _inProgress == true
         ? Center(child: CircularProgressIndicator())
         : AllBlockChainNetworksResponse.networkCount > 0
             ? SingleChildScrollView(
@@ -87,7 +84,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
                     return GestureDetector(
                       child: NetworkCard(),
                       onTap: () {
-                        t.cancel();
+                        // t.cancel();
                         Navigator.push(
                             context,
                             MaterialPageRoute(

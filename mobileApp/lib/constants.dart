@@ -49,11 +49,11 @@ class ApiConstants {
   }
 
   static Future sendPOST(String URL, Map<String, String> body) {
-    // print("Sending Post request to : $URL");
+    print("Sending Post request to : $URL");
     Map<String, String> headers = getHeaders();
-    // print("Sending POST request to : $URL");
-    // print("With headers ${headers.toString()}");
-    // print("With body ${body.toString()}");
+    print("Sending POST request to : $URL");
+    print("With headers ${headers.toString()}");
+    print("With body ${body.toString()}");
     return http.post(Uri.parse("$URL"),
         headers: headers, body: jsonEncode(body));
   }
@@ -75,10 +75,10 @@ class ApiConstants {
   }
 
   static Future sendDELETE(String URL) {
-    //   print("Sending DELETE request to : $URL");
+    print("Sending DELETE request to : $URL");
     Map<String, String> headers = ApiConstants.getHeaders();
-    //   print("Sending DELETE request to : $URL");
-    //   print("With headers ${headers.toString()}");
+    print("Sending DELETE request to : $URL");
+    print("With headers ${headers.toString()}");
     return http.delete(Uri.parse("$URL"), headers: headers);
   }
 }
