@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:medichain/screens/admin/models/patients.dart';
 import 'package:medichain/screens/admin/pages/patientTile.dart';
 
 import '../../../constants.dart';
@@ -12,29 +15,31 @@ class DoctorPage extends StatefulWidget {
 
 class _DoctorPageState extends State<DoctorPage> {
   int catagoryButtonNumber = 1;
-  String category = 'Watched';
+  String category = 'Watc hed';
+
+  List<dynamic> patients = [];
 
   Future<void> runApplication() async {
     setState(() {});
     await AdminConstants.sendGET(
         AdminConstants.getAllPatientData, <String, String>{}).then((response) {
       if (response.statusCode == 200) {
-        setState(() {
-          // _isStarted = false;
-          // statusButtonColor = kSecondaryColor;
-          // networkStatus = "Not Started";
-        });
+        List tempPatients = jsonDecode(response.body);
+        print(tempPatients[0]);
+        for (var i in tempPatients) {
+          Patient.fromJson(jsonDecode(tempPatients[i]));
+          print("Iterations $i : ${tempPatients[i]}");
+          // patients.add(Patient);
+        }
+
+        setState(() {});
       } else {
-        throw Exception('Failed to run ${response.statusCode}');
+        throw Exception('Failed to GT ${response.statusCode}');
       }
     }).catchError((onError) {
-      setState(() {
-        // statusButtonColor = Colors.red;
-        // networkStatus = "Failed to Start";
-      });
-      print('Error in Start Network API: ${onError.toString()}');
+      setState(() {});
+      print('Error in GET Partients API: ${onError.toString()}');
     });
-    ;
   }
 
   void getCategoryList(String categories) {
