@@ -7,21 +7,21 @@ import 'package:medichain/screens/admin/pages/patientTile.dart';
 
 import '../../../constants.dart';
 
-class DoctorPage extends StatefulWidget {
-  const DoctorPage({super.key});
+class PatientPage extends StatefulWidget {
+  const PatientPage({super.key});
 
   @override
-  State<DoctorPage> createState() => _DoctorPageState();
+  State<PatientPage> createState() => _DoctorPageState();
 }
 
-class _DoctorPageState extends State<DoctorPage> {
-  int categoryButtonNumber = 1;
+class _DoctorPageState extends State<PatientPage> {
+  int categoryButtonNumber = 0;
   String category = 'Watched';
   List<String> activeList = [
     "Watched",
     "Waiting For Discharge",
     "Waiting To Be Assigned",
-    "Not Patient"
+    "Not Patients"
   ];
 
   List<Patient> patientsList = [];

@@ -19,11 +19,13 @@ class NetworkDetails extends StatefulWidget {
 class _NetworkDetailsState extends State<NetworkDetails> {
   bool _inProgress = false;
   int currentCount = 0;
-  // static Timer t = Timer(const Duration(seconds: 5), () {});
+  int networkCount = 0;
+  static Timer t = Timer(const Duration(seconds: 5), () {});
 
   Future getNetworkDetails() async {
     setState(() {
       _inProgress = true;
+      networkCount = 0;
     });
     await SuperAdminConstants.sendGET(
         SuperAdminConstants.NetworkCount, <String, String>{}).then((response) {
@@ -56,6 +58,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
     });
     setState(() {
       _inProgress = false;
+      networkCount = AllBlockChainNetworksResponse.networkCount;
     });
   }
 
@@ -63,8 +66,16 @@ class _NetworkDetailsState extends State<NetworkDetails> {
   void initState() {
     // TODO: implement initState
     getNetworkDetails();
-    // t = Timer(const Duration(seconds: 5), getNetworkDetails);
+    t = Timer(const Duration(seconds: 5), getNetworkDetails);
+    print("CALLED ME ME");
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    t.cancel();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   // Create network details class - store network details
@@ -73,18 +84,18 @@ class _NetworkDetailsState extends State<NetworkDetails> {
   Widget build(BuildContext context) {
     return _inProgress == true
         ? Center(child: CircularProgressIndicator())
-        : AllBlockChainNetworksResponse.networkCount > 0
+        : networkCount > 0
             ? SingleChildScrollView(
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: ScrollPhysics(),
-                  itemCount: AllBlockChainNetworksResponse.networkCount,
+                  itemCount: networkCount,
                   padding: const EdgeInsets.all(20.0),
                   itemBuilder: ((context, index) {
                     return GestureDetector(
                       child: NetworkCard(),
                       onTap: () {
-                        // t.cancel();
+                        t.cancel();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -106,7 +117,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
                       ),
                       const SizedBox(height: 5),
                       const Text(
-                        "No Hospitals Available Yet",
+                        "No Network Available Yet",
                         style: TextStyle(
                             fontSize: 22,
                             fontFamily: "Inter",
@@ -117,7 +128,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 30),
                         child: Text(
-                          "Try adding a new hospital into the network using the button below",
+                          "Try adding a new network using the button below",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontSize: 15,

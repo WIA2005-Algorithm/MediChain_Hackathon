@@ -16,7 +16,7 @@ class LoginAccess {
   factory LoginAccess.fromJson(Map<String, dynamic> json) {
     ApiConstants.accessToken = json['session']['accessToken'];
     ApiConstants.refreshToken = json['session']['refreshToken'];
-    ApiConstants.refreshToken = json['org'] ?? "";
+    ApiConstants.orgranizationID = json['org'] ?? "";
     ApiConstants.isOnBehalf = json['isOnBehalf'];
 
     return LoginAccess(

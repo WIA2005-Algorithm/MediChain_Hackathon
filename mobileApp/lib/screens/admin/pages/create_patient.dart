@@ -1,48 +1,58 @@
 import 'dart:convert';
+import 'package:date_field/date_field.dart';
+import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/log_in/login_screen.dart';
 import '../../../constants.dart';
 
-class CreatePatient extends StatelessWidget {
+class CreatePatient extends StatefulWidget {
   CreatePatient({super.key});
 
+  @override
+  State<CreatePatient> createState() => _CreatePatientState();
+}
+
+class _CreatePatientState extends State<CreatePatient> {
+  int DOBvalue = 0;
+
   Future createPatientRequest(BuildContext context) async {
-    Map loginDetails = {
+    Map<String, dynamic> loginDetails = {
       "org": ApiConstants.orgranizationID,
       "ID": "QPT4PPUM",
       "password": passwordTextEditingController.text,
       "TYPE": "patient"
     };
-    Map personalDetails = {
+    Map<String, dynamic> personalDetails = {
       "firstName": patientFullNameController.text,
       "middleName": patientMiddleNameController.text,
       "lastName": patientLastNameController.text,
       "email": patientEmailNameController.text,
-      "DOB": dateOfBirthNameController.text,
-      "gender": patientGenderController.text,
-      "maritalStatus": maritalStatusController.text,
+      "DOB": DOBvalue,
+      "gender": selectedGender,
+      "maritalStatus": selectedMaritial,
       "passport": patientIDController.text,
     };
-    Map address = {
+    Map<String, dynamic> address = {
       "street1": street1Controller.text,
       "street2": street2Controller.text,
       "postcode": postalCodeController.text,
-      "country": countryController.text,
+      "country": selectedCountries,
       "state": "Wilayah Persekutuan",
       "city": "Kuala Lumpur"
     };
-    Map contactDetails = {
+    Map<String, dynamic> contactDetails = {
       "mobile": mobileNumberController.text,
       "whatsapp": whatsappNumberController.text,
-      "other": whatsappNumberController.text,
+      "other": alternateNumberController.text,
     };
 
     await AdminConstants.sendPOST(
         AdminConstants.addNewPatientOrDoctorAPI, <String, String>{
       "loginDetails": jsonEncode(loginDetails),
-      "personalDetails": jsonEncode(loginDetails),
-      "address": jsonEncode(loginDetails),
-      "contactDetails": jsonEncode(loginDetails),
+      "personalDetails": jsonEncode(personalDetails),
+      "address": jsonEncode(address),
+      "contactDetails": jsonEncode(contactDetails),
+      "onBehalf": jsonEncode(ApiConstants.isOnBehalf),
     }).then((response) async {
       print("Response code: ${response.statusCode}");
 
@@ -58,31 +68,74 @@ class CreatePatient extends StatelessWidget {
           .showSnackBar(SnackBar(content: Text(onError.toString())));
       print('Error : ${onError.toString()}');
     });
-    // ScaffoldMessenger.of(context)
-    //     .showSnackBar(SnackBar(content: Text(snackBarString)));
   }
 
   TextEditingController patientIDController = TextEditingController();
+
   TextEditingController patientalternateIDController = TextEditingController();
+
   TextEditingController patientFullNameController = TextEditingController();
+
   TextEditingController patientMiddleNameController = TextEditingController();
+
   TextEditingController patientLastNameController = TextEditingController();
+
   TextEditingController patientEmailNameController = TextEditingController();
+
   TextEditingController dateOfBirthNameController = TextEditingController();
-  TextEditingController patientGenderController = TextEditingController();
+
+  // TextEditingController patientGenderController = TextEditingController();
   TextEditingController maritalStatusController = TextEditingController();
 
   TextEditingController street1Controller = TextEditingController();
+
   TextEditingController street2Controller = TextEditingController();
+
   TextEditingController postalCodeController = TextEditingController();
+
   TextEditingController countryController = TextEditingController();
+
   TextEditingController mobileNumberController = TextEditingController();
+
   TextEditingController whatsappNumberController = TextEditingController();
 
-  List<String> gender = [
-    "Male",
-    "Female",
-  ];
+  TextEditingController alternateNumberController = TextEditingController();
+
+  SingleValueDropDownController patientGenderController =
+      SingleValueDropDownController();
+
+  String? selectedGender;
+
+  List<DropdownMenuItem<String>> get genderItems {
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem(child: Text("Male"), value: "Male"),
+      DropdownMenuItem(child: Text("Female"), value: "Female"),
+    ];
+    return menuItems;
+  }
+
+  String? selectedMaritial;
+
+  List<DropdownMenuItem<String>> get maritialItems {
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem(child: Text("Single"), value: "Single"),
+      DropdownMenuItem(child: Text("Married"), value: "Married"),
+      DropdownMenuItem(child: Text("Divorced"), value: "Divorced"),
+    ];
+    return menuItems;
+  }
+
+  String? selectedCountries;
+
+  List<DropdownMenuItem<String>> get countryItems {
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem(child: Text("Malaysia"), value: "Malaysia"),
+      DropdownMenuItem(child: Text("Singapore"), value: "Singapore"),
+      DropdownMenuItem(child: Text("Thailand"), value: "Thailand"),
+      DropdownMenuItem(child: Text("Indonesia"), value: "Indonesia"),
+    ];
+    return menuItems;
+  }
 
   List<String> countries = [
     "Malaysia",
@@ -91,6 +144,7 @@ class CreatePatient extends StatelessWidget {
     "Indonesia",
   ];
 
+  String? selectedStates = "Malaysia";
   List<String> states = [
     "Selangor",
     "Wilayah Persekutuan",
@@ -98,6 +152,28 @@ class CreatePatient extends StatelessWidget {
     "Johor",
     "Pahang",
   ];
+
+  @override
+  void dispose() {
+    patientIDController.dispose();
+    patientalternateIDController.dispose();
+    patientFullNameController.dispose();
+    patientMiddleNameController.dispose();
+    patientLastNameController.dispose();
+    patientEmailNameController.dispose();
+    dateOfBirthNameController.dispose();
+    maritalStatusController.dispose();
+    street1Controller.dispose();
+    street2Controller.dispose();
+    postalCodeController.dispose();
+    countryController.dispose();
+    mobileNumberController.dispose();
+    whatsappNumberController.dispose();
+    alternateNumberController.dispose();
+    patientGenderController.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +205,7 @@ class CreatePatient extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: defaultPadding),
+              const SizedBox(height: defaultPadding * 2),
               Text(
                 "Account Signup Details",
                 style: kSectionTextStyle,
@@ -142,7 +218,7 @@ class CreatePatient extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: defaultPadding),
+              const SizedBox(height: defaultPadding * 2),
               TextFormField(
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
@@ -152,7 +228,7 @@ class CreatePatient extends StatelessWidget {
                   hintText: "NRIC/Passport No.",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.edit),
+                    child: Icon(Icons.tag),
                   ),
                 ),
               ),
@@ -160,8 +236,9 @@ class CreatePatient extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  'A valid hospital name contains only contains only alpabets and spaces',
+                  'A valid NRIC/Passport number contains only contains only numbers and alpabets including hyphens for NRIC number',
                   style: TextStyle(color: Colors.white54),
+                  textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: defaultPadding),
@@ -174,7 +251,7 @@ class CreatePatient extends StatelessWidget {
                   hintText: "Alternate Key For Patient",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.tag),
+                    child: Icon(Icons.lock),
                   ),
                 ),
               ),
@@ -182,8 +259,9 @@ class CreatePatient extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  'A valid network name contains atleast 5 characters with no spaces, no special characters in the beginning or end. Allowed special characters include ‘underscore’ and  ‘dot’. ',
+                  'This alternate key acts as first time login for patient. A valid username contains atleast 8 characters with 1 uppercase character, 1 lowercase charcter, 2 special character and 1 digit with no restrictions and dot character',
                   style: TextStyle(color: Colors.white54),
+                  textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(height: defaultPadding / 2),
@@ -220,7 +298,7 @@ class CreatePatient extends StatelessWidget {
                   hintText: "Full Name",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.language),
+                    // child: Icon(Icons.language),
                   ),
                 ),
               ),
@@ -234,7 +312,7 @@ class CreatePatient extends StatelessWidget {
                   hintText: "Middle Name",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.language),
+                    // child: Icon(Icons.language),
                   ),
                 ),
               ),
@@ -248,7 +326,7 @@ class CreatePatient extends StatelessWidget {
                   hintText: "Last/Family Name",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.flag),
+                    // child: Icon(Icons.flag),
                   ),
                 ),
               ),
@@ -262,44 +340,80 @@ class CreatePatient extends StatelessWidget {
                   hintText: "Email Address",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.flag),
+                    child: Icon(Icons.alternate_email_sharp),
                   ),
                 ),
               ),
               const SizedBox(height: defaultPadding),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                cursorColor: kPrimaryColor,
-                controller: dateOfBirthNameController,
+              DateTimeFormField(
                 decoration: const InputDecoration(
-                  hintText: "Date Of Birth",
+                  hintStyle: TextStyle(color: Colors.black45),
+                  errorStyle: TextStyle(color: Colors.redAccent),
+                  // border: OutlineInputBorder(),
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.flag),
+                    child: Icon(Icons.event_note),
                   ),
+                  labelText: 'Date Of Birth',
                 ),
+                mode: DateTimeFieldPickerMode.date,
+                autovalidateMode: AutovalidateMode.always,
+                validator: (e) =>
+                    (e?.day ?? 0) == 1 ? 'Please not the first day' : null,
+                onDateSelected: (DateTime value) {
+                  DOBvalue = value.millisecondsSinceEpoch;
+                },
               ),
               const SizedBox(height: defaultPadding),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                cursorColor: kPrimaryColor,
-                controller: patientGenderController,
-                decoration: const InputDecoration(
-                  hintText: "Gender",
-                ),
-              ),
+
+              DropdownButtonFormField(
+                  hint: Text("Gender"),
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  validator: (value) =>
+                      value == null ? "Select a gender" : null,
+                  value: selectedGender,
+                  items: genderItems,
+                  onChanged: (newValue) {
+                    print(newValue);
+                    setState(() {
+                      selectedGender = newValue.toString()!;
+                    });
+                  }),
+
               const SizedBox(height: defaultPadding),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                cursorColor: kPrimaryColor,
-                controller: maritalStatusController,
-                decoration: const InputDecoration(
-                  hintText: "Marital Status",
-                ),
-              ),
+
+              DropdownButtonFormField(
+                  hint: Text("Marital Status"),
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    filled: true,
+                  ),
+                  validator: (value) =>
+                      value == null ? "Select a status" : null,
+                  value: selectedMaritial,
+                  items: maritialItems,
+                  onChanged: (newValue) {
+                    print(newValue);
+                    setState(() {
+                      selectedMaritial = newValue.toString()!;
+                    });
+                  }),
+
+              // TextFormField(
+              //   keyboardType: TextInputType.emailAddress,
+              //   textInputAction: TextInputAction.next,
+              //   cursorColor: kPrimaryColor,
+              //   controller: maritalStatusController,
+              //   decoration: const InputDecoration(
+              //     hintText: "Marital Status",
+              //   ),
+              // ),
               const SizedBox(height: defaultPadding),
 
               // #######################################################################
@@ -355,15 +469,33 @@ class CreatePatient extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: defaultPadding),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                cursorColor: kPrimaryColor,
-                controller: countryController,
-                decoration: const InputDecoration(
-                  hintText: "Country",
-                ),
-              ),
+              // TextFormField(
+              //   keyboardType: TextInputType.emailAddress,
+              //   textInputAction: TextInputAction.next,
+              //   cursorColor: kPrimaryColor,
+              //   controller: countryController,
+              //   decoration: const InputDecoration(
+              //     hintText: "Country",
+              //   ),
+              // ),
+              DropdownButtonFormField(
+                  hint: Text("Country"),
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  validator: (value) =>
+                      value == null ? "Select a country" : null,
+                  value: selectedCountries,
+                  items: countryItems,
+                  onChanged: (newValue) {
+                    print(newValue);
+                    setState(() {
+                      selectedCountries = newValue.toString()!;
+                    });
+                  }),
+
               const SizedBox(height: defaultPadding),
               // #######################################################################
               Divider(
@@ -407,11 +539,20 @@ class CreatePatient extends StatelessWidget {
                   hintText: "Whatsapp Number for Easier Access",
                 ),
               ),
+              const SizedBox(height: defaultPadding),
+              TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                cursorColor: kPrimaryColor,
+                controller: alternateNumberController,
+                decoration: const InputDecoration(
+                  hintText: "Alternative Number",
+                ),
+              ),
               const SizedBox(height: defaultPadding * 2),
 
               ElevatedButton(
                 onPressed: () {
-                  // getNetworkDetails();
                   createPatientRequest(context);
                 },
                 style: ElevatedButton.styleFrom(

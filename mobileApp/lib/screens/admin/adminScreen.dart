@@ -27,7 +27,7 @@ class _AdminScreenState extends State<AdminScreen> {
     // TODO: implement initState
     _widgetOptions = [
       AdminOverview(),
-      DoctorPage(),
+      PatientPage(),
       Text(
         'Index 2: Notification',
         style: optionStyle,

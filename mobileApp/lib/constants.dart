@@ -25,7 +25,7 @@ const kSectionTextStyle = TextStyle(
     fontSize: 20,
     fontFamily: 'Inter');
 
-const String kApibaseURL = "http://172.27.237.56:8080/api";
+const String kApibaseURL = "http://172.27.231.239:8080/api";
 
 // const kPrimaryColor = Color(0xFF6F35A5);
 const kPrimaryLightColor = Color(0xFFF1E6FF);
@@ -150,7 +150,7 @@ class AdminConstants {
   static String getHospitalsEnrolled = "getEnrolledHospitals";
   static String addNewPatientOrDoctorAPI = "addNewPatient/onBehalf";
   static String loginOnBehalfOF = "addNewPatient/onBehalf/Change";
-  static String patientLoginAuth = "network/stop";
+  static String patientLoginAuth = "login";
   static String doctorLoginAuth = "login";
   static String getAllPatientData = "getAllPatients";
   static String getAllDoctorData = "getAllDoctors";

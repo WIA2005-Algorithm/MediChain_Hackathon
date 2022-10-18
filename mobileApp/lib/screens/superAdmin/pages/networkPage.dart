@@ -21,6 +21,10 @@ class _NetworkPageState extends State<NetworkPage> {
   int _isStarted = 300;
   bool _customTileExpanded = false;
   late Timer t;
+  int hospitalCount = 0;
+
+  List<String> orgName = [];
+  List<String> createdAt = [];
 
   Future startNetwork() async {
     setState(() {
@@ -103,7 +107,7 @@ class _NetworkPageState extends State<NetworkPage> {
       case 300:
         setState(() {
           statusButtonColor = Colors.grey;
-          buttonTextColor = Colors.black;
+          // buttonTextColor = Colors.black;
         });
         break;
     }
@@ -148,7 +152,8 @@ class _NetworkPageState extends State<NetworkPage> {
         .then((response) {
       print(response.statusCode);
       if (response.statusCode == 200) {
-        getNetworkOrgDetails();
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Admin Enrolled successfully')));
         setState(() {
           _inProgress = false;
         });
@@ -157,42 +162,60 @@ class _NetworkPageState extends State<NetworkPage> {
       }
     }).catchError((onError) {
       print('Error in Admin Enrollment API: ${onError.toString()}');
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(onError.toString())));
     });
+    getNetworkOrgDetails();
+
     setState(() {
       _inProgress = false;
     });
   }
 
-  Future deleteOrganization() async {
-    await Future.delayed(Duration(seconds: 2));
+  Future deleteOrganization(int i) async {
     await SuperAdminConstants.sendDELETE(
-      SuperAdminConstants.deleteOrganization,
+      SuperAdminConstants.deleteOrganization +
+          "/${NetworkInfo.networkName}/${NetworkInfo.organizations[i].orgId}/${NetworkInfo.organizations[i].adminID}",
     ).then((response) {
+      print(response.body);
+
       if (response.statusCode == 200) {
         getNetworkOrgDetails();
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Deleted Organization successfully')));
       } else {
         throw Exception('Failed to Delete');
       }
     }).catchError((onError) {
       print('Error in Delete Network API: ${onError.toString()}');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(onError.toString())));
     });
+    getNetworkOrgDetails();
   }
 
   Future getNetworkOrgDetails() async {
+    print("Api run");
     setState(() {
       _inProgress = true;
+      hospitalCount = 0;
     });
+    orgName = [];
+    createdAt = [];
     await SuperAdminConstants.sendGET(
         SuperAdminConstants.NetworkExists, <String, String>{
       "networkName": AllBlockChainNetworksResponse.networkName
     }).then((response) {
       if (response.statusCode == 200) {
         NetworkInfo.fromJson(jsonDecode(response.body));
+        // orgName.add(NetworkInfo.)
         // print(
         //     'WE HAVE SUCCEEDED : ${NetworkInfo.organizations[0].orgFullName} $_inProgress');
         // print(NetworkInfo.networkName);
         setState(() {
           _inProgress = false;
+          hospitalCount = NetworkInfo.hospitalCount;
         });
       } else {
         throw Exception('Failed to GET ORGANIZATIONS');
@@ -210,12 +233,10 @@ class _NetworkPageState extends State<NetworkPage> {
   @override
   void initState() {
     // TODO: implement initState
-    getNetworkOrgDetails();
     checkNetworkStatus();
     super.initState();
     getNetworkOrgDetails();
-
-    // t = Timer(const Duration(seconds: 2), getNetworkOrgDetails);
+    t = Timer(const Duration(seconds: 5), getNetworkOrgDetails);
   }
 
   @override
@@ -225,6 +246,7 @@ class _NetworkPageState extends State<NetworkPage> {
     statusButtonColor = Colors.grey;
     _isStarted = 300;
     _inProgress = false;
+    t.cancel();
     super.dispose();
   }
 
@@ -353,20 +375,21 @@ class _NetworkPageState extends State<NetworkPage> {
   Widget enrollButton(int index) {
     return Container(
       // width: 150,
-      // height: 30,
-      padding: EdgeInsets.all(defaultPadding),
+      height: 60,
+      padding: EdgeInsets.only(top: defaultPadding),
       child: ElevatedButton(
         onPressed: () {
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
               backgroundColor: kBackgroundColor,
-              title: const Text('Enroll Organisation',
+              title: const Text('Enroll Admins',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 17,
                       fontFamily: 'Inter')),
+              // ${NetworkInfo.organizations[index].adminID}
               content: Text(
                   'Are you sure you want to enroll ${NetworkInfo.organizations[index].adminID} of ${NetworkInfo.networkName}?',
                   style: TextStyle(
@@ -404,10 +427,13 @@ class _NetworkPageState extends State<NetworkPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            primary: Colors.white,
+            primary: kSecondaryColor,
             elevation: 0),
         child: Text(
+          // NetworkInfo.organizations[index].enrolled == 0
+          //     ?
           "Enroll Admins".toUpperCase(),
+          // : "Admins Enrolled".toUpperCase(),
           textAlign: TextAlign.center,
           style: TextStyle(color: Colors.black, fontSize: 12),
         ),
@@ -418,8 +444,8 @@ class _NetworkPageState extends State<NetworkPage> {
   Widget deleteButton(int index) {
     return Container(
       // width: 150,
-      // height: 30,
-      padding: EdgeInsets.all(defaultPadding),
+      height: 60,
+      padding: EdgeInsets.only(top: defaultPadding),
       child: ElevatedButton(
         onPressed: () {
           showDialog<String>(
@@ -451,7 +477,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    deleteOrganization();
+                    deleteOrganization(index);
                     Navigator.pop(context, 'OK');
                   },
                   child: const Text('OK',
@@ -469,12 +495,12 @@ class _NetworkPageState extends State<NetworkPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            primary: Colors.white,
+            primary: Colors.white70,
             elevation: 0),
         child: Text(
           "Delete Organization".toUpperCase(),
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.black, fontSize: 12),
+          style: TextStyle(color: Colors.white, fontSize: 12),
         ),
       ),
     );
@@ -498,7 +524,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
               ),
             ),
-            body: AllBlockChainNetworksResponse.hospitalCount != 0
+            body: hospitalCount != 0
                 ? SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,9 +560,9 @@ class _NetworkPageState extends State<NetworkPage> {
                                 case 300:
                                   break;
                               }
-                              _isStarted == true
-                                  ? stopNetwork()
-                                  : startNetwork();
+                              // _isStarted == true
+                              //     ? stopNetwork()
+                              //     : startNetwork();
                             },
                             style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -544,16 +570,19 @@ class _NetworkPageState extends State<NetworkPage> {
                                 ),
                                 primary: statusButtonColor,
                                 elevation: 0),
-                            child: Text(
-                              networkStatus.toUpperCase(),
-                              style: TextStyle(color: buttonTextColor),
-                            ),
+                            child: _isStarted == 300
+                                ? CircularProgressIndicator(
+                                    color: kSecondaryColor)
+                                : Text(
+                                    networkStatus.toUpperCase(),
+                                    style: TextStyle(color: buttonTextColor),
+                                  ),
                           ),
                         ),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: ScrollPhysics(),
-                          itemCount: NetworkInfo.hospitalCount,
+                          itemCount: hospitalCount,
                           padding: const EdgeInsets.all(20.0),
                           itemBuilder: ((context, index) {
                             return Padding(
@@ -564,7 +593,34 @@ class _NetworkPageState extends State<NetworkPage> {
                                 child: ExpansionTile(
                                   backgroundColor: kPrimaryColor,
                                   childrenPadding: EdgeInsets.all(10),
-                                  title: HospitalCard(index: index),
+                                  title: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        // Change to hospital Name
+                                        NetworkInfo
+                                            .organizations[index].orgFullName,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            fontSize: 15,
+                                            fontFamily: 'Inter'),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        NetworkInfo
+                                            .organizations[index].createdAt,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                            fontSize: 13,
+                                            fontFamily: 'Inter'),
+                                      ),
+                                    ],
+                                  ),
                                   children: [expanedContent(index)],
                                   trailing: ImageIcon(
                                     AssetImage(_customTileExpanded

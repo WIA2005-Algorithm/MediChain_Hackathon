@@ -24,9 +24,7 @@ class _HospitalCardState extends State<HospitalCard> {
 
   @override
   Widget build(BuildContext context) {
-    return NetworkInfo.id == ''
-        ? CircularProgressIndicator()
-        : Column(
+    return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
