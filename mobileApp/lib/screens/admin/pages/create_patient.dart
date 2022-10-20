@@ -536,7 +536,7 @@ class _CreatePatientState extends State<CreatePatient> {
                 cursorColor: kPrimaryColor,
                 controller: whatsappNumberController,
                 decoration: const InputDecoration(
-                  hintText: "Whatsapp Number for Easier Access",
+                  hintText: "Whatsapp Number (Optional)",
                 ),
               ),
               const SizedBox(height: defaultPadding),
@@ -546,7 +546,7 @@ class _CreatePatientState extends State<CreatePatient> {
                 cursorColor: kPrimaryColor,
                 controller: alternateNumberController,
                 decoration: const InputDecoration(
-                  hintText: "Alternative Number",
+                  hintText: "Alternative Number (Optional)",
                 ),
               ),
               const SizedBox(height: defaultPadding * 2),

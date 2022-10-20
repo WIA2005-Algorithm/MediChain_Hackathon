@@ -43,11 +43,13 @@ class _SuperAdminOverviewState extends State<SuperAdminOverview> {
                 ),
               ),
             ),
-            body: NetworkDetails(),
+            body: const NetworkDetails(),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CreateNetwork()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateNetwork()));
               },
               label: const Text(
                 'Create',

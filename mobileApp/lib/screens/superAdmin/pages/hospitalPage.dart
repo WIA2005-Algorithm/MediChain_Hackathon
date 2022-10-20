@@ -2,29 +2,29 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/superAdmin/pages/create_hospital.dart';
-import 'package:medichain/screens/superAdmin/pages/hospitalCard.dart';
 import '../../../constants.dart';
 import '../models/network_info.dart';
 
 class NetworkPage extends StatefulWidget {
-  const NetworkPage({super.key});
-
+  const NetworkPage({Key? key, required this.networkName}) : super(key: key);
+  final String networkName;
   @override
   State<NetworkPage> createState() => _NetworkPageState();
 }
 
 class _NetworkPageState extends State<NetworkPage> {
+  int hospitalCount = 0;
   String networkStatus = 'Loading';
   Color statusButtonColor = Colors.grey;
   Color buttonTextColor = Colors.black;
   bool _inProgress = false;
   int _isStarted = 300;
   bool _customTileExpanded = false;
-  late Timer t;
-  int hospitalCount = 0;
-
   List<String> orgName = [];
   List<String> createdAt = [];
+  Timer? _timer;
+  Timer? _timer2;
+  NetworkInfo? networkHospitals;
 
   Future startNetwork() async {
     setState(() {
@@ -32,10 +32,8 @@ class _NetworkPageState extends State<NetworkPage> {
       statusButtonColor = Colors.grey;
       networkStatus = "Starting Network";
     });
-    await SuperAdminConstants.sendPOST(
-        SuperAdminConstants.startNetwork, <String, String>{
-      "networkName": AllBlockChainNetworksResponse.networkName
-    }).then((response) {
+    await SuperAdminConstants.sendPOST(SuperAdminConstants.startNetwork,
+        <String, String>{"networkName": widget.networkName}).then((response) {
       if (response.statusCode == 200) {
         checkNetworkStatus();
       } else {
@@ -50,6 +48,7 @@ class _NetworkPageState extends State<NetworkPage> {
       });
       print('Error in Start Network API: ${onError.toString()}');
     });
+    checkNetworkStatus();
   }
 
   Future stopNetwork() async {
@@ -60,7 +59,7 @@ class _NetworkPageState extends State<NetworkPage> {
     });
     // await Future.delayed(Duration(seconds: 2));
     await SuperAdminConstants.sendPOST(SuperAdminConstants.stopNetwork,
-            <String, String>{"networkName": NetworkInfo.networkName})
+            <String, String>{"networkName": networkHospitals!.networkName})
         .then((response) {
       if (response.statusCode == 200) {
         checkNetworkStatus();
@@ -106,8 +105,7 @@ class _NetworkPageState extends State<NetworkPage> {
       // Starting or Stopping : Pending
       case 300:
         setState(() {
-          statusButtonColor = Colors.grey;
-          // buttonTextColor = Colors.black;
+          statusButtonColor = Color.fromARGB(255, 41, 53, 66);
         });
         break;
     }
@@ -142,15 +140,14 @@ class _NetworkPageState extends State<NetworkPage> {
     });
   }
 
-  Future enrollAdmin(String orgName) async {
+  Future enrollAdmin(int index) async {
     setState(() {
       _inProgress = true;
     });
     print(orgName);
     await SuperAdminConstants.sendPOST(
-            SuperAdminConstants.enrollAdmin + "/$orgName", <String, String>{})
-        .then((response) {
-      print(response.statusCode);
+        "${SuperAdminConstants.enrollAdmin}/${networkHospitals!.organizations[index].orgName}",
+        <String, String>{}).then((response) {
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Admin Enrolled successfully')));
@@ -175,15 +172,14 @@ class _NetworkPageState extends State<NetworkPage> {
 
   Future deleteOrganization(int i) async {
     await SuperAdminConstants.sendDELETE(
-      SuperAdminConstants.deleteOrganization +
-          "/${NetworkInfo.networkName}/${NetworkInfo.organizations[i].orgId}/${NetworkInfo.organizations[i].adminID}",
+      "${SuperAdminConstants.deleteOrganization}/${networkHospitals!.networkName}/${networkHospitals!.organizations[i].orgId}/${networkHospitals!.organizations[i].adminID}",
     ).then((response) {
       print(response.body);
-
       if (response.statusCode == 200) {
         getNetworkOrgDetails();
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Deleted Organization successfully')));
+        stopNetwork();
       } else {
         throw Exception('Failed to Delete');
       }
@@ -196,35 +192,27 @@ class _NetworkPageState extends State<NetworkPage> {
   }
 
   Future getNetworkOrgDetails() async {
-    print("Api run");
     setState(() {
       _inProgress = true;
       hospitalCount = 0;
     });
     orgName = [];
     createdAt = [];
-    await SuperAdminConstants.sendGET(
-        SuperAdminConstants.NetworkExists, <String, String>{
-      "networkName": AllBlockChainNetworksResponse.networkName
-    }).then((response) {
+    await SuperAdminConstants.sendGET(SuperAdminConstants.NetworkExists,
+        <String, String>{"networkName": widget.networkName}).then((response) {
       if (response.statusCode == 200) {
-        NetworkInfo.fromJson(jsonDecode(response.body));
-        // orgName.add(NetworkInfo.)
-        // print(
-        //     'WE HAVE SUCCEEDED : ${NetworkInfo.organizations[0].orgFullName} $_inProgress');
-        // print(NetworkInfo.networkName);
         setState(() {
           _inProgress = false;
           hospitalCount = NetworkInfo.hospitalCount;
+          networkHospitals = NetworkInfo(jsonDecode(response.body));
         });
+        print(networkHospitals!.id);
       } else {
         throw Exception('Failed to GET ORGANIZATIONS');
       }
     }).catchError((onError) {
       print('Error in GET ORGANIZATIONS API: ${onError.toString()}');
     });
-    // print(
-    //     "Hospital Count ${AllBlockChainNetworksResponse.hospitalCount} $_inProgress");
     setState(() {
       _inProgress = false;
     });
@@ -232,21 +220,26 @@ class _NetworkPageState extends State<NetworkPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    getNetworkOrgDetails();
     checkNetworkStatus();
     super.initState();
+
     getNetworkOrgDetails();
-    t = Timer(const Duration(seconds: 5), getNetworkOrgDetails);
+    checkNetworkStatus();
+    _timer = Timer.periodic(
+        const Duration(seconds: 30), (_) => getNetworkOrgDetails());
+    _timer2 = Timer.periodic(
+        const Duration(seconds: 10), (_) => checkNetworkStatus());
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     networkStatus = 'Loading';
     statusButtonColor = Colors.grey;
     _isStarted = 300;
     _inProgress = false;
-    t.cancel();
+    _timer?.cancel();
+    _timer2?.cancel();
     super.dispose();
   }
 
@@ -280,7 +273,7 @@ class _NetworkPageState extends State<NetworkPage> {
           ),
           Text(
             // Change to hospital Name
-            NetworkInfo.organizations[index].adminID,
+            networkHospitals!.organizations[index].adminID,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -301,7 +294,7 @@ class _NetworkPageState extends State<NetworkPage> {
           ),
           Text(
             // Change to hospital Name
-            NetworkInfo.organizations[index].adminpassword,
+            networkHospitals!.organizations[index].adminpassword,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -334,7 +327,7 @@ class _NetworkPageState extends State<NetworkPage> {
           ),
           Text(
             // Change to hospital Name
-            NetworkInfo.organizations[index].state,
+            networkHospitals!.organizations[index].state,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -355,7 +348,7 @@ class _NetworkPageState extends State<NetworkPage> {
           ),
           Text(
             // Change to hospital Name
-            NetworkInfo.organizations[index].country,
+            networkHospitals!.organizations[index].country,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -379,49 +372,52 @@ class _NetworkPageState extends State<NetworkPage> {
       padding: EdgeInsets.only(top: defaultPadding),
       child: ElevatedButton(
         onPressed: () {
-          showDialog<String>(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              backgroundColor: kBackgroundColor,
-              title: const Text('Enroll Admins',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontFamily: 'Inter')),
-              // ${NetworkInfo.organizations[index].adminID}
-              content: Text(
-                  'Are you sure you want to enroll ${NetworkInfo.organizations[index].adminID} of ${NetworkInfo.networkName}?',
-                  style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      color: Colors.white70,
-                      fontSize: 15,
-                      fontFamily: 'Inter')),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.pop(context, 'Cancel'),
-                  child: const Text('Cancel',
-                      style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white70,
-                          fontSize: 15,
-                          fontFamily: 'Inter')),
-                ),
-                TextButton(
-                  onPressed: () {
-                    enrollAdmin(NetworkInfo.organizations[index].orgName);
-                    Navigator.pop(context, 'OK');
-                  },
-                  child: const Text('OK',
-                      style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white70,
-                          fontSize: 15,
-                          fontFamily: 'Inter')),
-                ),
-              ],
-            ),
-          );
+          _isStarted != 200 && _isStarted != 400
+              ? ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Please stop the network before proceeding")))
+              : showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    backgroundColor: kBackgroundColor,
+                    title: const Text('Enroll Admins',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontFamily: 'Inter')),
+                    // ${NetworkInfo.organizations[index].adminID}
+                    content: Text(
+                        'Are you sure you want to enroll ${networkHospitals!.organizations[index].adminID} of ${networkHospitals!.networkName}?',
+                        style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            color: Colors.white70,
+                            fontSize: 15,
+                            fontFamily: 'Inter')),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                        child: const Text('Cancel',
+                            style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white70,
+                                fontSize: 15,
+                                fontFamily: 'Inter')),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          enrollAdmin(index);
+                          Navigator.pop(context, 'OK');
+                        },
+                        child: const Text('OK',
+                            style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white70,
+                                fontSize: 15,
+                                fontFamily: 'Inter')),
+                      ),
+                    ],
+                  ),
+                );
         },
         style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -459,7 +455,7 @@ class _NetworkPageState extends State<NetworkPage> {
                       fontSize: 17,
                       fontFamily: 'Inter')),
               content: Text(
-                  'Are you sure you want to delete ${NetworkInfo.organizations[index].orgFullName} from ${NetworkInfo.networkName}?',
+                  'Are you sure you want to delete ${networkHospitals!.organizations[index].orgFullName} from ${networkHospitals!.networkName}? Please be aware that the network will be stopped if it was started.',
                   style: TextStyle(
                       fontWeight: FontWeight.normal,
                       color: Colors.white70,
@@ -495,7 +491,7 @@ class _NetworkPageState extends State<NetworkPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            primary: Colors.white70,
+            primary: Colors.red,
             elevation: 0),
         child: Text(
           "Delete Organization".toUpperCase(),
@@ -508,12 +504,15 @@ class _NetworkPageState extends State<NetworkPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _inProgress == true
+    // setState(() {
+    //   networkName = widget.networkName;
+    // });
+    return networkHospitals == null
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
             appBar: AppBar(
               centerTitle: true,
-              title: Text("${AllBlockChainNetworksResponse.networkName}"),
+              title: Text(networkHospitals!.networkName),
               elevation: 0,
               backgroundColor: kBackgroundColor,
               bottom: const PreferredSize(
@@ -546,8 +545,6 @@ class _NetworkPageState extends State<NetworkPage> {
                               horizontal: defaultPadding * 2),
                           child: ElevatedButton(
                             onPressed: () {
-                              print(
-                                  "Network Message ${NetworkInfo.networkMessage}");
                               switch (_isStarted) {
                                 case 200:
                                 case 400:
@@ -572,7 +569,7 @@ class _NetworkPageState extends State<NetworkPage> {
                                 elevation: 0),
                             child: _isStarted == 300
                                 ? CircularProgressIndicator(
-                                    color: kSecondaryColor)
+                                    color: Color.fromARGB(255, 71, 85, 101))
                                 : Text(
                                     networkStatus.toUpperCase(),
                                     style: TextStyle(color: buttonTextColor),
@@ -599,7 +596,7 @@ class _NetworkPageState extends State<NetworkPage> {
                                     children: [
                                       Text(
                                         // Change to hospital Name
-                                        NetworkInfo
+                                        networkHospitals!
                                             .organizations[index].orgFullName,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -610,7 +607,7 @@ class _NetworkPageState extends State<NetworkPage> {
                                       ),
                                       SizedBox(height: 10),
                                       Text(
-                                        NetworkInfo
+                                        networkHospitals!
                                             .organizations[index].createdAt,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -678,8 +675,16 @@ class _NetworkPageState extends State<NetworkPage> {
                   ),
             floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CreateHospital()));
+                _isStarted == 0 || _isStarted == 500
+                    ? Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CreateHospital(
+                                  networkName: networkHospitals!.networkName,
+                                )))
+                    : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content:
+                            Text("Please stop the network before proceeding")));
               },
               label: const Text(
                 'Add Hospital',

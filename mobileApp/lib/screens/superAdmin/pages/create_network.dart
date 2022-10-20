@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import '../models/network_info.dart';
+import 'networkDetails.dart';
 
 class CreateNetwork extends StatefulWidget {
   const CreateNetwork({super.key});
@@ -17,51 +18,6 @@ class _CreateNetworkState extends State<CreateNetwork> {
     TextEditingController networkNameController = TextEditingController();
     TextEditingController networkIDController = TextEditingController();
     TextEditingController networkAddressController = TextEditingController();
-
-    bool _inProgress = false;
-    int currentCount = 0;
-
-    Future getNetworkDetails() async {
-      setState(() {
-        _inProgress = true;
-      });
-      await SuperAdminConstants.sendGET(
-              SuperAdminConstants.NetworkCount, <String, String>{})
-          .then((response) {
-        currentCount = AllBlockChainNetworksResponse.networkCount;
-        if (response.statusCode == 200) {
-          AllBlockChainNetworksResponse.getCount(jsonDecode(response.body));
-          if (AllBlockChainNetworksResponse.networkCount > 0 &&
-              currentCount != AllBlockChainNetworksResponse.networkCount) {
-            SuperAdminConstants.sendGET(
-                    SuperAdminConstants.AllNetworks, <String, String>{})
-                .then((response) {
-              if (response.statusCode == 200) {
-                AllBlockChainNetworksResponse.fromJson(
-                    jsonDecode(response.body));
-                print("Network Info:$AllBlockChainNetworksResponse");
-                // setState(() {
-                //   _inProgress = false;
-                // });
-              } else {
-                throw Exception('Failed to GET all networks');
-              }
-            }).catchError((onError) {
-              print('Error in All Network API: ${onError.toString()}');
-            });
-          }
-        } else {
-          throw Exception('Failed to GET count');
-        }
-      }).catchError((onError) {
-        print('Error in Count API: ${onError.toString()}');
-      });
-
-      setState(() {
-        _inProgress = false;
-      });
-    }
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -149,12 +105,10 @@ class _CreateNetworkState extends State<CreateNetwork> {
               ),
               const SizedBox(height: defaultPadding),
               ElevatedButton(
-                onPressed: () {
-                  // getNetworkDetails();
+                onPressed: () async {
                   String snackBarString = 'Failed to create network';
                   final snackBar = SnackBar(content: Text(snackBarString));
-
-                  SuperAdminConstants.sendPOST(
+                  await SuperAdminConstants.sendPOST(
                       SuperAdminConstants.createNetwork, <String, String>{
                     "name": networkNameController.text,
                     "netID": networkIDController.text,
@@ -163,10 +117,6 @@ class _CreateNetworkState extends State<CreateNetwork> {
                     print("Response code: ${response.statusCode}");
 
                     if (response.statusCode == 200) {
-                      // LoginAccess.fromJson(jsonDecode(response.body));
-                      // CircularProgressIndicator();
-                      // await Future.delayed(Duration(seconds: 4));
-                      getNetworkDetails();
                       Navigator.pop(context);
                       snackBarString = 'Network created successfully';
                     } else {
@@ -175,7 +125,6 @@ class _CreateNetworkState extends State<CreateNetwork> {
                   }).catchError((onError) {
                     print('Error : ${onError.toString()}');
                   });
-                  // ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 },
                 style: ElevatedButton.styleFrom(
                     primary: kSecondaryColor, elevation: 0),

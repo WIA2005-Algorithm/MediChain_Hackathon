@@ -1,28 +1,19 @@
-import 'dart:convert';
-
 import 'package:intl/intl.dart';
 
 class NetworkInfo {
-  static String id = '';
-  static String networkName = '';
-  static String networkID = '';
-  static String netAddress = '';
-  static List<Organisations> organizations = [];
-
-  static int networkCount = 0;
-  static int networkCode = 0;
-  static String networkMessage = '';
-  static String createdAt = '';
-  static String networkDescription = '';
+  String id = '';
+  String networkName = '';
+  String networkID = '';
+  String netAddress = '';
+  List<Organisations> organizations = [];
+  int networkCode = 0;
+  String networkMessage = '';
+  String createdAt = '';
+  String networkDescription = '';
 
   static int hospitalCount = 0;
 
-  static void getCount(Map<String, dynamic> json) {
-    networkCount = json['count'];
-    // print('Network count: $networkCount');
-  }
-
-  static fromJson(Map<String, dynamic> json) {
+  NetworkInfo(Map<String, dynamic> json) {
     List<dynamic> orgs = json['Organizations'];
     final tempDate = DateTime.parse(json['createdAt']);
     id = json['_id'];
@@ -34,11 +25,11 @@ class NetworkInfo {
     networkDescription = json['Status']['description'];
     createdAt =
         "${DateFormat.MMMM().format(tempDate)} ${tempDate.day}, ${tempDate.year}";
-    hospitalCount = organizations.length;
     organizations = [];
     for (var hospital in orgs) {
       organizations.add(Organisations(hospital));
     }
+    hospitalCount = organizations.length;
   }
 }
 
@@ -59,6 +50,8 @@ class Organisations {
 
   //correct the variables for json organisation
   Organisations(Map<String, dynamic> json) {
+    final tempDate = DateTime.parse(json['createdAt']);
+
     orgId = json['_id'] ?? 'null';
     orgFullName = json['FullName'] ?? 'null';
     orgName = json['Name'] ?? 'null';
@@ -70,30 +63,24 @@ class Organisations {
     location = json['Location'] ?? 'null';
     orgType = json['OrganizationType'] ?? 'null';
     enrolled = json['Enrolled'] ?? 0;
-
-    createdAt = json['createdAt'] ?? 'null';
+    createdAt =
+        "${DateFormat.MMMM().format(tempDate)} ${tempDate.day}, ${tempDate.year}";
     updatedAt = json['updatedAt'] ?? 'null';
   }
 }
 
 class AllBlockChainNetworksResponse {
-  static String _id = '';
-  static String networkName = '';
-  static String networkID = '';
-  static String netAddress = '';
-  static int networkCode = 0;
-  static String networkMessage = '';
-  static String createdAt = '';
-  static String networkDescription = '';
-  static int hospitalCount = 0;
-  static int networkCount = 0;
+  String _id = '';
+  String networkName = '';
+  String networkID = '';
+  String netAddress = '';
+  int networkCode = 0;
+  String networkMessage = '';
+  String createdAt = '';
+  String networkDescription = '';
+  int hospitalCount = 0;
 
-  static void getCount(Map<String, dynamic> json) {
-    networkCount = json['count'];
-    // print('Network count: $networkCount');
-  }
-
-  static fromJson(Map<String, dynamic> json) {
+  AllBlockChainNetworksResponse(Map<String, dynamic> json) {
     final tempDate = DateTime.parse(json['createdAt']);
     _id = json['_id'];
     networkName = json['Name'];

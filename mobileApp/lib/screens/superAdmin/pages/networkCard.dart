@@ -4,7 +4,8 @@ import 'package:medichain/screens/superAdmin/models/network_info.dart';
 import 'package:medichain/screens/superAdmin/pages/networkDetails.dart';
 
 class NetworkCard extends StatelessWidget {
-  const NetworkCard({super.key});
+  final AllBlockChainNetworksResponse? networkDetails;
+  const NetworkCard({super.key, required this.networkDetails});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class NetworkCard extends StatelessWidget {
           children: [
             CardImage(),
             SizedBox(width: 30),
-            CardDetails(),
+            CardDetails(networkDetails: networkDetails),
           ],
         ),
       ),
@@ -46,8 +47,10 @@ class NetworkCard extends StatelessWidget {
 }
 
 class CardDetails extends StatelessWidget {
+  final AllBlockChainNetworksResponse? networkDetails;
   const CardDetails({
     Key? key,
+    this.networkDetails,
   }) : super(key: key);
 
   @override
@@ -64,7 +67,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          AllBlockChainNetworksResponse.networkName,
+          networkDetails!.networkName,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -82,7 +85,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          AllBlockChainNetworksResponse.networkID,
+          networkDetails!.networkID,
           overflow: TextOverflow.fade,
           maxLines: 1,
           softWrap: false,
@@ -102,7 +105,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          AllBlockChainNetworksResponse.netAddress,
+          networkDetails!.netAddress,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
               fontWeight: FontWeight.bold,
@@ -120,7 +123,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          AllBlockChainNetworksResponse.createdAt,
+          networkDetails!.createdAt,
           style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -137,7 +140,7 @@ class CardDetails extends StatelessWidget {
               fontFamily: 'Inter'),
         ),
         Text(
-          "${AllBlockChainNetworksResponse.hospitalCount}",
+          "${networkDetails!.hospitalCount}",
           style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,

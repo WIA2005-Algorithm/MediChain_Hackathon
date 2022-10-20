@@ -6,14 +6,15 @@ import 'package:medichain/screens/superAdmin/models/network_info.dart';
 import '../../../constants.dart';
 
 class CreateHospital extends StatefulWidget {
-  const CreateHospital({super.key});
-
+  const CreateHospital({super.key, required this.networkName});
+  final String networkName;
   @override
   State<CreateHospital> createState() => _CreateHospitalState();
 }
 
 class _CreateHospitalState extends State<CreateHospital> {
   bool _inProgress = false;
+  String networkName = "";
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,9 @@ class _CreateHospitalState extends State<CreateHospital> {
     TextEditingController countryController = TextEditingController();
     TextEditingController stateController = TextEditingController();
     TextEditingController locationController = TextEditingController();
-
+    setState(() {
+      networkName = widget.networkName;
+    });
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -249,8 +252,7 @@ class _CreateHospitalState extends State<CreateHospital> {
                         SuperAdminConstants.sendPOST(
                             SuperAdminConstants.createOrganisation,
                             <String, String>{
-                              "networkName":
-                                  AllBlockChainNetworksResponse.networkName,
+                              "networkName": networkName,
                               "fullName": hospNameController.text,
                               "id": hospIDController.text,
                               "adminID": adminIDController.text,
@@ -289,29 +291,6 @@ class _CreateHospitalState extends State<CreateHospital> {
               ),
             ),
     );
-  }
-
-  Future getNetworkOrgDetails() async {
-    setState(() {
-      _inProgress = true;
-    });
-    await SuperAdminConstants.sendGET(
-        SuperAdminConstants.NetworkExists, <String, String>{
-      "networkName": AllBlockChainNetworksResponse.networkName
-    }).then((response) {
-      if (response.statusCode == 200) {
-        NetworkInfo.fromJson(jsonDecode(response.body));
-        print(
-            'WE HAVE SUCCEEDED : ${NetworkInfo.organizations[0].orgFullName}');
-      } else {
-        throw Exception('Failed to GET ORGANIZATIONS');
-      }
-    }).catchError((onError) {
-      print('Error in GET ORGANIZATIONS API: ${onError.toString()}');
-    });
-    setState(() {
-      _inProgress = false;
-    });
   }
 
   TextEditingController CustomInputField(String hintText, String subText) {

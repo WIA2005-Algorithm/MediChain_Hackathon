@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/superAdmin/pages/networkCard.dart';
-import 'package:medichain/screens/superAdmin/pages/networkPage.dart';
-
+import 'package:medichain/screens/superAdmin/pages/hospitalPage.dart';
 import '../../../constants.dart';
 import '../models/network_info.dart';
 
@@ -17,29 +14,36 @@ class NetworkDetails extends StatefulWidget {
 }
 
 class _NetworkDetailsState extends State<NetworkDetails> {
+  Timer? _timer;
   bool _inProgress = false;
-  int currentCount = 0;
   int networkCount = 0;
-  static Timer t = Timer(const Duration(seconds: 5), () {});
+  AllBlockChainNetworksResponse? allNetworksResponse;
+  String networkName = "";
 
   Future getNetworkDetails() async {
     setState(() {
       _inProgress = true;
-      networkCount = 0;
     });
     await SuperAdminConstants.sendGET(
         SuperAdminConstants.NetworkCount, <String, String>{}).then((response) {
-      currentCount = AllBlockChainNetworksResponse.networkCount;
       if (response.statusCode == 200) {
-        AllBlockChainNetworksResponse.getCount(jsonDecode(response.body));
-        if (AllBlockChainNetworksResponse.networkCount > 0 &&
-            currentCount != AllBlockChainNetworksResponse.networkCount) {
+        int tempCountVar = jsonDecode(response.body)["count"];
+        setState(() {
+          networkCount = tempCountVar;
+        });
+        if (tempCountVar > 0) {
           SuperAdminConstants.sendGET(
                   SuperAdminConstants.AllNetworks, <String, String>{})
               .then((response) {
             if (response.statusCode == 200) {
-              AllBlockChainNetworksResponse.fromJson(jsonDecode(response.body));
-              print("Network Info:$AllBlockChainNetworksResponse");
+              setState(() {
+                allNetworksResponse =
+                    AllBlockChainNetworksResponse(jsonDecode(response.body));
+              });
+              setState(() {
+                networkName = allNetworksResponse!.networkName;
+              });
+              print("Network Info: ${networkName}");
               setState(() {
                 _inProgress = false;
               });
@@ -56,29 +60,27 @@ class _NetworkDetailsState extends State<NetworkDetails> {
     }).catchError((onError) {
       print('Error in Count API: ${onError.toString()}');
     });
+
     setState(() {
       _inProgress = false;
-      networkCount = AllBlockChainNetworksResponse.networkCount;
     });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     getNetworkDetails();
-    t = Timer(const Duration(seconds: 5), getNetworkDetails);
-    print("CALLED ME ME");
+    _timer =
+        Timer.periodic(const Duration(seconds: 30), (_) => getNetworkDetails());
     super.initState();
   }
 
   @override
   void dispose() {
-    t.cancel();
-    // TODO: implement dispose
+    _timer?.cancel();
     super.dispose();
   }
 
-  // Create network details class - store network details
+  bool loopTimer = true;
 
   @override
   Widget build(BuildContext context) {
@@ -92,16 +94,21 @@ class _NetworkDetailsState extends State<NetworkDetails> {
                   itemCount: networkCount,
                   padding: const EdgeInsets.all(20.0),
                   itemBuilder: ((context, index) {
-                    return GestureDetector(
-                      child: NetworkCard(),
-                      onTap: () {
-                        t.cancel();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NetworkPage()));
-                      },
-                    );
+                    return allNetworksResponse == null
+                        ? CircularProgressIndicator()
+                        : GestureDetector(
+                            child: NetworkCard(
+                                networkDetails: allNetworksResponse),
+                            onTap: () {
+                              // print("PRINTING --$allNetworksResponse");
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => NetworkPage(
+                                            networkName: networkName,
+                                          )));
+                            },
+                          );
                   }),
                 ),
               )

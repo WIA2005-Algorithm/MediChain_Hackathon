@@ -25,7 +25,7 @@ const kSectionTextStyle = TextStyle(
     fontSize: 20,
     fontFamily: 'Inter');
 
-const String kApibaseURL = "http://172.27.231.239:8080/api";
+const String kApibaseURL = "http://172.29.252.166:8080/api";
 
 // const kPrimaryColor = Color(0xFF6F35A5);
 const kPrimaryLightColor = Color(0xFFF1E6FF);
