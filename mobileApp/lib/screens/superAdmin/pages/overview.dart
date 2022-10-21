@@ -6,6 +6,7 @@ import 'package:medichain/screens/superAdmin/pages/create_network.dart';
 import 'package:medichain/screens/superAdmin/pages/networkDetails.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../welcome/welcome_screen.dart';
 import '../models/network_info.dart';
 
 class SuperAdminOverview extends StatefulWidget {
@@ -42,6 +43,21 @@ class _SuperAdminOverviewState extends State<SuperAdminOverview> {
                   style: TextStyle(color: Colors.white60),
                 ),
               ),
+              automaticallyImplyLeading: false,
+              actions: [
+                IconButton(
+                    icon: Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                    ),
+                    tooltip: 'Login/Registration',
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => WelcomeScreen()));
+                    })
+              ],
             ),
             body: const NetworkDetails(),
             floatingActionButton: FloatingActionButton.extended(

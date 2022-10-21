@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/pages/create_patient.dart';
+import 'package:medichain/screens/welcome/welcome_screen.dart';
 import '../../../constants.dart';
 
 class AdminOverview extends StatefulWidget {
@@ -43,7 +44,8 @@ class _AdminOverviewState extends State<AdminOverview> {
               ),
               tooltip: 'Login/Registration',
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => WelcomeScreen()));
               })
         ],
       ),
@@ -94,8 +96,13 @@ class _AdminOverviewState extends State<AdminOverview> {
       body: OverviewBody(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => CreatePatient()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CreatePatient(
+                        onBehalf: true,
+                        type: 'patient',
+                      )));
         },
         label: const Text(
           'Register Patient',

@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:date_field/date_field.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:medichain/helper/registration/registeration.dart';
 import 'package:medichain/screens/log_in/login_screen.dart';
 import '../../../constants.dart';
 
 class CreatePatient extends StatefulWidget {
-  CreatePatient({super.key});
+  final String type;
+  final bool onBehalf;
+  CreatePatient({super.key, required this.type, required this.onBehalf});
 
   @override
   State<CreatePatient> createState() => _CreatePatientState();
@@ -14,54 +17,72 @@ class CreatePatient extends StatefulWidget {
 
 class _CreatePatientState extends State<CreatePatient> {
   int DOBvalue = 0;
+  List<String> organizations = [];
 
-  Future createPatientRequest(BuildContext context) async {
-    Map<String, dynamic> loginDetails = {
-      "org": ApiConstants.orgranizationID,
-      "ID": "QPT4PPUM",
-      "password": passwordTextEditingController.text,
-      "TYPE": "patient"
-    };
-    Map<String, dynamic> personalDetails = {
-      "firstName": patientFullNameController.text,
-      "middleName": patientMiddleNameController.text,
-      "lastName": patientLastNameController.text,
-      "email": patientEmailNameController.text,
-      "DOB": DOBvalue,
-      "gender": selectedGender,
-      "maritalStatus": selectedMaritial,
-      "passport": patientIDController.text,
-    };
-    Map<String, dynamic> address = {
-      "street1": street1Controller.text,
-      "street2": street2Controller.text,
-      "postcode": postalCodeController.text,
-      "country": selectedCountries,
-      "state": "Wilayah Persekutuan",
-      "city": "Kuala Lumpur"
-    };
-    Map<String, dynamic> contactDetails = {
-      "mobile": mobileNumberController.text,
-      "whatsapp": whatsappNumberController.text,
-      "other": alternateNumberController.text,
-    };
+  String getFullOrgName() {
+    List<String> orgHold = [];
+    String hold = '';
+    getOrganizationList();
+    organizations.forEach((element) {
+      var orgID = element.split("-")[1].trim();
+      if (ApiConstants.orgranizationID == orgID) {
+        hold = element;
+      }
+    });
+    print("OrgName ${hold}");
+    return hold;
+  }
+
+  Future createPatientRequest() async {
+    print("$selectedDepartment");
+    Payload payloadData = Payload(
+        LoginDetails(
+          widget.onBehalf ? getFullOrgName() : selectedOrganization!,
+          // : selectedOrganization!.split("-")[1].trim(),
+          patientIDController.text,
+          patientalternateIDController.text,
+          widget.type,
+        ),
+        PersonalDetails(
+          patientFullNameController.text,
+          patientMiddleNameController.text,
+          patientLastNameController.text,
+          patientEmailNameController.text,
+          DOBvalue,
+          selectedGender!,
+          selectedMaritial!,
+          selectedDepartment!,
+          patientIDController.text,
+        ),
+        Address(
+          street1Controller.text,
+          street2Controller.text,
+          postalCodeController.text,
+          countryController.text,
+          stateController.text,
+          cityController.text,
+        ),
+        ContactDetails(
+          mobileNumberController.text,
+          whatsappNumberController.text,
+          alternateNumberController.text,
+        ));
 
     await AdminConstants.sendPOST(
-        AdminConstants.addNewPatientOrDoctorAPI, <String, String>{
-      "loginDetails": jsonEncode(loginDetails),
-      "personalDetails": jsonEncode(personalDetails),
-      "address": jsonEncode(address),
-      "contactDetails": jsonEncode(contactDetails),
-      "onBehalf": jsonEncode(ApiConstants.isOnBehalf),
+        AdminConstants.addNewPatientOrDoctorAPI, <String, dynamic>{
+      "payloadData": payloadData,
+      "onBehalf": widget.onBehalf ? true : false
     }).then((response) async {
       print("Response code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Patient Checked In successfully')));
-        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content:
+                Text('${widget.type.toUpperCase()} Registered Successfully')));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => LoginScreen()));
       } else {
-        throw Exception('Failed to Patient Checked In');
+        throw Exception('Failed ${widget.type.toUpperCase()} Registeration');
       }
     }).catchError((onError) {
       ScaffoldMessenger.of(context)
@@ -70,35 +91,42 @@ class _CreatePatientState extends State<CreatePatient> {
     });
   }
 
+  Future getOrganizationList() async {
+    List<String> newItems = [];
+    await AdminConstants.sendGET(
+            AdminConstants.getHospitalsEnrolled, <String, String>{})
+        .then((response) async {
+      if (response.statusCode == 200) {
+        setState(() {
+          organizations =
+              (jsonDecode(response.body) as List<dynamic>).cast<String>();
+        });
+        print("Organization state -- ${organizations}");
+      } else {
+        throw Exception('Failed to Patient Checked In');
+      }
+    }).catchError((onError) {});
+  }
+
   TextEditingController patientIDController = TextEditingController();
-
   TextEditingController patientalternateIDController = TextEditingController();
-
   TextEditingController patientFullNameController = TextEditingController();
-
   TextEditingController patientMiddleNameController = TextEditingController();
-
   TextEditingController patientLastNameController = TextEditingController();
-
   TextEditingController patientEmailNameController = TextEditingController();
-
   TextEditingController dateOfBirthNameController = TextEditingController();
-
-  // TextEditingController patientGenderController = TextEditingController();
   TextEditingController maritalStatusController = TextEditingController();
-
   TextEditingController street1Controller = TextEditingController();
-
   TextEditingController street2Controller = TextEditingController();
-
   TextEditingController postalCodeController = TextEditingController();
-
   TextEditingController countryController = TextEditingController();
+  TextEditingController stateController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
+
+  TextEditingController patientUserNameController = TextEditingController();
 
   TextEditingController mobileNumberController = TextEditingController();
-
   TextEditingController whatsappNumberController = TextEditingController();
-
   TextEditingController alternateNumberController = TextEditingController();
 
   SingleValueDropDownController patientGenderController =
@@ -107,21 +135,40 @@ class _CreatePatientState extends State<CreatePatient> {
   String? selectedGender;
 
   List<DropdownMenuItem<String>> get genderItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("Male"), value: "Male"),
-      DropdownMenuItem(child: Text("Female"), value: "Female"),
-    ];
+    List<DropdownMenuItem<String>> menuItems = [];
+    for (var ele in RegistrationConstants.genderOptions) {
+      menuItems.add(DropdownMenuItem(value: ele, child: Text(ele)));
+    }
     return menuItems;
   }
 
   String? selectedMaritial;
 
   List<DropdownMenuItem<String>> get maritialItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("Single"), value: "Single"),
-      DropdownMenuItem(child: Text("Married"), value: "Married"),
-      DropdownMenuItem(child: Text("Divorced"), value: "Divorced"),
-    ];
+    List<DropdownMenuItem<String>> menuItems = [];
+    for (var ele in RegistrationConstants.maritalStatusOptions) {
+      menuItems.add(DropdownMenuItem(value: ele, child: Text(ele)));
+    }
+    return menuItems;
+  }
+
+  String selectedDepartment = "General";
+
+  List<DropdownMenuItem<String>> get departmentItems {
+    List<DropdownMenuItem<String>> menuItems = [];
+    for (var ele in RegistrationConstants.departmentOptions) {
+      menuItems.add(DropdownMenuItem(value: ele, child: Text(ele)));
+    }
+    return menuItems;
+  }
+
+  String? selectedOrganization;
+
+  List<DropdownMenuItem<String>> get organizationItems {
+    List<DropdownMenuItem<String>> menuItems = [];
+    for (var ele in organizations) {
+      menuItems.add(DropdownMenuItem(value: ele, child: Text(ele)));
+    }
     return menuItems;
   }
 
@@ -164,6 +211,7 @@ class _CreatePatientState extends State<CreatePatient> {
     dateOfBirthNameController.dispose();
     maritalStatusController.dispose();
     street1Controller.dispose();
+    patientUserNameController.dispose();
     street2Controller.dispose();
     postalCodeController.dispose();
     countryController.dispose();
@@ -171,8 +219,19 @@ class _CreatePatientState extends State<CreatePatient> {
     whatsappNumberController.dispose();
     alternateNumberController.dispose();
     patientGenderController.dispose();
+
+    stateController.dispose();
+    cityController.dispose();
     // TODO: implement dispose
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    if (!widget.onBehalf) {
+      getOrganizationList();
+    }
+    super.initState();
   }
 
   @override
@@ -180,16 +239,11 @@ class _CreatePatientState extends State<CreatePatient> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Signup On Patient's Behalf"),
+        title: Text(widget.onBehalf
+            ? "Create New Patient Record"
+            : "New ${widget.type == "doctor" ? "Doctor" : "Patient"} Signup"),
         elevation: 0,
         backgroundColor: kBackgroundColor,
-        // bottom: const PreferredSize(
-        //   preferredSize: Size.fromHeight(2),
-        //   child: Text(
-        //     '',
-        //     style: TextStyle(color: Colors.white60),
-        // ),
-        // ),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -197,10 +251,12 @@ class _CreatePatientState extends State<CreatePatient> {
           child: Column(
             children: [
               // const SizedBox(height: defaultPadding),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  "The patient's deails filled below on the behalf are confluded as accurately spoken by patient themselves. The password filled is temporary and patient needs to put a new password when they login.",
+                  widget.onBehalf
+                      ? "The patient's details filled below on the behalf are confluded as accurately spoken by patient themselves. The password filled is temporary and patient needs to put a new password when they login."
+                      : "Your personal details are be filled as accurately as possible to conclude correct diagnosis as well as help the hospital identify you easily",
                   style: TextStyle(color: Colors.white54, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
@@ -232,39 +288,48 @@ class _CreatePatientState extends State<CreatePatient> {
                   ),
                 ),
               ),
-              const SizedBox(height: defaultPadding / 2),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'A valid NRIC/Passport number contains only contains only numbers and alpabets including hyphens for NRIC number',
-                  style: TextStyle(color: Colors.white54),
-                  textAlign: TextAlign.center,
-                ),
-              ),
               const SizedBox(height: defaultPadding),
               TextFormField(
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: patientalternateIDController,
-                decoration: const InputDecoration(
-                  hintText: "Alternate Key For Patient",
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: widget.onBehalf
+                      ? "Alternate Key For Patient"
+                      : "Password",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
                     child: Icon(Icons.lock),
                   ),
                 ),
               ),
-              const SizedBox(height: defaultPadding / 2),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'This alternate key acts as first time login for patient. A valid username contains atleast 8 characters with 1 uppercase character, 1 lowercase charcter, 2 special character and 1 digit with no restrictions and dot character',
-                  style: TextStyle(color: Colors.white54),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: defaultPadding / 2),
+              const SizedBox(height: defaultPadding),
+              widget.onBehalf
+                  ? Container()
+                  : DropdownButtonFormField(
+                      hint: Text("Organization"),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        filled: true,
+                      ),
+                      validator: (value) =>
+                          value == null ? "Select a status" : null,
+                      value: selectedOrganization,
+                      items: organizations
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (newValue) {
+                        print(newValue);
+                        setState(() {
+                          selectedOrganization = newValue.toString()!;
+                        });
+                      }),
+              const SizedBox(height: defaultPadding),
 
               // #######################################################################
               Divider(
@@ -415,6 +480,28 @@ class _CreatePatientState extends State<CreatePatient> {
               //   ),
               // ),
               const SizedBox(height: defaultPadding),
+              widget.type == "patient"
+                  ? Container()
+                  : DropdownButtonFormField(
+                      hint: Text("Department"),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        filled: true,
+                      ),
+                      validator: (value) =>
+                          value == null ? "Select a status" : null,
+                      value: selectedDepartment,
+                      items: departmentItems,
+                      onChanged: (newValue) {
+                        print(newValue);
+                        setState(() {
+                          selectedDepartment = newValue.toString()!;
+                        });
+                      }),
+
+              const SizedBox(height: defaultPadding),
 
               // #######################################################################
               Divider(
@@ -440,7 +527,7 @@ class _CreatePatientState extends State<CreatePatient> {
               ),
               const SizedBox(height: defaultPadding),
               TextFormField(
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: street1Controller,
@@ -450,7 +537,7 @@ class _CreatePatientState extends State<CreatePatient> {
               ),
               const SizedBox(height: defaultPadding),
               TextFormField(
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: street2Controller,
@@ -460,7 +547,7 @@ class _CreatePatientState extends State<CreatePatient> {
               ),
               const SizedBox(height: defaultPadding),
               TextFormField(
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: postalCodeController,
@@ -469,33 +556,35 @@ class _CreatePatientState extends State<CreatePatient> {
                 ),
               ),
               const SizedBox(height: defaultPadding),
-              // TextFormField(
-              //   keyboardType: TextInputType.emailAddress,
-              //   textInputAction: TextInputAction.next,
-              //   cursorColor: kPrimaryColor,
-              //   controller: countryController,
-              //   decoration: const InputDecoration(
-              //     hintText: "Country",
-              //   ),
-              // ),
-              DropdownButtonFormField(
-                  hint: Text("Country"),
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  validator: (value) =>
-                      value == null ? "Select a country" : null,
-                  value: selectedCountries,
-                  items: countryItems,
-                  onChanged: (newValue) {
-                    print(newValue);
-                    setState(() {
-                      selectedCountries = newValue.toString()!;
-                    });
-                  }),
-
+              TextFormField(
+                keyboardType: TextInputType.streetAddress,
+                textInputAction: TextInputAction.next,
+                cursorColor: kPrimaryColor,
+                controller: countryController,
+                decoration: const InputDecoration(
+                  hintText: "Country",
+                ),
+              ),
+              const SizedBox(height: defaultPadding),
+              TextFormField(
+                keyboardType: TextInputType.streetAddress,
+                textInputAction: TextInputAction.next,
+                cursorColor: kPrimaryColor,
+                controller: stateController,
+                decoration: const InputDecoration(
+                  hintText: "State",
+                ),
+              ),
+              const SizedBox(height: defaultPadding),
+              TextFormField(
+                keyboardType: TextInputType.streetAddress,
+                textInputAction: TextInputAction.next,
+                cursorColor: kPrimaryColor,
+                controller: cityController,
+                decoration: const InputDecoration(
+                  hintText: "City",
+                ),
+              ),
               const SizedBox(height: defaultPadding),
               // #######################################################################
               Divider(
@@ -521,7 +610,7 @@ class _CreatePatientState extends State<CreatePatient> {
               ),
               const SizedBox(height: defaultPadding),
               TextFormField(
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: mobileNumberController,
@@ -531,7 +620,7 @@ class _CreatePatientState extends State<CreatePatient> {
               ),
               const SizedBox(height: defaultPadding),
               TextFormField(
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: whatsappNumberController,
@@ -541,7 +630,7 @@ class _CreatePatientState extends State<CreatePatient> {
               ),
               const SizedBox(height: defaultPadding),
               TextFormField(
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 cursorColor: kPrimaryColor,
                 controller: alternateNumberController,
@@ -553,7 +642,7 @@ class _CreatePatientState extends State<CreatePatient> {
 
               ElevatedButton(
                 onPressed: () {
-                  createPatientRequest(context);
+                  createPatientRequest();
                 },
                 style: ElevatedButton.styleFrom(
                     primary: kSecondaryColor, elevation: 0),

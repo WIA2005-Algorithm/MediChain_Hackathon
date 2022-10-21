@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:medichain/screens/patient/changePassword.dart';
+import 'package:medichain/screens/patient/patientHome.dart';
 import 'package:medichain/screens/superAdmin/pages/overview.dart';
 import '../../../../components/already_have_an_account_acheck.dart';
 import '../../../../constants.dart';
@@ -64,7 +66,7 @@ class _LoginFormState extends State<LoginForm> {
           print('Attempt successful');
 
           LoginAccess.fromJson(jsonDecode(response.body));
-          Navigator.push(
+          Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => AdminScreen()));
         } else {
           throw Exception('Failed to login');
@@ -83,7 +85,7 @@ class _LoginFormState extends State<LoginForm> {
           print('Attempt successful');
 
           LoginAccess.fromJson(jsonDecode(response.body));
-          Navigator.push(
+          Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => AdminScreen()));
         } else {
           throw Exception('Failed to login');
@@ -99,11 +101,11 @@ class _LoginFormState extends State<LoginForm> {
         "type": "patient"
       }).then((response) {
         if (response.statusCode == 200) {
-          print('Attempt successful');
-
-          LoginAccess.fromJson(jsonDecode(response.body));
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => AdminScreen()));
+          jsonDecode(response.body)['isOnBehalf'] == 1
+              ? Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => ChangePassword()))
+              : Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => PatientHome()));
         } else {
           throw Exception('Failed to login');
         }
@@ -156,7 +158,7 @@ class _LoginFormState extends State<LoginForm> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              hintText: "Your username",
+              hintText: "Your ID",
               prefixIcon: const Padding(
                 padding: EdgeInsets.all(defaultPadding),
                 child: Icon(Icons.person),

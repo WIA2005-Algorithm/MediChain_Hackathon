@@ -1,29 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:medichain/screens/admin/models/patients.dart';
-import 'package:medichain/screens/admin/pages/patientDetails.dart';
+import 'package:medichain/screens/admin/models/doctors.dart';
+import 'package:medichain/screens/admin/pages/doctorDetails.dart';
 
 import '../../../constants.dart';
 
-class PatientPage extends StatefulWidget {
-  const PatientPage({super.key});
+class DoctorPage extends StatefulWidget {
+  const DoctorPage({super.key});
 
   @override
-  State<PatientPage> createState() => _PatientPageState();
+  State<DoctorPage> createState() => _DoctorPageState();
 }
 
-class _PatientPageState extends State<PatientPage> {
+class _DoctorPageState extends State<DoctorPage> {
   int categoryButtonNumber = 0;
   String category = 'Watched';
   List<String> activeList = [
-    "Watched",
-    "Waiting For Discharge",
-    "Waiting To Be Assigned",
-    "Not Patients"
+    "Occupied",
+    "Unoccupied",
   ];
 
-  List<Patient> patientsList = [];
-  List<Patient> currentList = [];
+  List<Doctor> doctorsList = [];
+  List<Doctor> currentList = [];
   List<int> currentIndex = [];
   bool _inProgress = false;
   int listLength = 0;
@@ -33,20 +31,20 @@ class _PatientPageState extends State<PatientPage> {
       _inProgress = true;
     });
     await AdminConstants.sendGET(
-        AdminConstants.getAllPatientData, <String, String>{}).then((response) {
+        AdminConstants.getAllDoctorData, <String, String>{}).then((response) {
       if (response.statusCode == 200) {
-        List tempPatients = jsonDecode(response.body);
+        List tempDoctors = jsonDecode(response.body);
         int i = 0;
         currentList = [];
         currentIndex = [];
         listLength = 0;
-        for (var iteration in tempPatients) {
+        for (var iteration in tempDoctors) {
           setState(() {
-            patientsList.add(Patient(iteration));
+            doctorsList.add(Doctor(iteration));
           });
-          if (patientsList[i].active == activeList[categoryButtonNumber]) {
+          if (doctorsList[i].active[1] == activeList[categoryButtonNumber]) {
             setState(() {
-              currentList.add(patientsList[i]);
+              currentList.add(doctorsList[i]);
               currentIndex.add(i);
             });
             listLength++;
@@ -54,13 +52,11 @@ class _PatientPageState extends State<PatientPage> {
           i++;
         }
         print("Current $currentIndex");
-
-        setState(() {});
       } else {
         throw Exception('Failed to GT ${response.statusCode}');
       }
     }).catchError((onError) {
-      print('Error in GET Partients API: ${onError.toString()}');
+      print('Error in GET Doctor API: ${onError.toString()}');
     });
     setState(() {
       _inProgress = false;
@@ -103,9 +99,9 @@ class _PatientPageState extends State<PatientPage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => PatientDetails(
+                                        builder: (context) => DoctorDetails(
                                               index: index,
-                                              patient: patientsList[
+                                              doctor: doctorsList[
                                                   currentIndex[index]],
                                               activeList: activeList,
                                             )));
@@ -135,7 +131,8 @@ class _PatientPageState extends State<PatientPage> {
                 const SizedBox(width: defaultPadding / 2),
                 InkWell(
                   child: Container(
-                    child: Text(activeList[0]),
+                    // child: Text("${doctorsList[0].active[0]} - ${doctorsList[0].active[0]}"),
+                    child: Text("Active - ${activeList[0]}"),
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       color: categoryButtonNumber == 0
@@ -145,18 +142,18 @@ class _PatientPageState extends State<PatientPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onTap: () async {
+                  onTap: () {
                     setState(() {
                       categoryButtonNumber = 0;
-                      category = 'Watched';
+                      category = activeList[0];
                     });
-                    await runApplication();
+                    runApplication();
                   },
                 ),
                 const SizedBox(width: defaultPadding / 2),
                 InkWell(
                   child: Container(
-                    child: Text(activeList[1]),
+                    child: Text("Active - ${activeList[1]}"),
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       color: categoryButtonNumber == 1
@@ -169,49 +166,7 @@ class _PatientPageState extends State<PatientPage> {
                   onTap: () async {
                     setState(() {
                       categoryButtonNumber = 1;
-                      category = 'waiting_discharge';
-                    });
-                    await runApplication();
-                  },
-                ),
-                const SizedBox(width: defaultPadding / 2),
-                InkWell(
-                  child: Container(
-                    child: Text(activeList[2]),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: categoryButtonNumber == 2
-                          ? kSecondaryColor
-                          : Colors.white70,
-                      border: Border.all(color: Colors.black26),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onTap: () async {
-                    setState(() {
-                      categoryButtonNumber = 2;
-                      category = 'waiting_assigned';
-                    });
-                    await runApplication();
-                  },
-                ),
-                const SizedBox(width: defaultPadding / 2),
-                InkWell(
-                  child: Container(
-                    child: Text(activeList[3]),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: categoryButtonNumber == 3
-                          ? kSecondaryColor
-                          : Colors.white70,
-                      border: Border.all(color: Colors.black26),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onTap: () async {
-                    setState(() {
-                      categoryButtonNumber = 3;
-                      category = 'not_patient';
+                      category = activeList[1];
                     });
                     await runApplication();
                   },
@@ -229,7 +184,7 @@ class _PatientPageState extends State<PatientPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Patients"),
+        title: const Text("Doctors"),
         elevation: 0,
         backgroundColor: kBackgroundColor,
         bottom: const PreferredSize(

@@ -44,6 +44,7 @@ router.post("/login", (req, res) => {
     .exec()
     .then((u) => {
       user = u;
+      console.log(user.password);
       if (user.password) return user.comparePassword(`${password}@${userID}`);
       return user.compareAlternate(`${password}@${userID}`);
     })
@@ -195,6 +196,7 @@ router.post("/addNewPatient/onBehalf/Change", (req, res) => {
 
 router.post("/addNewPatient/onBehalf", (req, res) => {
   const { loginDetails, personalDetails, address, contactDetails } = req.body.payloadData;
+  console.log(loginDetails, personalDetails, address, contactDetails);
   // As In doctor's signup --> Organization is in the format of "NAME - SHORTFORMID"
   loginDetails.org = [
     loginDetails.org.split("-")[0].trim(),

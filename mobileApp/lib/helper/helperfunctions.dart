@@ -17,7 +17,7 @@ class LoginAccess {
     ApiConstants.accessToken = json['session']['accessToken'];
     ApiConstants.refreshToken = json['session']['refreshToken'];
     ApiConstants.orgranizationID = json['org'] ?? "";
-    ApiConstants.isOnBehalf = json['isOnBehalf'];
+    ApiConstants.isOnBehalf = json['isOnBehalf'] ?? -1;
 
     return LoginAccess(
       accessToken: json['session']['accessToken'],

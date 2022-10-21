@@ -37,7 +37,7 @@ class _NetworkPageState extends State<NetworkPage> {
       if (response.statusCode == 200) {
         checkNetworkStatus();
       } else {
-        throw Exception('Failed to starting network');
+        throw Exception('Failed in starting network');
       }
     }).catchError((onError) {
       setState(() {

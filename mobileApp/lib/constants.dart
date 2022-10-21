@@ -25,6 +25,12 @@ const kSectionTextStyle = TextStyle(
     fontSize: 20,
     fontFamily: 'Inter');
 
+const kParagaphTextStyle = TextStyle(
+    fontWeight: FontWeight.normal,
+    color: Colors.white,
+    fontSize: 17,
+    fontFamily: 'Inter');
+
 const String kApibaseURL = "http://172.29.252.166:8080/api";
 
 // const kPrimaryColor = Color(0xFF6F35A5);
@@ -48,12 +54,12 @@ class ApiConstants {
     };
   }
 
-  static Future sendPOST(String URL, Map<String, String> body) {
+  static Future sendPOST(String URL, Map<String, dynamic> body) {
     print("Sending Post request to : $URL");
     Map<String, String> headers = getHeaders();
     print("Sending POST request to : $URL");
     print("With headers ${headers.toString()}");
-    print("With body ${body.toString()}");
+    print("With body ${jsonEncode(body)}");
     return http.post(Uri.parse("$URL"),
         headers: headers, body: jsonEncode(body));
   }
@@ -110,6 +116,39 @@ class SuperAdminConstants {
   }
 }
 
+class AdminConstants {
+  static String AdminBase = "${ApiConstants.baseURL}/entity/";
+  static String loginAuth = "login";
+  static String getHospitalsEnrolled = "getEnrolledHospitals";
+  static String addNewPatientOrDoctorAPI = "addNewPatient/onBehalf";
+  static String loginOnBehalfOF = "addNewPatient/onBehalf/Change";
+  static String patientLoginAuth = "login";
+  static String doctorLoginAuth = "login";
+  static String getAllPatientData = "getAllPatients";
+  static String getAllDoctorData = "getAllDoctors";
+  static String CheckInPatient = "checkInPatient";
+  static String AssignDoctor = "assignPatient";
+  static String Discharge = "checkOutPatient";
+  static String PatientDataStatsCheckInCheckOut =
+      "getPatientCheckInCheckOutStats";
+  static String getPatientDetails = "getPatientDetails";
+  static String acceptExternalDoctorRequest = "acceptExternalDoctorRequest";
+  static String denyExternalDoctorRequest = "denyExternalDoctorRequest";
+  static String getPatientDataStatsTimeLine = "getPatientDataStatsTimeLine";
+
+  static Future sendPOST(String URL, Map<String, dynamic> body) {
+    return ApiConstants.sendPOST("$AdminBase$URL", body);
+  }
+
+  static Future sendGET(String URL, Map<String, String> queryParams) {
+    return ApiConstants.sendGET("$AdminBase$URL", queryParams);
+  }
+
+  static Future sendDELETE(String URL) {
+    return ApiConstants.sendDELETE("$AdminBase$URL");
+  }
+}
+
 class DoctorConstants {
   static String AdminBase = "${ApiConstants.baseURL}/doctor/";
   static String loginAuth = "login";
@@ -144,13 +183,14 @@ class DoctorConstants {
   }
 }
 
-class AdminConstants {
+class PatientConstants {
   static String AdminBase = "${ApiConstants.baseURL}/entity/";
   static String loginAuth = "login";
+  //
   static String getHospitalsEnrolled = "getEnrolledHospitals";
   static String addNewPatientOrDoctorAPI = "addNewPatient/onBehalf";
   static String loginOnBehalfOF = "addNewPatient/onBehalf/Change";
-  static String patientLoginAuth = "login";
+  static String patientLoginAuth = "network/stop";
   static String doctorLoginAuth = "login";
   static String getAllPatientData = "getAllPatients";
   static String getAllDoctorData = "getAllDoctors";

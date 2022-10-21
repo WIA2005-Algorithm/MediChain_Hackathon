@@ -1,17 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:medichain/screens/Admin/pages/overview.dart';
-import 'package:medichain/screens/admin/pages/doctorPage.dart';
+import "package:flutter/material.dart";
 import '../../constants.dart';
-import 'pages/patientPage.dart';
 
-class AdminScreen extends StatefulWidget {
-  const AdminScreen({super.key});
+class PatientHome extends StatefulWidget {
+  const PatientHome({super.key});
 
   @override
-  State<AdminScreen> createState() => _AdminScreenState();
+  State<PatientHome> createState() => PatientHomeState();
 }
 
-class _AdminScreenState extends State<AdminScreen> {
+class PatientHomeState extends State<PatientHome> {
   @override
   int _selectedIndex = 0;
   List _widgetOptions = [];
@@ -27,21 +24,16 @@ class _AdminScreenState extends State<AdminScreen> {
   void initState() {
     // TODO: implement initState
     _widgetOptions = [
-      AdminOverview(),
-      PatientPage(),
-      DoctorPage(),
       Text(
-        'Index 3: History',
+        'Index 1: Profile',
+        style: optionStyle,
+      ),
+      Text(
+        'Index 2: Records',
         style: optionStyle,
       ),
     ];
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
   }
 
   @override
@@ -62,20 +54,12 @@ class _AdminScreenState extends State<AdminScreen> {
                 child: BottomNavigationBar(
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Overview',
+                      icon: Icon(Icons.person),
+                      label: 'Profile',
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(Icons.medication),
-                      label: 'Patient',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.people),
-                      label: 'Doctor',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.history),
-                      label: 'History',
+                      label: 'Medical Records',
                     ),
                   ],
                   currentIndex: _selectedIndex,
