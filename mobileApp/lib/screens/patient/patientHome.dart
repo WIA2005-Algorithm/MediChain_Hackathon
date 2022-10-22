@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:medichain/screens/patient/patientPage.dart';
 import '../../constants.dart';
 
 class PatientHome extends StatefulWidget {
@@ -24,12 +25,9 @@ class PatientHomeState extends State<PatientHome> {
   void initState() {
     // TODO: implement initState
     _widgetOptions = [
+      PatientPage(),
       Text(
-        'Index 1: Profile',
-        style: optionStyle,
-      ),
-      Text(
-        'Index 2: Records',
+        'Index 2: Medical Record',
         style: optionStyle,
       ),
     ];

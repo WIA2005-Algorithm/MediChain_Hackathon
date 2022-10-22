@@ -150,69 +150,49 @@ class AdminConstants {
 }
 
 class DoctorConstants {
-  static String AdminBase = "${ApiConstants.baseURL}/doctor/";
+  static String DoctorBase = "${ApiConstants.baseURL}/doctor/";
   static String loginAuth = "login";
   //
-  static String getHospitalsEnrolled = "getEnrolledHospitals";
-  static String addNewPatientOrDoctorAPI = "addNewPatient/onBehalf";
-  static String loginOnBehalfOF = "addNewPatient/onBehalf/Change";
-  static String patientLoginAuth = "network/stop";
-  static String doctorLoginAuth = "login";
-  static String getAllPatientData = "getAllPatients";
-  static String getAllDoctorData = "getAllDoctors";
-  static String CheckInPatient = "checkInPatient";
-  static String AssignDoctor = "assignPatient";
-  static String Discharge = "checkOutPatient";
-  static String PatientDataStatsCheckInCheckOut =
-      "getPatientCheckInCheckOutStats";
-  static String getPatientDetails = "getPatientDetails";
-  static String acceptExternalDoctorRequest = "acceptExternalDoctorRequest";
-  static String denyExternalDoctorRequest = "denyExternalDoctorRequest";
-  static String getPatientDataStatsTimeLine = "getPatientDataStatsTimeLine";
+
+  static String getDoctorInfo = "getDoctor";
+  static String getPatientInfo = "getPatient";
+  static String uploadFile = "uploadPatientFile";
+  static String dischargePTForDoctor = "dischargePTForDoctor";
+  static String requestExternalPatient = "requestExternalPatient";
+  static String acceptRequestToFromAdmin = "acceptRequestToFromAdmin";
+  static String denyRequestToFromAdmin = "denyRequestToFromAdmin";
+  static String getDataForExternal = "getDataForExternal";
 
   static Future sendPOST(String URL, Map<String, String> body) {
-    return ApiConstants.sendPOST("$AdminBase$URL", body);
+    return ApiConstants.sendPOST("$DoctorBase$URL", body);
   }
 
   static Future sendGET(String URL, Map<String, String> queryParams) {
-    return ApiConstants.sendGET("$AdminBase$URL", queryParams);
+    return ApiConstants.sendGET("$DoctorBase$URL", queryParams);
   }
 
   static Future sendDELETE(String URL) {
-    return ApiConstants.sendDELETE("$AdminBase$URL");
+    return ApiConstants.sendDELETE("$DoctorBase$URL");
   }
 }
 
 class PatientConstants {
-  static String AdminBase = "${ApiConstants.baseURL}/entity/";
+  static String PatientBase = "${ApiConstants.baseURL}/patient/";
   static String loginAuth = "login";
   //
-  static String getHospitalsEnrolled = "getEnrolledHospitals";
-  static String addNewPatientOrDoctorAPI = "addNewPatient/onBehalf";
-  static String loginOnBehalfOF = "addNewPatient/onBehalf/Change";
-  static String patientLoginAuth = "network/stop";
-  static String doctorLoginAuth = "login";
-  static String getAllPatientData = "getAllPatients";
-  static String getAllDoctorData = "getAllDoctors";
-  static String CheckInPatient = "checkInPatient";
-  static String AssignDoctor = "assignPatient";
-  static String Discharge = "checkOutPatient";
-  static String PatientDataStatsCheckInCheckOut =
-      "getPatientCheckInCheckOutStats";
-  static String getPatientDetails = "getPatientDetails";
-  static String acceptExternalDoctorRequest = "acceptExternalDoctorRequest";
-  static String denyExternalDoctorRequest = "denyExternalDoctorRequest";
-  static String getPatientDataStatsTimeLine = "getPatientDataStatsTimeLine";
+  static String getPatientInfo = "getPatient";
+  static String acceptRequestToFromDoctors = "acceptRequestToFromDoctors";
+  static String denyRequestToFromDoctors = "denyRequestToFromDoctors";
 
   static Future sendPOST(String URL, Map<String, String> body) {
-    return ApiConstants.sendPOST("$AdminBase$URL", body);
+    return ApiConstants.sendPOST("$PatientBase$URL", body);
   }
 
   static Future sendGET(String URL, Map<String, String> queryParams) {
-    return ApiConstants.sendGET("$AdminBase$URL", queryParams);
+    return ApiConstants.sendGET("$PatientBase$URL", queryParams);
   }
 
   static Future sendDELETE(String URL) {
-    return ApiConstants.sendDELETE("$AdminBase$URL");
+    return ApiConstants.sendDELETE("$PatientBase$URL");
   }
 }

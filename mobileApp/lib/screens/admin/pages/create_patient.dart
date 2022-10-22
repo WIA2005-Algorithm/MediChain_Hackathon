@@ -18,26 +18,39 @@ class CreatePatient extends StatefulWidget {
 class _CreatePatientState extends State<CreatePatient> {
   int DOBvalue = 0;
   List<String> organizations = [];
+  String orgFullName = "";
 
-  String getFullOrgName() {
+  // void getOrgFullName() {
+  //   List<String> orgHold = [];
+  //   String orgFullName = '';
+  //   getOrganizationList();
+  //   organizations.forEach((element) {
+  //     var orgID = element.split("-")[1].trim();
+  //     if (ApiConstants.orgranizationID == orgID) {
+  //       setState(() {
+  //         orgFullName = element;
+  //       });
+  //     }
+  //   });
+  // }
+
+  Future createPatientRequest() async {
     List<String> orgHold = [];
-    String hold = '';
+    String orgFullName = '';
     getOrganizationList();
     organizations.forEach((element) {
       var orgID = element.split("-")[1].trim();
       if (ApiConstants.orgranizationID == orgID) {
-        hold = element;
+        setState(() {
+          orgFullName = element;
+        });
       }
     });
-    print("OrgName ${hold}");
-    return hold;
-  }
 
-  Future createPatientRequest() async {
     print("$selectedDepartment");
     Payload payloadData = Payload(
         LoginDetails(
-          widget.onBehalf ? getFullOrgName() : selectedOrganization!,
+          widget.onBehalf ? orgFullName : selectedOrganization!,
           // : selectedOrganization!.split("-")[1].trim(),
           patientIDController.text,
           patientalternateIDController.text,
@@ -228,9 +241,7 @@ class _CreatePatientState extends State<CreatePatient> {
 
   @override
   void initState() {
-    if (!widget.onBehalf) {
-      getOrganizationList();
-    }
+    getOrganizationList();
     super.initState();
   }
 
@@ -374,7 +385,7 @@ class _CreatePatientState extends State<CreatePatient> {
                 cursorColor: kPrimaryColor,
                 controller: patientMiddleNameController,
                 decoration: const InputDecoration(
-                  hintText: "Middle Name",
+                  hintText: "Middle Name (Optional)",
                   prefixIcon: Padding(
                     padding: EdgeInsets.all(defaultPadding),
                     // child: Icon(Icons.language),
@@ -423,8 +434,8 @@ class _CreatePatientState extends State<CreatePatient> {
                 ),
                 mode: DateTimeFieldPickerMode.date,
                 autovalidateMode: AutovalidateMode.always,
-                validator: (e) =>
-                    (e?.day ?? 0) == 1 ? 'Please not the first day' : null,
+                // validator: (e) =>
+                //     (e?.day ?? 0) == 1 ? 'Please not the first day' : null,
                 onDateSelected: (DateTime value) {
                   DOBvalue = value.millisecondsSinceEpoch;
                 },
@@ -647,7 +658,7 @@ class _CreatePatientState extends State<CreatePatient> {
                 style: ElevatedButton.styleFrom(
                     primary: kSecondaryColor, elevation: 0),
                 child: Text(
-                  "Submit ".toUpperCase(),
+                  "Submit".toUpperCase(),
                   style: TextStyle(color: Colors.black),
                 ),
               ),

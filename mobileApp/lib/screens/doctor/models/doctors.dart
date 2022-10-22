@@ -44,10 +44,10 @@ class Doctor {
   String role = '';
 
   Doctor(Map<String, dynamic> json) {
+    print(json);
     json['active'].forEach((element) {
-          active.add(element);
-        }) ??
-        <String, dynamic>{};
+      active.add(element);
+    });
 
     associatedPatients = json['associatedDoctors'] ?? <String, dynamic>{};
     details = json['details'] ?? <String, dynamic>{};

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:medichain/screens/doctor/doctorScreen.dart';
 import 'package:medichain/screens/patient/changePassword.dart';
 import 'package:medichain/screens/patient/patientHome.dart';
 import 'package:medichain/screens/superAdmin/pages/overview.dart';
@@ -86,7 +87,7 @@ class _LoginFormState extends State<LoginForm> {
 
           LoginAccess.fromJson(jsonDecode(response.body));
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => AdminScreen()));
+              context, MaterialPageRoute(builder: (context) => DoctorScreen()));
         } else {
           throw Exception('Failed to login');
         }

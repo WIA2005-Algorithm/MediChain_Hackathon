@@ -1,32 +1,29 @@
-import 'dart:convert';
+// ignore_for_file: unnecessary_string_interpolations
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/models/doctors.dart';
-import 'package:medichain/screens/admin/models/patients.dart';
-
 import '../../../constants.dart';
+import '../models/patients.dart';
 
-class DoctorDetails extends StatefulWidget {
-  final Doctor doctor;
+class PatientDetails extends StatefulWidget {
+  final Patient patient;
   final int index;
-  final List<String> activeList;
-  DoctorDetails(
-      {super.key,
-      required this.doctor,
-      required this.index,
-      required this.activeList});
+
+  PatientDetails({super.key, required this.index, required this.patient});
 
   @override
-  State<DoctorDetails> createState() => _DoctorDetailsState();
+  State<PatientDetails> createState() => _PatientDetailsState();
 }
 
-class _DoctorDetailsState extends State<DoctorDetails> {
-  List<Patient> availablePatients = [];
+class _PatientDetailsState extends State<PatientDetails> {
+  List<Doctor> availableDoctors = [];
 
   @override
   void initState() {
     // TODO: implement initState
-    getPatientData();
+    print(widget.patient.checkIn);
+    getDoctorData();
     super.initState();
   }
 
@@ -35,7 +32,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Doctor Details"),
+        title: const Text("Patient Details"),
         elevation: 0,
         backgroundColor: kBackgroundColor,
         bottom: const PreferredSize(
@@ -45,6 +42,18 @@ class _DoctorDetailsState extends State<DoctorDetails> {
             style: TextStyle(color: Colors.white60),
           ),
         ),
+        actions: [
+          IconButton(
+              icon: const Icon(
+                Icons.notifications,
+                color: Colors.white,
+              ),
+              tooltip: 'Login/Registration',
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Container()));
+              })
+        ],
       ),
       body: Container(
         padding: EdgeInsets.all(defaultPadding),
@@ -64,17 +73,17 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "First Name: ${widget.doctor.firstName}",
+                      "First Name: ${widget.patient.firstName}",
                       style: kParagaphTextStyle,
                     ),
-                    widget.doctor.middleName == "UNDEFINED"
+                    widget.patient.middleName == "UNDEFINED"
                         ? SizedBox()
                         : Text(
-                            "Middle Name: ${widget.doctor.middleName}",
+                            "Middle Name: ${widget.patient.middleName}",
                             style: kParagaphTextStyle,
                           ),
                     Text(
-                      "Last Name: ${widget.doctor.lastName}",
+                      "Last Name: ${widget.patient.lastName}",
                       style: kParagaphTextStyle,
                     ),
                   ],
@@ -95,11 +104,11 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Main: ${widget.doctor.mobile}",
+                    Text("Main: ${widget.patient.mobile}",
                         style: kParagaphTextStyle),
-                    Text("Whatsapp: ${widget.doctor.whatsapp}",
+                    Text("Whatsapp: ${widget.patient.whatsapp}",
                         style: kParagaphTextStyle),
-                    Text("Alternate: ${widget.doctor.otherNumber}",
+                    Text("Alternate: ${widget.patient.otherNumber}",
                         style: kParagaphTextStyle),
                   ],
                 ),
@@ -121,17 +130,17 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${widget.doctor.street1},",
+                        "${widget.patient.street1}",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       Text(
-                        "${widget.doctor.street2},",
+                        "${widget.patient.street2}",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       Text(
-                        "${widget.doctor.city}.",
+                        "${widget.patient.city}",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
@@ -149,11 +158,11 @@ class _DoctorDetailsState extends State<DoctorDetails> {
               color: Colors.white70,
             ),
             SizedBox(height: defaultPadding),
-            const Text("Associated Patients", style: kSectionTextStyle),
+            const Text("Associated Doctor", style: kSectionTextStyle),
             const SizedBox(height: defaultPadding),
-            widget.doctor.associatedPatients.toString() == "{}"
+            widget.patient.associatedDoctors.toString() == "{}"
                 ? Text(
-                    "Patient has not been assigned \nto this doctor",
+                    "Doctor has not been assigned \nto this patient",
                     style: kParagaphTextStyle,
                   )
                 : Expanded(
@@ -178,57 +187,44 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        "Name: ${availablePatients[index].fullName}",
+                                        "Name: ${availableDoctors[index].fullName}",
                                         style: kParagaphTextStyle),
                                     // Text(
                                     //     "Assignation date: ${widget.patient.checkIn}",
                                     //     style: kParagaphTextStyle),
                                     Text(
-                                        "Department: ${availablePatients[index].department}",
+                                        "Department: ${availableDoctors[index].department}",
                                         style: kParagaphTextStyle),
                                     Text(
-                                        "Hospital: ${availablePatients[index].org}",
+                                        "Hospital: ${availableDoctors[index].org}",
                                         style: kParagaphTextStyle),
                                   ],
                                 ),
                               ]),
                         );
                       },
-                      itemCount: availablePatients.length,
+                      itemCount: availableDoctors.length,
                     ),
                   ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          // onPressedDynamic(context);
-        },
-        label: Text(
-          "Discharge Patient",
-          style: TextStyle(color: Colors.black),
-        ),
-        icon: const Icon(
-          Icons.add,
-          color: kPrimaryColor,
-        ),
-        backgroundColor: kSecondaryColor,
-      ),
     );
   }
 
-  Future<void> getPatientData() async {
+  Future<void> getDoctorData() async {
     await AdminConstants.sendGET(
-        AdminConstants.getAllPatientData, <String, String>{}).then((response) {
+        AdminConstants.getAllDoctorData, <String, String>{}).then((response) {
       if (response.statusCode == 200) {
-        List<dynamic> tempPatient = jsonDecode(response.body);
-        List<Patient> patients = [];
-        for (var patients in tempPatient) {
-          print(patients);
-          patients.add(Patient(patients));
+        List<dynamic> tempDoctors = jsonDecode(response.body);
+        List<Doctor> doctors = [];
+        for (var doctor in tempDoctors) {
+          doctors.add(Doctor(doctor));
         }
+
+        print("${doctors[0].fullName} ${doctors[0].activeList}");
         setState(() {
-          availablePatients = patients;
+          availableDoctors = doctors;
         });
       } else {
         throw Exception('Failed to GT ${response.statusCode}');
@@ -236,5 +232,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
     }).catchError((onError) {
       print('Error in GET Doctor API: ${onError.toString()}');
     });
+
+    print("Success in api call");
   }
 }

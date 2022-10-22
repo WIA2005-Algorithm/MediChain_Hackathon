@@ -14,9 +14,8 @@ class PatientPage extends StatefulWidget {
 
 class _PatientPageState extends State<PatientPage> {
   int categoryButtonNumber = 0;
-  String category = 'Watched';
   List<String> activeList = [
-    "Watched",
+    "Actively Watched",
     "Waiting For Discharge",
     "Waiting To Be Assigned",
     "Not Patients"
@@ -35,11 +34,15 @@ class _PatientPageState extends State<PatientPage> {
     await AdminConstants.sendGET(
         AdminConstants.getAllPatientData, <String, String>{}).then((response) {
       if (response.statusCode == 200) {
-        List tempPatients = jsonDecode(response.body);
         int i = 0;
-        currentList = [];
-        currentIndex = [];
-        listLength = 0;
+        setState(() {
+          patientsList = [];
+          currentList = [];
+          currentIndex = [];
+          listLength = 0;
+        });
+        List tempPatients = jsonDecode(response.body);
+
         for (var iteration in tempPatients) {
           setState(() {
             patientsList.add(Patient(iteration));
@@ -48,14 +51,12 @@ class _PatientPageState extends State<PatientPage> {
             setState(() {
               currentList.add(patientsList[i]);
               currentIndex.add(i);
+              listLength++;
             });
-            listLength++;
           }
           i++;
         }
         print("Current $currentIndex");
-
-        setState(() {});
       } else {
         throw Exception('Failed to GT ${response.statusCode}');
       }
@@ -75,51 +76,48 @@ class _PatientPageState extends State<PatientPage> {
   }
 
   Widget patientList() {
-    return _inProgress
-        ? CircularProgressIndicator()
-        : Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(defaultPadding),
-                child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: currentList.length,
-                    itemBuilder: (context, index) {
-                      return SingleChildScrollView(
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: defaultPadding),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white70,
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                  "${currentList[index].firstName} ${currentList[index].middleName} ${currentList[index].lastName}",
-                                  style: TextStyle(color: kPrimaryColor)),
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => PatientDetails(
-                                              index: index,
-                                              patient: patientsList[
-                                                  currentIndex[index]],
-                                              activeList: activeList,
-                                            )));
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-              ),
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(defaultPadding),
+          child: ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: currentList.length,
+              itemBuilder: (context, index) {
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: defaultPadding),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white70,
+                      ),
+                      child: ListTile(
+                        title: Text(
+                            "${currentList[index].firstName == "UNDEFINED" ? "" : currentList[index].firstName} ${currentList[index].middleName == "UNDEFINED" ? "" : currentList[index].middleName} ${currentList[index].lastName == "UNDEFINED" ? "" : currentList[index].lastName}",
+                            style: TextStyle(color: kPrimaryColor)),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PatientDetails(
+                                        index: index,
+                                        patient:
+                                            patientsList[currentIndex[index]],
+                                        activeList: activeList,
+                                      )));
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              }),
+        ),
 
-              // SizedBox(height: 1000),
-            ],
-          );
+        // SizedBox(height: 1000),
+      ],
+    );
   }
 
   Widget categoryHeaders() {
@@ -145,12 +143,11 @@ class _PatientPageState extends State<PatientPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onTap: () async {
+                  onTap: () {
                     setState(() {
                       categoryButtonNumber = 0;
-                      category = 'Watched';
                     });
-                    await runApplication();
+                    runApplication();
                   },
                 ),
                 const SizedBox(width: defaultPadding / 2),
@@ -166,12 +163,11 @@ class _PatientPageState extends State<PatientPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onTap: () async {
+                  onTap: () {
                     setState(() {
                       categoryButtonNumber = 1;
-                      category = 'waiting_discharge';
                     });
-                    await runApplication();
+                    runApplication();
                   },
                 ),
                 const SizedBox(width: defaultPadding / 2),
@@ -187,12 +183,11 @@ class _PatientPageState extends State<PatientPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onTap: () async {
+                  onTap: () {
                     setState(() {
                       categoryButtonNumber = 2;
-                      category = 'waiting_assigned';
                     });
-                    await runApplication();
+                    runApplication();
                   },
                 ),
                 const SizedBox(width: defaultPadding / 2),
@@ -208,12 +203,11 @@ class _PatientPageState extends State<PatientPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onTap: () async {
+                  onTap: () {
                     setState(() {
                       categoryButtonNumber = 3;
-                      category = 'not_patient';
                     });
-                    await runApplication();
+                    runApplication();
                   },
                 ),
               ],
@@ -239,18 +233,6 @@ class _PatientPageState extends State<PatientPage> {
             style: TextStyle(color: Colors.white60),
           ),
         ),
-        //   actions: [
-        //     IconButton(
-        //         icon: const Icon(
-        //           Icons.notifications,
-        //           color: Colors.white,
-        //         ),
-        //         tooltip: 'Login/Registration',
-        //         onPressed: () {
-        //           Navigator.push(context,
-        //               MaterialPageRoute(builder: (context) => Container()));
-        //         })
-        //   ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -263,7 +245,9 @@ class _PatientPageState extends State<PatientPage> {
               endIndent: defaultPadding,
               color: Colors.white70,
             ),
-            patientList(),
+            _inProgress
+                ? Center(child: CircularProgressIndicator())
+                : patientList(),
           ],
         ),
       ),

@@ -14,7 +14,7 @@ class DoctorPage extends StatefulWidget {
 
 class _DoctorPageState extends State<DoctorPage> {
   int categoryButtonNumber = 0;
-  String category = 'Watched';
+  String category = '';
   List<String> activeList = [
     "Occupied",
     "Unoccupied",
@@ -35,9 +35,14 @@ class _DoctorPageState extends State<DoctorPage> {
       if (response.statusCode == 200) {
         List tempDoctors = jsonDecode(response.body);
         int i = 0;
-        currentList = [];
-        currentIndex = [];
-        listLength = 0;
+
+        setState(() {
+          currentList = [];
+          doctorsList = [];
+          currentIndex = [];
+          listLength = 0;
+        });
+
         for (var iteration in tempDoctors) {
           setState(() {
             doctorsList.add(Doctor(iteration));
@@ -70,7 +75,7 @@ class _DoctorPageState extends State<DoctorPage> {
     super.initState();
   }
 
-  Widget patientList() {
+  Widget doctorList() {
     return _inProgress
         ? CircularProgressIndicator()
         : Column(
@@ -194,18 +199,6 @@ class _DoctorPageState extends State<DoctorPage> {
             style: TextStyle(color: Colors.white60),
           ),
         ),
-        //   actions: [
-        //     IconButton(
-        //         icon: const Icon(
-        //           Icons.notifications,
-        //           color: Colors.white,
-        //         ),
-        //         tooltip: 'Login/Registration',
-        //         onPressed: () {
-        //           Navigator.push(context,
-        //               MaterialPageRoute(builder: (context) => Container()));
-        //         })
-        //   ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -218,7 +211,7 @@ class _DoctorPageState extends State<DoctorPage> {
               endIndent: defaultPadding,
               color: Colors.white70,
             ),
-            patientList(),
+            doctorList(),
           ],
         ),
       ),

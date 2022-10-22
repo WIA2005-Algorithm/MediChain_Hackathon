@@ -1,4 +1,9 @@
 import axios from "axios";
+const org1AdminID = "Admin";
+const org2AdminID = "BAdmin";
+const commonPassword = "Kamal@2001";
+
+
 axios.defaults.baseURL = "http://localhost:8080/api";
 const payloads = [
   /* UMMC */
@@ -8,7 +13,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QDOCUMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "doctor"
     },
     personalDetails: {
@@ -41,7 +46,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QDOC2UMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "doctor"
     },
     personalDetails: {
@@ -74,7 +79,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QDOC3UMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "doctor"
     },
     personalDetails: {
@@ -108,7 +113,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QPTUMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -140,7 +145,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QPT2UMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -172,7 +177,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QPT3UMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -204,7 +209,7 @@ const payloads = [
     loginDetails: {
       org: "Univeristy of Malaya Medical Center - UMMC",
       ID: "QPT4UMMC",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -238,7 +243,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QDOCPPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "doctor"
     },
     personalDetails: {
@@ -271,7 +276,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QDOC2PPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "doctor"
     },
     personalDetails: {
@@ -304,7 +309,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QDOC3PPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "doctor"
     },
     personalDetails: {
@@ -338,7 +343,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QPTPPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -370,7 +375,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QPT2PPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -402,7 +407,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QPT3PPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -434,7 +439,7 @@ const payloads = [
     loginDetails: {
       org: "Perpeskuatuan - PPUM",
       ID: "QPT4PPUM",
-      password: "Kamal@2001",
+      password: commonPassword,
       TYPE: "patient"
     },
     personalDetails: {
@@ -514,7 +519,7 @@ function dischargePTForDoctor(PTID, DOCID) {
 
 async function FinalPPUM(t, noDischarge = true) {
   console.log("Logging in as Admin - 1");
-  await loginSetAuthorization("BAdmin", "Kamal@2001", "admin");
+  await loginSetAuthorization(org2AdminID, commonPassword, "admin");
   console.log("CheckIn Patient : QPTPPUM");
   await checkInPatients("QPTPPUM", new Date().getTime());
   console.log("CheckIn Patient : QPT2PPUM");
@@ -551,7 +556,7 @@ async function FinalPPUM(t, noDischarge = true) {
     await assignPatients("QPT2PPUM", "QDOC3PPUM");
   }
   console.log("Login as Doctor : QDOCPPUM");
-  await loginSetAuthorization("QDOCPPUM", "Kamal@2001", "doctor");
+  await loginSetAuthorization("QDOCPPUM", commonPassword, "doctor");
   console.log("Discharge Patient : QPTPPUM from Doctor : QDOCPPUM");
   await dischargePTForDoctor("QPTPPUM", "QDOCPPUM");
   if (noDischarge) {
@@ -561,13 +566,13 @@ async function FinalPPUM(t, noDischarge = true) {
     await dischargePTForDoctor("QPT3PPUM", "QDOCPPUM");
   }
   console.log("Login as Doctor : QDOC2PPUM");
-  await loginSetAuthorization("QDOC2PPUM", "Kamal@2001", "doctor");
+  await loginSetAuthorization("QDOC2PPUM", commonPassword, "doctor");
   console.log("Discharge Patient : QPTPPUM from Doctor : QDOC2PPUM");
   await dischargePTForDoctor("QPTPPUM", "QDOC2PPUM");
   console.log("Discharge Patient : QPT3PPUM from Doctor : QDOC2PPUM");
   await dischargePTForDoctor("QPT3PPUM", "QDOC2PPUM");
   console.log("Login as Doctor : QDOC3PPUM");
-  await loginSetAuthorization("QDOC3PPUM", "Kamal@2001", "doctor");
+  await loginSetAuthorization("QDOC3PPUM", commonPassword, "doctor");
   console.log("Discharge Patient : QPT4PPUM from Doctor : QDOC3PPUM");
   await dischargePTForDoctor("QPT4PPUM", "QDOC3PPUM");
   if (noDischarge) {
@@ -578,7 +583,7 @@ async function FinalPPUM(t, noDischarge = true) {
   }
 
   console.log("Logging in as Admin - 2");
-  await loginSetAuthorization("BAdmin", "Kamal@2001", "admin");
+  await loginSetAuthorization(org2AdminID, commonPassword, "admin");
   console.log("CheckOut Patient QPTPPUM");
   await checkOutPatient("QPTPPUM", new Date().getTime());
   console.log("CheckOut Patient QPT4PPUM");
@@ -599,7 +604,7 @@ async function FinalPPUM(t, noDischarge = true) {
 
 async function FinalUMMC(t, noDischarge = true) {
   console.log("Logging in as Admin - 1");
-  await loginSetAuthorization("Admin", "Kamal@2001", "admin");
+  await loginSetAuthorization(org1AdminID, commonPassword, "admin");
   console.log("CheckIn Patient : QPTUMMC");
   await checkInPatients("QPTUMMC", new Date().getTime());
   console.log("CheckIn Patient : QPT2UMMC");
@@ -636,7 +641,7 @@ async function FinalUMMC(t, noDischarge = true) {
   console.log("Assign Patient : QPT4UMMC to Doctor : QDOC3UMMC");
   await assignPatients("QPT4UMMC", "QDOC3UMMC");
   console.log("Login as Doctor : QDOCUMMC");
-  await loginSetAuthorization("QDOCUMMC", "Kamal@2001", "doctor");
+  await loginSetAuthorization("QDOCUMMC", commonPassword, "doctor");
   console.log("Discharge Patient : QPTUMMC from Doctor : QDOCUMMC");
   await dischargePTForDoctor("QPTUMMC", "QDOCUMMC");
   if (noDischarge) {
@@ -646,12 +651,12 @@ async function FinalUMMC(t, noDischarge = true) {
     await dischargePTForDoctor("QPT3UMMC", "QDOCUMMC");
   }
   console.log("Logging in as QDOC2UMMC");
-  await loginSetAuthorization("QDOC2UMMC", "Kamal@2001", "doctor");
+  await loginSetAuthorization("QDOC2UMMC", commonPassword, "doctor");
   console.log("Discharge Patient : QPTUMMC from Doctor : QDOC2UMMC");
   await dischargePTForDoctor("QPTUMMC", "QDOC2UMMC");
   await dischargePTForDoctor("QPT3UMMC", "QDOC2UMMC");
   console.log("Logging in as QDOC3UMMC");
-  await loginSetAuthorization("QDOC3UMMC", "Kamal@2001", "doctor");
+  await loginSetAuthorization("QDOC3UMMC", commonPassword, "doctor");
   await dischargePTForDoctor("QPT4UMMC", "QDOC3UMMC");
   if (noDischarge) {
     console.log("Discharge Patient : QPT2UMMC from Doctor : QDOC3UMMC");
@@ -660,7 +665,7 @@ async function FinalUMMC(t, noDischarge = true) {
     await dischargePTForDoctor("QPT3UMMC", "QDOC3UMMC");
   }
   console.log("Logging in as Admin - 2");
-  await loginSetAuthorization("Admin", "Kamal@2001", "admin");
+  await loginSetAuthorization(org1AdminID, commonPassword, "admin");
   console.log("CheckOut Patient QPTUMMC");
   await checkOutPatient("QPTUMMC", new Date().getTime());
   if (noDischarge) {
