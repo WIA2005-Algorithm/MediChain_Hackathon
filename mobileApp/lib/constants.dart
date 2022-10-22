@@ -31,7 +31,7 @@ const kParagaphTextStyle = TextStyle(
     fontSize: 17,
     fontFamily: 'Inter');
 
-const String kApibaseURL = "http://172.29.252.166:8080/api";
+const String kApibaseURL = "http://172.24.86.94:8080/api";
 
 // const kPrimaryColor = Color(0xFF6F35A5);
 const kPrimaryLightColor = Color(0xFFF1E6FF);

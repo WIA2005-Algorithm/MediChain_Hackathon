@@ -3,11 +3,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/models/doctors.dart';
+import 'package:medichain/screens/doctor/models/doctors.dart';
 import '../../../constants.dart';
 import '../models/patients.dart';
 
 class PatientDetails extends StatefulWidget {
-  final Patient patient;
+  final PatientDetailsAPIResponse? patient;
   final int index;
 
   PatientDetails({super.key, required this.index, required this.patient});
@@ -17,13 +18,10 @@ class PatientDetails extends StatefulWidget {
 }
 
 class _PatientDetailsState extends State<PatientDetails> {
-  List<Doctor> availableDoctors = [];
-
   @override
   void initState() {
     // TODO: implement initState
-    print(widget.patient.checkIn);
-    getDoctorData();
+    print(widget.patient!.checkIn);
     super.initState();
   }
 
@@ -73,17 +71,17 @@ class _PatientDetailsState extends State<PatientDetails> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "First Name: ${widget.patient.firstName}",
+                      "First Name: ${widget.patient!.details!.firstName}",
                       style: kParagaphTextStyle,
                     ),
-                    widget.patient.middleName == "UNDEFINED"
+                    widget.patient!.details!.middleName == "UNDEFINED"
                         ? SizedBox()
                         : Text(
-                            "Middle Name: ${widget.patient.middleName}",
+                            "Middle Name: ${widget.patient!.details!.middleName}",
                             style: kParagaphTextStyle,
                           ),
                     Text(
-                      "Last Name: ${widget.patient.lastName}",
+                      "Last Name: ${widget.patient!.details!.lastName}",
                       style: kParagaphTextStyle,
                     ),
                   ],
@@ -104,11 +102,11 @@ class _PatientDetailsState extends State<PatientDetails> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Main: ${widget.patient.mobile}",
+                    Text("Main: ${widget.patient!.details!.mobile}",
                         style: kParagaphTextStyle),
-                    Text("Whatsapp: ${widget.patient.whatsapp}",
+                    Text("Whatsapp: ${widget.patient!.details!.whatsapp}",
                         style: kParagaphTextStyle),
-                    Text("Alternate: ${widget.patient.otherNumber}",
+                    Text("Alternate: ${widget.patient!.details!.otherNumber}",
                         style: kParagaphTextStyle),
                   ],
                 ),
@@ -130,17 +128,17 @@ class _PatientDetailsState extends State<PatientDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${widget.patient.street1}",
+                        "${widget.patient!.details!.street1}",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       Text(
-                        "${widget.patient.street2}",
+                        "${widget.patient!.details!.street2}",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       Text(
-                        "${widget.patient.city}",
+                        "${widget.patient!.details!.city}",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
@@ -160,79 +158,56 @@ class _PatientDetailsState extends State<PatientDetails> {
             SizedBox(height: defaultPadding),
             const Text("Associated Doctor", style: kSectionTextStyle),
             const SizedBox(height: defaultPadding),
-            widget.patient.associatedDoctors.toString() == "{}"
-                ? Text(
-                    "Doctor has not been assigned \nto this patient",
-                    style: kParagaphTextStyle,
-                  )
-                : Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                              vertical: defaultPadding / 3),
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                SizedBox(width: defaultPadding),
-                                Icon(
-                                  Icons.medical_information,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: defaultPadding),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                        "Name: ${availableDoctors[index].fullName}",
-                                        style: kParagaphTextStyle),
-                                    // Text(
-                                    //     "Assignation date: ${widget.patient.checkIn}",
-                                    //     style: kParagaphTextStyle),
-                                    Text(
-                                        "Department: ${availableDoctors[index].department}",
-                                        style: kParagaphTextStyle),
-                                    Text(
-                                        "Hospital: ${availableDoctors[index].org}",
-                                        style: kParagaphTextStyle),
-                                  ],
-                                ),
-                              ]),
-                        );
-                      },
-                      itemCount: availableDoctors.length,
-                    ),
-                  ),
+            // widget.patient!.associatedDoctors.toString() == "{}"
+            //     ? Text(
+            //         "Doctor has not been assigned \nto this patient",
+            //         style: kParagaphTextStyle,
+            //       )
+            //     : Expanded(
+            //         child: ListView.builder(
+            //           shrinkWrap: true,
+            //           physics: const NeverScrollableScrollPhysics(),
+            //           itemBuilder: (context, index) {
+            //             return Container(
+            //               padding: EdgeInsets.symmetric(
+            //                   vertical: defaultPadding / 3),
+            //               child: Row(
+            //                   mainAxisAlignment: MainAxisAlignment.start,
+            //                   children: [
+            //                     SizedBox(width: defaultPadding),
+            //                     Icon(
+            //                       Icons.medical_information,
+            //                       size: 40,
+            //                       color: Colors.white,
+            //                     ),
+            //                     SizedBox(width: defaultPadding),
+            //                     // Create New page for doctors list
+            //                     Column(
+            //                       crossAxisAlignment: CrossAxisAlignment.start,
+            //                       children: [
+            //                         Text(
+            //                             "Name: ${widget.patient.details}",
+            //                             style: kParagaphTextStyle),
+            //                         // Text(
+            //                         //     "Assignation date: ${widget.patient.checkIn}",
+            //                         //     style: kParagaphTextStyle),
+            //                         Text(
+            //                             "Department: ${widget.patient.details.doctors}",
+            //                             style: kParagaphTextStyle),
+            //                         Text(
+            //                             "Hospital: ${availableDoctors[index].org}",
+            //                             style: kParagaphTextStyle),
+            //                       ],
+            //                     ),
+            //                   ]),
+            //             );
+            //           },
+            //           itemCount: availableDoctors.length,
+            //         ),
+            //       ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> getDoctorData() async {
-    await AdminConstants.sendGET(
-        AdminConstants.getAllDoctorData, <String, String>{}).then((response) {
-      if (response.statusCode == 200) {
-        List<dynamic> tempDoctors = jsonDecode(response.body);
-        List<Doctor> doctors = [];
-        for (var doctor in tempDoctors) {
-          doctors.add(Doctor(doctor));
-        }
-
-        print("${doctors[0].fullName} ${doctors[0].activeList}");
-        setState(() {
-          availableDoctors = doctors;
-        });
-      } else {
-        throw Exception('Failed to GT ${response.statusCode}');
-      }
-    }).catchError((onError) {
-      print('Error in GET Doctor API: ${onError.toString()}');
-    });
-
-    print("Success in api call");
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: empty_constructor_bodies
+
 import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -69,6 +71,8 @@ class PersonalDetails {
       this.department,
       this.passport);
 
+  PersonalDetails.getJson() {}
+
   Map<String, dynamic> toJson() {
     return {
       "firstName": firstName,
@@ -131,6 +135,15 @@ class Address {
     this.city,
   );
 
+  Address.getJson(Map<String, dynamic> json) {
+    this.street1 = json["street1"] ?? "";
+    this.street2 = json["street2"] ?? "";
+    this.postcode = json["postcode"] ?? "";
+    this.country = json["country"] ?? "";
+    this.state = json["state"] ?? "";
+    this.city = json["city"] ?? "";
+  }
+
   Map<String, String> toJson() {
     return {
       "street1": street1,
@@ -154,6 +167,12 @@ class ContactDetails {
     this.whatsapp,
     this.other,
   );
+
+  ContactDetails.getJson(Map<String, dynamic> json) {
+    this.mobile = json["mobile"] ?? "";
+    this.whatsapp = json["whatsapp"] ?? "";
+    this.other = json["other"] ?? "";
+  }
 
   Map<String, String> toJson() {
     return {

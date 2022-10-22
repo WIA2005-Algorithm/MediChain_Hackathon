@@ -1,162 +1,17 @@
-class Patient {
-  List<String> activeList = [
-    "Actively Watched",
-    "Waiting For Discharge",
-    "Waiting To Be Assigned",
-    "Not Patients"
-  ];
+import 'dart:convert';
 
-  // Common Details
-  String active = '';
-  Map<String, dynamic> associatedDoctors = {};
-  List checkIn = [];
-  List checkOut = [];
-  Map<String, dynamic> details = {};
-  Map<String, dynamic> orgDetails = {};
-  Map<String, dynamic> secretSharingPair = {};
-  int patientCount = 0;
+import 'package:medichain/constants.dart';
+import 'package:medichain/helper/registration/registeration.dart';
+import 'package:medichain/screens/doctor/models/doctors.dart';
 
-  // Patient Details
-  int DOB = 0;
-  String city = '';
-  String country = '';
-  String postcode = '';
-  String state = '';
-  String street1 = '';
-  String street2 = '';
+// THIS IS GETDoctor API Response
+class Details extends PersonalDetails {
+  Address? address;
+  ContactDetails? contact;
 
-  String mobile = '';
-  String otherNumber = '';
-  String whatsapp = '';
-
-  String email = '';
-  String firstName = '';
-  String middleName = '';
-  String lastName = '';
-  String fullName = '';
-  String gender = '';
-  String maritalStatus = '';
-  String passport = '';
-
-  // Org Details
-  String org = '';
-  String role = '';
-
-  // Associated Doctors
-  String doctorID = '';
-  String EMRID = '';
-  String PHRID = '';
-
-  List activeDoctorStatus = [];
-  String assignedOn = '';
-  String deAssigned = '';
-  String department = '';
-  String dischargeOk = '';
-  String doctorEmail = '';
-  String name = '';
-  String note = '';
-
-  Patient(Map<String, dynamic> json) {
-    active = json['active'] ?? 'null';
-    associatedDoctors = json['associatedDoctors'] ?? 'null';
-    // print("Doctors $associatedDoctors");
-    // json['checkIn'].forEach((date) {
-    //   DateTime hold =
-    //       DateTime.fromMillisecondsSinceEpoch(date * 1000, isUtc: true);
-    //   print("${hold.day} ${hold.month} ${hold.year}");
-    //   checkIn.add("${hold.day} ${hold.month} ${hold.year}");
-    // });
-    // print("Check in $checkIn");
-    // checkIn.add(json['checkIn'] != null
-    //     ? DateTime.parse(json['checkIn'].toString())
-    //     : 'null');
-    // checkOut.add(json['checkOut'] != null
-    //     ? DateTime.parse(json['']['checkOut'].toString())
-    //     : 'null');
-    details = json['details'] ?? 'null';
-    orgDetails = json['orgDetails'] ?? 'null';
-    secretSharingPair = json['secretSharingPair'] ?? 'null';
-
-    // Patient Details
-    // final tempDate = DateTime.parse(json['DOB'].toString());
-
-    // DOB = tempDate as int;
-    city = details['address']['city'] ?? 'null';
-    country = details['address']['country'] ?? 'null';
-    postcode = details['address']['postcode'] ?? 'null';
-    state = details['address']['state'] ?? 'null';
-    street1 = details['address']['street1'] ?? 'null';
-    street2 = details['address']['street2'] ?? 'null';
-
-    mobile = details['contact']['mobile'] ?? 'null';
-    otherNumber = details['contact']['otherNumber'] ?? 'null';
-    whatsapp = details['contact']['whatsapp'] ?? 'null';
-
-    email = details['email'] ?? 'null';
-    firstName = details['firstName'] ?? 'null';
-    middleName = details['middleName'] ?? 'null';
-    lastName = details['lastName'] ?? 'null';
-    fullName = '$firstName $middleName $lastName';
-    gender = details['gender'] ?? 'null';
-    maritalStatus = details['maritalStatus'] ?? 'null';
-    passport = details['passport'] ?? 'null';
-
-    org = orgDetails['org'] ?? 'null';
-    role = orgDetails['role'] ?? 'null';
-
-    // Details(details);
-    // OrgDetails(orgDetails);
-
-    // Associated Doctors
-
-    // doctorID = associatedDoctors[''];
-    // EMRID = associatedDoctors['PHRID'];
-    // activeDoctorStatus = associatedDoctors[''];
-    // assignedOn = associatedDoctors[''];
-    // deAssigned = associatedDoctors[''];
-    // department = associatedDoctors[''];
-    // dischargeOk = associatedDoctors[''];
-    // doctorEmail = associatedDoctors[''];
-    // name = associatedDoctors[''];
-    // note = associatedDoctors[''];
-  }
-}
-
-class Details {
-  int DOB = 0;
-  String city = '';
-  String country = '';
-  String postcode = '';
-  String state = '';
-  String street1 = '';
-  String street2 = '';
-
-  String mobile = '';
-  String otherNumber = '';
-  String whatsapp = '';
-
-  String email = '';
-  String firstName = '';
-  String middleName = '';
-  String lastName = '';
-  String gender = '';
-  String maritalStatus = '';
-  String passport = '';
-
-  Details(Map<String, dynamic> json) {
-    // final tempDate = DateTime.parse(json['DOB'].toString());
-
-    // DOB = tempDate as int;
-    city = json['address']['city'] ?? 'null';
-    country = json['address']['country'] ?? 'null';
-    postcode = json['address']['postcode'] ?? 'null';
-    state = json['address']['state'] ?? 'null';
-    street1 = json['address']['street1'] ?? 'null';
-    street2 = json['address']['street2'] ?? 'null';
-
-    mobile = json['contact']['mobile'] ?? 'null';
-    otherNumber = json['contact']['otherNumber'] ?? 'null';
-    whatsapp = json['contact']['whatsapp'] ?? 'null';
+  Details(Map<String, dynamic> json) : super.getJson() {
+    address = Address.getJson(json['address']);
+    contact = ContactDetails.getJson(json['contact']);
 
     email = json['email'] ?? 'null';
     firstName = json['firstName'] ?? 'null';
@@ -175,5 +30,51 @@ class OrgDetails {
   OrgDetails(Map<String, dynamic> json) {
     org = json['org'] ?? 'null';
     role = json['role'] ?? 'null';
+  }
+}
+
+class EachPatient {
+  String active = '';
+  num assignedOn = 0;
+  String dischargeOk = 'null';
+  String name = '';
+  PatientDetailsAPIResponse? patientData;
+
+  EachPatient.getJson(Map<String, dynamic> json, String ptID) {
+    active = json['active'];
+    assignedOn = json['assignedOn'];
+    dischargeOk = json['dischargeOk'] ?? "null";
+    name = json['name'];
+    print("HELLO I AM PRINTED");
+    patientData = getPatientData(ptID) as PatientDetailsAPIResponse?;
+  }
+}
+
+Future getPatientData(String id) async {
+  final response = await DoctorConstants.sendGET(
+      "${DoctorConstants.getPatientInfo}?ptID=$id", <String, String>{});
+  return PatientDetailsAPIResponse(jsonDecode(response.body));
+}
+
+class AssociatedPatients {
+  Map<String, EachPatient> patients = <String, EachPatient>{};
+  AssociatedPatients(Map<String, dynamic> json) {
+    json.forEach((key, value) {
+      patients[key] = EachPatient.getJson(value, key);
+    });
+  }
+}
+
+class DoctorDetailsAPIResponse {
+  List<String>? active;
+  AssociatedPatients? associatedPatients;
+  Details? details;
+  OrgDetails? orgDetails;
+
+  DoctorDetailsAPIResponse(Map<String, dynamic> json) {
+    active = List<String>.from(json['active']);
+    associatedPatients = AssociatedPatients(json['associatedPatients']);
+    details = Details(json['details']);
+    orgDetails = OrgDetails(json["orgDetails"]);
   }
 }

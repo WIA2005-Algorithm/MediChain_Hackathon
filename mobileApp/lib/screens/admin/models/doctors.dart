@@ -44,12 +44,13 @@ class Doctor {
   String role = '';
 
   Doctor(Map<String, dynamic> json) {
-    json['active'].forEach((element) {
-          active.add(element);
-        }) ??
-        <String, dynamic>{};
+    json['active'] != <String, dynamic>{}
+        ? json['active'].forEach((element) {
+            active.add(element);
+          })
+        : null;
 
-    associatedPatients = json['associatedDoctors'] ?? <String, dynamic>{};
+    associatedPatients = json['associatedPatients'] ?? <String, dynamic>{};
     details = json['details'] ?? <String, dynamic>{};
     orgDetails = json['orgDetails'] ?? <String, dynamic>{};
     secretSharingPair = json['secretSharingPair'] ?? <String, dynamic>{};

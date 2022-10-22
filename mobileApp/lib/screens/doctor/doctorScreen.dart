@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/models/doctors.dart';
+import 'package:medichain/screens/doctor/models/doctors.dart';
 import 'package:medichain/screens/doctor/models/patients.dart';
 import 'package:medichain/screens/doctor/pages/patientDetails.dart';
+import 'package:medichain/screens/doctor/pages/takeAction.dart';
 import '../../constants.dart';
 import '../welcome/welcome_screen.dart';
 
@@ -19,10 +21,8 @@ class _DoctorScreenState extends State<DoctorScreen> {
   // List _widgetOptions = [];
   bool _inProgress = false;
   TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-
-  List<Patient> patientsList = [];
-  List<Patient> currentList = [];
-  Doctor doctorInfo = Doctor(<String, String>{});
+  // List<Patient> currentList = [];
+  DoctorDetailsAPIResponse? doctorInfo;
   List<int> currentIndex = [];
   int listLength = 0;
 
@@ -36,42 +36,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
   void initState() {
     // TODO: implement initState
     getDoctorInfo();
-    getPatientInfo();
     super.initState();
-  }
-
-  Future<void> getPatientInfo() async {
-    setState(() {
-      _inProgress = true;
-    });
-
-    await DoctorConstants.sendGET(
-        "${DoctorConstants.getPatientInfo}/ptID=${doctorInfo.passport}",
-        <String, String>{}).then((response) {
-      if (response.statusCode == 200) {
-        // print(response.body);
-        int i = 0;
-        setState(() {
-          patientsList = [];
-          listLength = 0;
-        });
-        List tempPatients = jsonDecode(response.body);
-
-        for (var iteration in tempPatients) {
-          setState(() {
-            patientsList.add(Patient(iteration));
-          });
-          i++;
-        }
-      } else {
-        throw Exception('Failed to GET ${response.statusCode}');
-      }
-    }).catchError((onError) {
-      print('Error in GET Partients API: ${onError.toString()}');
-    });
-    setState(() {
-      _inProgress = false;
-    });
   }
 
   Future<void> getDoctorInfo() async {
@@ -82,9 +47,12 @@ class _DoctorScreenState extends State<DoctorScreen> {
     await DoctorConstants.sendGET(
         DoctorConstants.getDoctorInfo, <String, String>{}).then((response) {
       if (response.statusCode == 200) {
-        // print(response.body);
+        print(response.body);
+        DoctorDetailsAPIResponse d =
+            DoctorDetailsAPIResponse(jsonDecode(response.body));
+        // STOPPED HERE
         setState(() {
-          doctorInfo = Doctor(jsonDecode(response.body));
+          doctorInfo = DoctorDetailsAPIResponse(jsonDecode(response.body));
         });
       } else {
         throw Exception('Failed to GET ${response.statusCode}');
@@ -105,7 +73,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
           child: ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount: patientsList.length,
+              itemCount: doctorInfo!.associatedPatients!.patients.length,
               itemBuilder: (context, index) {
                 return SingleChildScrollView(
                   child: Padding(
@@ -117,7 +85,9 @@ class _DoctorScreenState extends State<DoctorScreen> {
                       ),
                       child: ListTile(
                         title: Text(
-                            "${patientsList[index].firstName == "UNDEFINED" ? "" : patientsList[index].firstName} ${patientsList[index].middleName == "UNDEFINED" ? "" : patientsList[index].middleName} ${currentList[index].lastName == "UNDEFINED" ? "" : patientsList[index].lastName}",
+                            doctorInfo!.associatedPatients!.patients.values
+                                .toList()[index]
+                                .name,
                             style: TextStyle(color: kPrimaryColor)),
                         onTap: () {
                           Navigator.push(
@@ -125,8 +95,10 @@ class _DoctorScreenState extends State<DoctorScreen> {
                               MaterialPageRoute(
                                   builder: (context) => PatientDetails(
                                         index: index,
-                                        patient:
-                                            patientsList[currentIndex[index]],
+                                        patient: doctorInfo!
+                                            .associatedPatients!.patients.values
+                                            .toList()[index]
+                                            .patientData,
                                       )));
                         },
                       ),
@@ -213,7 +185,9 @@ class _DoctorScreenState extends State<DoctorScreen> {
                         'Take Action',
                         style: TextStyle(color: kTextColor),
                       ),
-                      onTap: () {}),
+                      onTap: () {
+                        // TakeAction();
+                      }),
                   ListTile(
                       leading: Icon(Icons.contact_mail, color: kTextColor),
                       title: Text(

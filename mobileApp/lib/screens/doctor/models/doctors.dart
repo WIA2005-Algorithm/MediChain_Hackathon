@@ -1,84 +1,55 @@
 import 'dart:convert';
 
-class Doctor {
-  List<String> activeList = [
-    "Active",
-    "Unoccupied",
-  ];
+import 'package:medichain/helper/registration/registeration.dart';
+import 'package:medichain/screens/admin/models/patients.dart';
 
-  // Common Details
-  List active = [];
-  List checkOut = [];
+class EachDoctor {
+  List<String> active = [];
+  num assignedOn = 0;
+  num deAssigned = 0;
+  String department = "";
+  String dischargeOk = "null";
+  String email = "";
+  String name = "";
+  String note = "";
 
-  Map<String, dynamic> associatedPatients = {};
-  Map<String, dynamic> details = {};
-  Map<String, dynamic> orgDetails = {};
-  Map<String, dynamic> secretSharingPair = {};
-  int patientCount = 0;
+  EachDoctor.getJson(Map<String, dynamic> json) {
+    active = List<String>.from(json["active"]);
+    assignedOn = json["assignedOn"] ?? 0;
+    deAssigned = json["deAssigned"] ?? 0;
+    department = json["department"] ?? 'null';
+    dischargeOk = json["dischargeOk"] ?? 'null';
+    email = json["email"] ?? 'null';
+    name = json["name"] ?? 'null';
+    note = json["note"] ?? 'null';
+  }
+}
 
-  // Doctor Details
-  int DOB = 0;
-  String city = '';
-  String country = '';
-  String postcode = '';
-  String state = '';
-  String street1 = '';
-  String street2 = '';
-
-  String mobile = '';
-  String otherNumber = '';
-  String whatsapp = '';
-
-  String department = '';
-  String email = '';
-  String firstName = '';
-  String middleName = '';
-  String lastName = '';
-  String fullName = '';
-  String gender = '';
-  String maritalStatus = '';
-  String passport = '';
-
-  // Org Details
-  String org = '';
-  String role = '';
-
-  Doctor(Map<String, dynamic> json) {
-    print(json);
-    json['active'].forEach((element) {
-      active.add(element);
+class AssociatedDoctors {
+  Map<String, EachDoctor> doctors = <String, EachDoctor>{};
+  AssociatedDoctors(Map<String, dynamic> json) {
+    json.forEach((key, value) {
+      doctors[key] = EachDoctor.getJson(value);
     });
+  }
+}
 
-    associatedPatients = json['associatedDoctors'] ?? <String, dynamic>{};
-    details = json['details'] ?? <String, dynamic>{};
-    orgDetails = json['orgDetails'] ?? <String, dynamic>{};
-    secretSharingPair = json['secretSharingPair'] ?? <String, dynamic>{};
-    department = details['department'] ?? 'null';
-    // Patient Details
-    // final tempDate = DateTime.parse(json['DOB'].toString());
+class PatientDetailsAPIResponse {
+  String active = "";
+  List<num> checkIn = [];
+  List<num> checkOut = [];
+  OrgDetails? orgDetails;
+  Details? details;
+  AssociatedDoctors? associatedDoctors;
 
-    // DOB = tempDate as int;
-    city = details['address']['city'] ?? 'null';
-    country = details['address']['country'] ?? 'null';
-    postcode = details['address']['postcode'] ?? 'null';
-    state = details['address']['state'] ?? 'null';
-    street1 = details['address']['street1'] ?? 'null';
-    street2 = details['address']['street2'] ?? 'null';
-
-    mobile = details['contact']['mobile'] ?? 'null';
-    otherNumber = details['contact']['otherNumber'] ?? 'null';
-    whatsapp = details['contact']['whatsapp'] ?? 'null';
-
-    email = details['email'] ?? 'null';
-    firstName = details['firstName'] ?? 'null';
-    middleName = details['middleName'] ?? 'null';
-    lastName = details['lastName'] ?? 'null';
-    fullName = firstName + " " + middleName + " " + lastName;
-    gender = details['gender'] ?? 'null';
-    maritalStatus = details['maritalStatus'] ?? 'null';
-    passport = details['passport'] ?? 'null';
-
-    org = orgDetails['org'] ?? 'null';
-    role = orgDetails['role'] ?? 'null';
+  PatientDetailsAPIResponse(Map<String, dynamic> json) {
+    print("HELLO");
+    active = json["active"] ?? "";
+    print("HELLO - 2");
+    checkIn = List<num>.from(json["checkIn"]);
+    checkOut = List<num>.from(json["checkOut"]);
+    orgDetails = OrgDetails(json["orgDetails"]);
+    details = Details(json["details"]);
+    associatedDoctors = AssociatedDoctors(json["associatedDoctors"]);
   }
 }

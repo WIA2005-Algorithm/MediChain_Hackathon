@@ -10,11 +10,11 @@ class PatientHome extends StatefulWidget {
 }
 
 class PatientHomeState extends State<PatientHome> {
-  @override
   int _selectedIndex = 0;
   List _widgetOptions = [];
   TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 
+  @override
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;

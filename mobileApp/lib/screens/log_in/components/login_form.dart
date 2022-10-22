@@ -86,7 +86,7 @@ class _LoginFormState extends State<LoginForm> {
           print('Attempt successful');
 
           LoginAccess.fromJson(jsonDecode(response.body));
-          Navigator.pushReplacement(
+          Navigator.push(
               context, MaterialPageRoute(builder: (context) => DoctorScreen()));
         } else {
           throw Exception('Failed to login');
@@ -102,10 +102,12 @@ class _LoginFormState extends State<LoginForm> {
         "type": "patient"
       }).then((response) {
         if (response.statusCode == 200) {
+          LoginAccess.fromJson(jsonDecode(response.body));
+
           jsonDecode(response.body)['isOnBehalf'] == 1
               ? Navigator.push(context,
                   MaterialPageRoute(builder: (context) => ChangePassword()))
-              : Navigator.pushReplacement(context,
+              : Navigator.push(context,
                   MaterialPageRoute(builder: (context) => PatientHome()));
         } else {
           throw Exception('Failed to login');
