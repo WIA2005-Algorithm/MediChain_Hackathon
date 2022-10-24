@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/models/doctors.dart';
 import 'package:medichain/screens/admin/models/patients.dart';
+import 'package:medichain/screens/doctor/models/patients.dart';
 
 import '../../../constants.dart';
 
 class DoctorDetails extends StatefulWidget {
-  final Doctor doctor;
+  // final Doctor doctor;
+
+  final DoctorDetailsAPIResponse doctor;
   final int index;
   final List<String> activeList;
   DoctorDetails(
@@ -26,7 +29,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
   @override
   void initState() {
     // TODO: implement initState
-    getPatientData();
+    // getPatientData();
     super.initState();
   }
 
@@ -64,17 +67,17 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "First Name: ${widget.doctor.firstName}",
+                      "First Name: ${widget.doctor.details!.firstName}",
                       style: kParagaphTextStyle,
                     ),
-                    widget.doctor.middleName == "UNDEFINED"
+                    widget.doctor.details!.firstName == "UNDEFINED"
                         ? SizedBox()
                         : Text(
-                            "Middle Name: ${widget.doctor.middleName}",
+                            "Middle Name: ${widget.doctor.details!.firstName}",
                             style: kParagaphTextStyle,
                           ),
                     Text(
-                      "Last Name: ${widget.doctor.lastName}",
+                      "Last Name: ${widget.doctor.details!.firstName}",
                       style: kParagaphTextStyle,
                     ),
                   ],
@@ -95,11 +98,12 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Main: ${widget.doctor.mobile}",
+                    Text("Main: ${widget.doctor.details!.contact!.mobile}",
                         style: kParagaphTextStyle),
-                    Text("Whatsapp: ${widget.doctor.whatsapp}",
+                    Text(
+                        "Whatsapp: ${widget.doctor.details!.contact!.whatsapp}",
                         style: kParagaphTextStyle),
-                    Text("Alternate: ${widget.doctor.otherNumber}",
+                    Text("Alternate: ${widget.doctor.details!.contact!.other}",
                         style: kParagaphTextStyle),
                   ],
                 ),
@@ -121,17 +125,17 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${widget.doctor.street1},",
+                        "${widget.doctor.details!.address!.street1},",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       Text(
-                        "${widget.doctor.street2},",
+                        "${widget.doctor.details!.address!.street2},",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       Text(
-                        "${widget.doctor.city}.",
+                        "${widget.doctor.details!.address!.city}.",
                         style: kParagaphTextStyle,
                         textAlign: TextAlign.left,
                       ),
@@ -151,10 +155,12 @@ class _DoctorDetailsState extends State<DoctorDetails> {
             SizedBox(height: defaultPadding),
             const Text("Associated Patients", style: kSectionTextStyle),
             const SizedBox(height: defaultPadding),
-            widget.doctor.associatedPatients.toString() == "{}"
+            widget.doctor.associatedPatients!.patients.values.toList().length ==
+                    0
                 ? Text(
                     "Patient has not been assigned \nto this doctor",
                     style: kParagaphTextStyle,
+                    textAlign: TextAlign.center,
                   )
                 : Expanded(
                     child: ListView.builder(
@@ -178,23 +184,26 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        "Name: ${availablePatients[index].fullName}",
+                                        "Name: ${widget.doctor.associatedPatients!.patients.values.toList()[index].name}",
+                                        style: kParagaphTextStyle),
+                                    Text(
+                                        "Assignation date: ${widget.doctor.associatedPatients!.patients.values.toList()[index].assignedOn}",
+                                        style: kParagaphTextStyle),
+                                    Text(
+                                        "Status: ${widget.doctor.associatedPatients!.patients.values.toList()[index].active}",
                                         style: kParagaphTextStyle),
                                     // Text(
-                                    //     "Assignation date: ${widget.patient.checkIn}",
+                                    //     "Hospital: ${widget.doctor.associatedPatients!.patients.values.toList()[index].patientData!.orgDetails!.org}",
                                     //     style: kParagaphTextStyle),
-                                    Text(
-                                        "Department: ${availablePatients[index].department}",
-                                        style: kParagaphTextStyle),
-                                    Text(
-                                        "Hospital: ${availablePatients[index].org}",
-                                        style: kParagaphTextStyle),
                                   ],
                                 ),
                               ]),
                         );
                       },
-                      itemCount: availablePatients.length,
+                      itemCount: widget
+                          .doctor.associatedPatients!.patients.values
+                          .toList()
+                          .length,
                     ),
                   ),
           ],

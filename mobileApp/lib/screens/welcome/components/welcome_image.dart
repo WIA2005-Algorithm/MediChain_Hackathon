@@ -12,10 +12,6 @@ class WelcomeImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          "Medichain",
-          style: kTextStyle,
-        ),
         SizedBox(height: defaultPadding * 2),
         Row(
           children: [
@@ -25,11 +21,22 @@ class WelcomeImage extends StatelessWidget {
             //   child: Image.asset(
             //     // Insert medichain logo
 
-            //     "assets/images/app_logo_1.png",
+            //     "assets/images/app_logo.png",
             //   ),
             // ),
+            Image.asset(
+              "assets/images/app_logo.png",
+              // height: 200,
+              // width: 200,
+              scale: 0.6,
+            ),
             Spacer(),
           ],
+        ),
+        SizedBox(height: defaultPadding * 2),
+        const Text(
+          "Medichain",
+          style: kTextStyle,
         ),
         SizedBox(height: defaultPadding * 2),
       ],

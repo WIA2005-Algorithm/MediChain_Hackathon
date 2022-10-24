@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import '../../../constants.dart';
-import '../models/network_info.dart';
-import 'networkDetails.dart';
 
 class CreateNetwork extends StatefulWidget {
   const CreateNetwork({super.key});

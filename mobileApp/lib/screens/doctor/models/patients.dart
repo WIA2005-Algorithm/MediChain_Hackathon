@@ -45,12 +45,14 @@ class EachPatient {
     assignedOn = json['assignedOn'];
     dischargeOk = json['dischargeOk'] ?? "null";
     name = json['name'];
-    print("HELLO I AM PRINTED");
-    patientData = getPatientData(ptID) as PatientDetailsAPIResponse?;
+    getPatientData(ptID).then((value) {
+      print("Valuie $value");
+      patientData = value;
+    });
   }
 }
 
-Future getPatientData(String id) async {
+Future<PatientDetailsAPIResponse?> getPatientData(String id) async {
   final response = await DoctorConstants.sendGET(
       "${DoctorConstants.getPatientInfo}?ptID=$id", <String, String>{});
   return PatientDetailsAPIResponse(jsonDecode(response.body));

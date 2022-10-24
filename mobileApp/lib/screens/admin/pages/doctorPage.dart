@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:medichain/screens/admin/models/doctors.dart';
 import 'package:medichain/screens/admin/pages/doctorDetails.dart';
+import 'package:medichain/screens/doctor/models/patients.dart';
 
 import '../../../constants.dart';
 
@@ -20,8 +21,8 @@ class _DoctorPageState extends State<DoctorPage> {
     "Unoccupied",
   ];
 
-  List<Doctor> doctorsList = [];
-  List<Doctor> currentList = [];
+  List<DoctorDetailsAPIResponse> doctorsList = [];
+  List<DoctorDetailsAPIResponse> currentList = [];
   List<int> currentIndex = [];
   bool _inProgress = false;
   int listLength = 0;
@@ -45,9 +46,9 @@ class _DoctorPageState extends State<DoctorPage> {
 
         for (var iteration in tempDoctors) {
           setState(() {
-            doctorsList.add(Doctor(iteration));
+            doctorsList.add(DoctorDetailsAPIResponse(iteration));
           });
-          if (doctorsList[i].active[1] == activeList[categoryButtonNumber]) {
+          if (doctorsList[i].active![1] == activeList[categoryButtonNumber]) {
             setState(() {
               currentList.add(doctorsList[i]);
               currentIndex.add(i);
@@ -98,7 +99,7 @@ class _DoctorPageState extends State<DoctorPage> {
                             ),
                             child: ListTile(
                               title: Text(
-                                  "${currentList[index].firstName} ${currentList[index].middleName} ${currentList[index].lastName}",
+                                  "${currentList[index].details!.firstName} ${currentList[index].details!.middleName} ${currentList[index].details!.lastName}",
                                   style: TextStyle(color: kPrimaryColor)),
                               onTap: () {
                                 Navigator.push(

@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 import 'package:medichain/screens/admin/pages/create_patient.dart';
 import 'package:medichain/screens/welcome/welcome_screen.dart';
 import '../../../constants.dart';
+import '../../doctor/models/notifications.dart';
+import '../../doctor/pages/notificationPage.dart';
 
 class AdminOverview extends StatefulWidget {
   const AdminOverview({super.key});
@@ -12,6 +17,38 @@ class AdminOverview extends StatefulWidget {
 
 class _AdminOverviewState extends State<AdminOverview> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  List<NotificationResponseAPI> notifications = [];
+
+  Future getNotifications() async {
+    await ApiConstants.sendGET(
+        ApiConstants.getNotificationData, <String, String>{}).then((response) {
+      if (response.statusCode == 200) {
+        // print(response.body);
+        setState(() {
+          notifications = [];
+          for (var notification
+              in (List<dynamic>.from(jsonDecode(response.body)))) {
+            notifications.add(NotificationResponseAPI(notification));
+          }
+        });
+        Map<String, dynamic> payload = Jwt.parseJwt(ApiConstants.accessToken);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => NotificationPage(
+                      notification: notifications,
+                      ID: payload["username"],
+                    )));
+      } else {
+        throw Exception('Failed to POST ${response.statusCode}');
+      }
+    }).catchError((onError) {
+      print('Error in GET Notification API: ${onError.toString()}');
+    });
+
+    print("notification ${notifications.length}");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +90,8 @@ class _AdminOverviewState extends State<AdminOverview> {
         backgroundColor: kBackgroundColor,
         child: ListView(
           padding: EdgeInsets.zero,
-          children: const <Widget>[
-            SizedBox(
+          children: <Widget>[
+            const SizedBox(
               height: 150,
               child: DrawerHeader(
                 decoration: BoxDecoration(
@@ -72,18 +109,21 @@ class _AdminOverviewState extends State<AdminOverview> {
             ListTile(
               leading: Icon(Icons.notifications, color: kTextColor),
               title: Text(
-                'Alerts',
+                'Notifications',
                 style: TextStyle(color: kTextColor),
               ),
+              onTap: () {
+                getNotifications();
+              },
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.account_circle, color: kTextColor),
               title: Text(
                 'Profile',
                 style: TextStyle(color: kTextColor),
               ),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.contact_mail, color: kTextColor),
               title: Text(
                 'Contact SuperAdmin',

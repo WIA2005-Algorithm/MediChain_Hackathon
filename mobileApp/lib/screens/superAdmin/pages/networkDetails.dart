@@ -70,7 +70,7 @@ class _NetworkDetailsState extends State<NetworkDetails> {
   void initState() {
     getNetworkDetails();
     _timer =
-        Timer.periodic(const Duration(seconds: 30), (_) => getNetworkDetails());
+        Timer.periodic(const Duration(seconds: 15), (_) => getNetworkDetails());
     super.initState();
   }
 

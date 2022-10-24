@@ -187,16 +187,6 @@ class _CreatePatientState extends State<CreatePatient> {
 
   String? selectedCountries;
 
-  List<DropdownMenuItem<String>> get countryItems {
-    List<DropdownMenuItem<String>> menuItems = [
-      DropdownMenuItem(child: Text("Malaysia"), value: "Malaysia"),
-      DropdownMenuItem(child: Text("Singapore"), value: "Singapore"),
-      DropdownMenuItem(child: Text("Thailand"), value: "Thailand"),
-      DropdownMenuItem(child: Text("Indonesia"), value: "Indonesia"),
-    ];
-    return menuItems;
-  }
-
   List<String> countries = [
     "Malaysia",
     "Singapore",

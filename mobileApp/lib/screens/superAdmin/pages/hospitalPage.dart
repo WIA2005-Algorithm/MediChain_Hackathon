@@ -227,7 +227,7 @@ class _NetworkPageState extends State<NetworkPage> {
     getNetworkOrgDetails();
     checkNetworkStatus();
     _timer = Timer.periodic(
-        const Duration(seconds: 30), (_) => getNetworkOrgDetails());
+        const Duration(seconds: 15), (_) => getNetworkOrgDetails());
     _timer2 = Timer.periodic(
         const Duration(seconds: 10), (_) => checkNetworkStatus());
   }

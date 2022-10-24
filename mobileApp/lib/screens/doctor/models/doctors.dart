@@ -1,24 +1,40 @@
-import 'dart:convert';
-
-import 'package:medichain/helper/registration/registeration.dart';
+import 'package:intl/intl.dart';
 import 'package:medichain/screens/admin/models/patients.dart';
 
 class EachDoctor {
   List<String> active = [];
-  num assignedOn = 0;
-  num deAssigned = 0;
+  String assignedOn = '';
+  String? deAssigned = '';
   String department = "";
-  String dischargeOk = "null";
+  String? dischargeOk = "null";
   String email = "";
   String name = "";
   String note = "";
 
   EachDoctor.getJson(Map<String, dynamic> json) {
+    print("test 1");
     active = List<String>.from(json["active"]);
-    assignedOn = json["assignedOn"] ?? 0;
-    deAssigned = json["deAssigned"] ?? 0;
+    print("test 2");
+
+    final tempAssigned = DateTime(json["assignedOn"]).toLocal();
+    print("test 3");
+
+    assignedOn =
+        "${DateFormat.MMMM().format(tempAssigned)} ${tempAssigned.day}, ${tempAssigned.year}";
+
+    print("TYPES ::- ${(json["deAssigned"]).runtimeType}");
+
+    try {
+      final tempDeAssigned = DateTime(json["deAssignedOn"]).toLocal();
+      deAssigned =
+          "${DateFormat.MMMM().format(tempDeAssigned)} ${tempDeAssigned.day}, ${tempDeAssigned.year}";
+      // ignore: empty_catches
+    } catch (err) {
+      print(err.toString());
+    }
+
     department = json["department"] ?? 'null';
-    dischargeOk = json["dischargeOk"] ?? 'null';
+    dischargeOk = json["dischargeOk"].toString();
     email = json["email"] ?? 'null';
     name = json["name"] ?? 'null';
     note = json["note"] ?? 'null';

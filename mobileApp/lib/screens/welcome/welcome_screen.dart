@@ -20,6 +20,12 @@ class WelcomeScreen extends StatelessWidget {
                 const Expanded(
                   child: WelcomeImage(),
                 ),
+                // Image.asset(
+                //   "assets/images/app_logo.png",
+                //   // height: 200,
+                //   // width: 200,
+                //   scale: 0.5,
+                // ),
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
