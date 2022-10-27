@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:medichain/screens/doctor/models/doctors.dart';
 import 'package:medichain/screens/doctor/models/notifications.dart';
 import 'package:medichain/screens/doctor/models/patients.dart';
 import 'package:medichain/screens/doctor/pages/takeAction.dart';
@@ -10,9 +11,14 @@ import '../../../constants.dart';
 class NotificationPage extends StatefulWidget {
   final List<NotificationResponseAPI> notification;
   final DoctorDetailsAPIResponse? doctor;
+  final PatientDetailsAPIResponse? patient;
   final String ID;
   const NotificationPage(
-      {super.key, required this.notification, this.doctor, required this.ID});
+      {super.key,
+      required this.notification,
+      this.doctor,
+      required this.ID,
+      this.patient});
 
   @override
   State<NotificationPage> createState() => _NotificationPageState();
@@ -36,6 +42,8 @@ class _NotificationPageState extends State<NotificationPage> {
             MaterialPageRoute(
                 builder: (context) => TakeAction(
                       notification: widget.notification[index],
+                      doctor: widget.doctor,
+                      patient: widget.patient,
                     )));
       } else {
         throw Exception('Failed to POST ${response.statusCode}');

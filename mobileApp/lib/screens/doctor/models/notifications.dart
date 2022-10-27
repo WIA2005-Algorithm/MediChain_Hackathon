@@ -19,6 +19,17 @@ class NotificationData {
     FromName = json['FromName'] ?? "";
     UID = json['UID'] ?? "";
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "patientID": patientID,
+      "patientOrg": patientOrg,
+      "FromDoc": FromDoc,
+      "FromOrg": FromOrg,
+      "FromName": FromName,
+      "UID": UID,
+    };
+  }
 }
 
 class NotificationResponseAPI {
@@ -31,11 +42,11 @@ class NotificationResponseAPI {
   String createdAt = '';
   NotificationData? Data;
   String id = '';
+  String selectedEMR = '';
 
   NotificationResponseAPI(Map<String, dynamic> json) {
     id = json["_id"];
     final temp = DateTime.parse(json["createdAt"]).toLocal();
-    print("hello -- 123");
     From = json['From'] != "null"
         ? "${json['From'].toString().split("#")[0]}, ${json['From'].toString().split("#")[1]}"
         : "Web System";
@@ -61,6 +72,22 @@ class NotificationResponseAPI {
       print("Error Encountered which is ignored :- $error");
     }
     print("hello -- DONE");
+    selectedEMR = json["selectedEMR"] ?? '';
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "From": From,
+      "NotificationAccept": NotificationAccept,
+      "NotificationDeny": NotificationDeny,
+      "NotificationString": NotificationString,
+      "Read": Read.toString().toLowerCase() == 'true',
+      "To": To,
+      "createdAt": createdAt,
+      "Data": jsonEncode(Data),
+      "_id": id,
+      "selectedEMR": selectedEMR
+    };
   }
 }
 

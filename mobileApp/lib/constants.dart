@@ -31,7 +31,7 @@ const kParagaphTextStyle = TextStyle(
     fontSize: 17,
     fontFamily: 'Inter');
 
-const String kApibaseURL = "http://172.22.125.205:8080/api";
+const String kApibaseURL = "http://172.22.116.196:8080/api";
 
 // const kPrimaryColor = Color(0xFF6F35A5);
 const kPrimaryLightColor = Color(0xFFF1E6FF);
@@ -139,6 +139,7 @@ class AdminConstants {
   static String acceptExternalDoctorRequest = "acceptExternalDoctorRequest";
   static String denyExternalDoctorRequest = "denyExternalDoctorRequest";
   static String getPatientDataStatsTimeLine = "getPatientDataStatsTimeLine";
+  static String getAllSelectedEMRDoctors = "getAllSelectedEMRDoctors";
 
   static Future sendPOST(String URL, Map<String, dynamic> body) {
     return ApiConstants.sendPOST("$AdminBase$URL", body);
@@ -167,7 +168,7 @@ class DoctorConstants {
   static String denyRequestToFromAdmin = "denyRequestToFromAdmin";
   static String getDataForExternal = "getDataForExternal";
 
-  static Future sendPOST(String URL, Map<String, String> body) {
+  static Future sendPOST(String URL, Map<String, dynamic> body) {
     return ApiConstants.sendPOST("$DoctorBase$URL", body);
   }
 
@@ -188,7 +189,7 @@ class PatientConstants {
   static String acceptRequestToFromDoctors = "acceptRequestToFromDoctors";
   static String denyRequestToFromDoctors = "denyRequestToFromDoctors";
 
-  static Future sendPOST(String URL, Map<String, String> body) {
+  static Future sendPOST(String URL, Map<String, dynamic> body) {
     return ApiConstants.sendPOST("$PatientBase$URL", body);
   }
 

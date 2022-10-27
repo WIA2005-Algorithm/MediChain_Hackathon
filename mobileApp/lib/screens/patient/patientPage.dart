@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:medichain/screens/doctor/models/doctors.dart';
-import 'package:medichain/screens/patient/models/patients.dart';
 
 import '../../constants.dart';
 import '../doctor/models/notifications.dart';
@@ -70,9 +69,9 @@ class _PatientPageState extends State<PatientPage> {
             context,
             MaterialPageRoute(
                 builder: (context) => NotificationPage(
-                      notification: notifications,
-                      ID: payload["username"],
-                    )));
+                    notification: notifications,
+                    ID: payload["username"],
+                    patient: patientDetails)));
       } else {
         throw Exception('Failed to POST ${response.statusCode}');
       }

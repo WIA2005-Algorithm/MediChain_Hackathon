@@ -161,6 +161,10 @@ class Details {
     email = json['email'] ?? 'null';
     firstName = json['firstName'] ?? 'null';
     middleName = json['middleName'] ?? 'null';
+
+    if (middleName == "UNDEFINED") {
+      middleName = "";
+    }
     lastName = json['lastName'] ?? 'null';
     gender = json['gender'] ?? 'null';
     maritalStatus = json['maritalStatus'] ?? 'null';

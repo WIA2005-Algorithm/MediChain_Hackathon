@@ -1,17 +1,18 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:medichain/screens/doctor/models/doctors.dart';
-
 import '../../../constants.dart';
-import '../../admin/models/doctors.dart';
 import '../models/notifications.dart';
+import '../models/patients.dart';
 
 class TakeAction extends StatefulWidget {
   final NotificationResponseAPI notification;
+  final DoctorDetailsAPIResponse? doctor;
+  final PatientDetailsAPIResponse? patient;
 
-  TakeAction({super.key, required this.notification});
+  TakeAction(
+      {super.key, required this.notification, this.doctor, this.patient});
 
   @override
   State<TakeAction> createState() => _TakeActionState();
@@ -24,12 +25,14 @@ class _TakeActionState extends State<TakeAction> {
   bool _ischeckBox1 = false;
   List<bool> _checkBoxes = [];
   Map<String, EachDoctor> availableDoctors = {};
+  PatientDetailsAPIResponse? allDoctorsList;
 
   TextEditingController noteController = TextEditingController();
 
   Map<String, dynamic> payload = Jwt.parseJwt(ApiConstants.accessToken);
   String userID = '';
   String userRole = '';
+  String selectedEMR = "";
 
   // List<String> _texts = [
   //   "InduceSmile.com",
@@ -41,8 +44,29 @@ class _TakeActionState extends State<TakeAction> {
   // ];
   // List<bool> _isChecked = [false, false, false, false, false];
 
-  Future<void> getPaitentData() async {
-    print("patient id ${widget.notification.Data!.patientID}");
+  Future<void> getAssociatedDoctors() async {
+    print("PATIENT ID IS " + widget.notification.Data!.patientID);
+    await AdminConstants.sendGET(AdminConstants.getAllSelectedEMRDoctors,
+            <String, String>{"patientID": widget.notification.Data!.patientID})
+        .then((response) {
+      if (response.statusCode == 200) {
+        print("Response ${response.body}");
+        setState(() {
+          selectedEMR = response.body;
+        });
+      } else {
+        throw Exception('Failed to GT ${response.statusCode}');
+      }
+    }).catchError((onError) {
+      print('Error in GET Doctor API: ${onError.toString()}');
+    });
+    print("Success in api call");
+
+    print(selectedEMR);
+  }
+
+  Future<void> getPatientData() async {
+    // print("patient id ${widget.notification.Data!.patientID}");
     await AdminConstants.sendGET(AdminConstants.getPatientDetails,
             <String, String>{"ID": widget.notification.Data!.patientID})
         .then((response) {
@@ -54,6 +78,7 @@ class _TakeActionState extends State<TakeAction> {
         setState(() {
           if (tempPatient.associatedDoctors!.doctors.isNotEmpty) {
             availableDoctors = tempPatient.associatedDoctors!.doctors;
+            allDoctorsList = tempPatient;
           }
           print(availableDoctors);
         });
@@ -97,7 +122,11 @@ class _TakeActionState extends State<TakeAction> {
     userID = payload["username"];
     userRole = payload["role"];
     // getDoctorData();
-    getPaitentData();
+
+    if (userRole == "admin") {
+      getAssociatedDoctors();
+    }
+    getPatientData();
     super.initState();
   }
 
@@ -267,14 +296,25 @@ class _TakeActionState extends State<TakeAction> {
   }
 
   void acceptRequest() async {
+    Map<String, dynamic> data = {
+      "PatientID": widget.notification.Data!.patientID,
+      "PatientOrg": widget.notification.Data!.patientOrg,
+      "FromDoc": widget.notification.Data!.FromDoc,
+      "FromName": widget.notification.Data!.FromName,
+      "FromOrg": widget.notification.Data!.FromOrg,
+      "UID": widget.notification.Data!.UID
+    };
     if (userRole == "admin") {
+      await getAssociatedDoctors();
+
       await AdminConstants.sendPOST(
-          AdminConstants.acceptExternalDoctorRequest, <String, String>{
-        // "selectedEMR": networkName,
-        // "data": networkName,
-        // "notifyObj": networkName,
+          AdminConstants.acceptExternalDoctorRequest, <String, dynamic>{
+        "selectedEMR": jsonDecode(selectedEMR),
+        "data": data,
+        "notifObj": widget.notification,
       }).then((response) async {
         print("Response code: ${response.statusCode}");
+        print("Response ${response.body}");
 
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -284,20 +324,38 @@ class _TakeActionState extends State<TakeAction> {
           throw Exception('Failed accepting request');
         }
       }).catchError((onError) {
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(onError.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(onError.toString())));
         print('Error : ${onError.toString()}');
       });
     } else if (userRole == "doctor") {
+      EachDoctor? doctorDetails;
+      String ID = '';
+
+      availableDoctors.values.forEach((element) {
+        if (element.email == widget.doctor!.details!.email) {
+          doctorDetails = element;
+          ID = widget.doctor!.details!.passport;
+          print("ID: $ID, ${doctorDetails!.EMRID}, ${doctorDetails!.name}");
+        }
+      });
+
+      Map<String, dynamic> doctor = {
+        "EMRID": doctorDetails!.EMRID,
+        "ID": ID,
+        "name": doctorDetails!.name,
+      };
+
       await DoctorConstants.sendPOST(
-          DoctorConstants.acceptRequestToFromAdmin, <String, String>{
-        // "selectedEMR": networkName,
-        // "data": networkName,
-        // "notifyObj": networkName,
+          DoctorConstants.acceptRequestToFromAdmin, <String, dynamic>{
+        "data": data,
+        "doctor": doctor,
+        "notifObj": widget.notification,
       }).then((response) async {
         print("Response code: ${response.statusCode}");
 
         if (response.statusCode == 200) {
+          print("Success in accepting ...");
           ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Request accepted successfully')));
           Navigator.pop(context);
@@ -305,16 +363,24 @@ class _TakeActionState extends State<TakeAction> {
           throw Exception('Failed accepting request');
         }
       }).catchError((onError) {
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(onError.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(onError.toString())));
         print('Error : ${onError.toString()}');
       });
     } else if (userRole == "patient") {
+      // String name = "";
+      // widget.patient!.details!.middleName != ""
+      //     ? name = "${widget.patient!.details!.firstName}" +
+      //         " ${widget.patient!.details!.middleName}" +
+      //         " ${widget.patient!.details!.lastName}"
+      //     : name = "${widget.patient!.details!.firstName}" +
+      //         " ${widget.patient!.details!.lastName}";
+
       await PatientConstants.sendPOST(
-          PatientConstants.acceptRequestToFromDoctors, <String, String>{
-        // "selectedEMR": networkName,
-        // "data": networkName,
-        // "notifyObj": networkName,
+          PatientConstants.acceptRequestToFromDoctors, <String, dynamic>{
+        "data": data,
+        "name": payload["fullOrg"],
+        "notifObj": widget.notification,
       }).then((response) async {
         print("Response code: ${response.statusCode}");
 
@@ -326,8 +392,8 @@ class _TakeActionState extends State<TakeAction> {
           throw Exception('Failed accepting request');
         }
       }).catchError((onError) {
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(onError.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(onError.toString())));
         print('Error : ${onError.toString()}');
       });
     }
@@ -336,13 +402,21 @@ class _TakeActionState extends State<TakeAction> {
 
   void denyRequest() async {
     // check user
-
+    Map<String, dynamic> data = {
+      "PatientID": widget.notification.Data!.patientID,
+      "PatientOrg": widget.notification.Data!.patientOrg,
+      "FromDoc": widget.notification.Data!.FromDoc,
+      "FromName": widget.notification.Data!.FromName,
+      "FromOrg": widget.notification.Data!.FromOrg,
+      "UID": widget.notification.Data!.UID
+    };
     if (userRole == "admin") {
       await AdminConstants.sendPOST(
-          AdminConstants.denyExternalDoctorRequest, <String, String>{
-        // "data": networkName,
-        // "note": noteController.text,
-        // "notifObj": ,
+          AdminConstants.denyExternalDoctorRequest, <String, dynamic>{
+        "selectedEMR": jsonDecode(selectedEMR),
+        "data": data,
+        "note": noteController.text,
+        "notifObj": widget.notification,
       }).then((response) async {
         print("Response code: ${response.statusCode}");
 
@@ -354,16 +428,34 @@ class _TakeActionState extends State<TakeAction> {
           throw Exception('Failed Denying Request');
         }
       }).catchError((onError) {
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(onError.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(onError.toString())));
         print('Error : ${onError.toString()}');
       });
     } else if (userRole == "doctor") {
+      EachDoctor? doctorDetails;
+      String ID = '';
+
+      availableDoctors.values.forEach((element) {
+        if (element.email == widget.doctor!.details!.email) {
+          doctorDetails = element;
+          ID = widget.doctor!.details!.passport;
+          print("ID: $ID, ${doctorDetails!.EMRID}, ${doctorDetails!.name}");
+        }
+      });
+
+      Map<String, dynamic> doctor = {
+        "EMRID": doctorDetails!.EMRID,
+        "ID": ID,
+        "name": doctorDetails!.name,
+      };
+
       await DoctorConstants.sendPOST(
-          DoctorConstants.denyRequestToFromAdmin, <String, String>{
-        // "data": networkName,
-        // "note": noteController.text,
-        // "notifObj": ,
+          DoctorConstants.denyRequestToFromAdmin, <String, dynamic>{
+        "data": data,
+        "others": doctor,
+        "note": noteController.text,
+        "notifObj": widget.notification,
       }).then((response) async {
         print("Response code: ${response.statusCode}");
 
@@ -375,16 +467,17 @@ class _TakeActionState extends State<TakeAction> {
           throw Exception('Failed Denying Request');
         }
       }).catchError((onError) {
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(onError.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(onError.toString())));
         print('Error : ${onError.toString()}');
       });
     } else if (userRole == "patient") {
       await PatientConstants.sendPOST(
-          PatientConstants.denyRequestToFromDoctors, <String, String>{
-        // "data": networkName,
-        // "note": noteController.text,
-        // "notifObj": ,
+          PatientConstants.denyRequestToFromDoctors, <String, dynamic>{
+        "data": data,
+        "name": payload["fullOrg"],
+        "note": noteController.text,
+        "notifObj": widget.notification,
       }).then((response) async {
         print("Response code: ${response.statusCode}");
 
@@ -396,8 +489,8 @@ class _TakeActionState extends State<TakeAction> {
           throw Exception('Failed Denying Request');
         }
       }).catchError((onError) {
-        // ScaffoldMessenger.of(context)
-        //     .showSnackBar(SnackBar(content: Text(onError.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(onError.toString())));
         print('Error : ${onError.toString()}');
       });
     }

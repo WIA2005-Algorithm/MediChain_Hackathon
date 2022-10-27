@@ -4,6 +4,7 @@ import 'package:medichain/screens/admin/models/patients.dart';
 class EachDoctor {
   List<String> active = [];
   String assignedOn = '';
+  int EMRID = 0;
   String? deAssigned = '';
   String department = "";
   String? dischargeOk = "null";
@@ -38,6 +39,7 @@ class EachDoctor {
     email = json["email"] ?? 'null';
     name = json["name"] ?? 'null';
     note = json["note"] ?? 'null';
+    EMRID = json["EMRID"] ?? 0;
   }
 }
 
