@@ -167,13 +167,6 @@ class _PatientPageState extends State<PatientPage> {
               endIndent: defaultPadding,
               color: Colors.white70,
             ),
-            ListTile(
-                leading: Icon(Icons.contact_mail, color: kTextColor),
-                title: Text(
-                  'Take Action',
-                  style: TextStyle(color: kTextColor),
-                ),
-                onTap: () {}),
           ],
         ),
       ),

@@ -48,18 +48,18 @@ class _PatientDetailsState extends State<PatientDetails> {
             style: TextStyle(color: Colors.white60),
           ),
         ),
-        actions: [
-          IconButton(
-              icon: const Icon(
-                Icons.notifications,
-                color: Colors.white,
-              ),
-              tooltip: 'Login/Registration',
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Container()));
-              })
-        ],
+        // actions: [
+        //   IconButton(
+        //       icon: const Icon(
+        //         Icons.notifications,
+        //         color: Colors.white,
+        //       ),
+        //       tooltip: 'Login/Registration',
+        //       onPressed: () {
+        //         Navigator.push(context,
+        //             MaterialPageRoute(builder: (context) => Container()));
+        //       })
+        // ],
       ),
       body: Container(
         padding: EdgeInsets.all(defaultPadding),

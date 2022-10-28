@@ -267,7 +267,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
                         }).then((response) {
                       if (response.statusCode == 200) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Doctor Assigned Successful')));
+                            content: Text('Patient Request Successful')));
                         return Navigator.pop(context, 'Ok');
                       } else {
                         throw Exception(
@@ -275,7 +275,7 @@ class _DoctorScreenState extends State<DoctorScreen> {
                       }
                     }).catchError((onError) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Doctor Assigned Failed')));
+                          SnackBar(content: Text('Patient Request Failed')));
                       print(
                           'Error in POST Assign Doctor API: ${onError.toString()}');
                     });

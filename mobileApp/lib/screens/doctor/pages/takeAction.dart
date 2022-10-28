@@ -25,7 +25,6 @@ class _TakeActionState extends State<TakeAction> {
   bool _ischeckBox1 = false;
   List<bool> _checkBoxes = [];
   Map<String, EachDoctor> availableDoctors = {};
-  PatientDetailsAPIResponse? allDoctorsList;
 
   TextEditingController noteController = TextEditingController();
 
@@ -34,15 +33,10 @@ class _TakeActionState extends State<TakeAction> {
   String userRole = '';
   String selectedEMR = "";
 
-  // List<String> _texts = [
-  //   "InduceSmile.com",
-  //   "Flutter.io",
-  //   "google.com",
-  //   "youtube.com",
-  //   "yahoo.com",
-  //   "gmail.com"
-  // ];
-  // List<bool> _isChecked = [false, false, false, false, false];
+  // List doctors = [];
+  List listEMR = [];
+  List listID = [];
+  List listName = [];
 
   Future<void> getAssociatedDoctors() async {
     print("PATIENT ID IS " + widget.notification.Data!.patientID);
@@ -53,7 +47,19 @@ class _TakeActionState extends State<TakeAction> {
         print("Response ${response.body}");
         setState(() {
           selectedEMR = response.body;
+          jsonDecode(response.body).toList().forEach((doctor) {
+            doctor = jsonDecode(doctor);
+            listEMR.add(doctor["EMRID"]);
+            listID.add(doctor["ID"]);
+            listName.add(doctor['name']);
+            _checkBoxes.add(false);
+          });
         });
+        print("Doctor Info");
+
+        print(listEMR);
+        print(listID);
+        print(listName);
       } else {
         throw Exception('Failed to GT ${response.statusCode}');
       }
@@ -66,7 +72,6 @@ class _TakeActionState extends State<TakeAction> {
   }
 
   Future<void> getPatientData() async {
-    // print("patient id ${widget.notification.Data!.patientID}");
     await AdminConstants.sendGET(AdminConstants.getPatientDetails,
             <String, String>{"ID": widget.notification.Data!.patientID})
         .then((response) {
@@ -78,7 +83,6 @@ class _TakeActionState extends State<TakeAction> {
         setState(() {
           if (tempPatient.associatedDoctors!.doctors.isNotEmpty) {
             availableDoctors = tempPatient.associatedDoctors!.doctors;
-            allDoctorsList = tempPatient;
           }
           print(availableDoctors);
         });
@@ -188,7 +192,7 @@ class _TakeActionState extends State<TakeAction> {
             ),
             selected == true && userRole == "admin"
                 ? Padding(
-                    padding: const EdgeInsets.only(left: defaultPadding * 2),
+                    padding: const EdgeInsets.only(left: defaultPadding * 1.5),
                     child: Column(
                       children: [
                         CheckboxListTile(
@@ -200,37 +204,46 @@ class _TakeActionState extends State<TakeAction> {
                           onChanged: (newValue) {
                             setState(() {
                               _ischeckBox1 = newValue!;
+                              for (var i = 0; i < _checkBoxes.length; i++) {
+                                _checkBoxes[i] = _ischeckBox1;
+                              }
                             });
                           },
                           controlAffinity: ListTileControlAffinity
                               .leading, //  <-- leading Checkbox
                         ),
-                        // availableDoctors.isEmpty
-                        //     ? Text(
-                        //         "No Associated Doctors",
-                        //         style: kParagaphTextStyle,
-                        //       )
-                        //     : ListView.builder(
-                        //         shrinkWrap: true,
-                        //         itemCount: availableDoctors.length,
-                        //         itemBuilder: (context, index) {
-                        //           print(_checkBoxes[index]);
-                        //           return Expanded(
-                        //             child: CheckboxListTile(
-                        //               title: Text(
-                        //                   "${availableDoctors.values.toList()[index].name} - ${availableDoctors.values.toList()[index].department}",
-                        //                   style: kParagaphTextStyle),
-                        //               value: _checkBoxes[index],
-                        //               onChanged: (val) {
-                        //                 setState(() {
-                        //                   _checkBoxes[index] = val!;
-                        //                 });
-                        //               },
-                        //               controlAffinity:
-                        //                   ListTileControlAffinity.leading,
-                        //             ),
-                        //           );
-                        //         }),
+                        listName.isEmpty && _ischeckBox1
+                            ? Text(
+                                "No Associated Doctors",
+                                style: kParagaphTextStyle,
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.only(
+                                    left: defaultPadding * 1.5),
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: listName.length,
+                                    itemBuilder: (context, index) {
+                                      print(listName[index]);
+                                      return Expanded(
+                                        child: CheckboxListTile(
+                                          activeColor: kAppBarColor,
+                                          checkColor: kSecondaryColor,
+                                          title: Text(
+                                              "${listName[index]} - ${availableDoctors.values.toList()[index].department}",
+                                              style: kParagaphTextStyle),
+                                          value: _checkBoxes[index],
+                                          onChanged: (val) {
+                                            setState(() {
+                                              _checkBoxes[index] = val!;
+                                            });
+                                          },
+                                          controlAffinity:
+                                              ListTileControlAffinity.leading,
+                                        ),
+                                      );
+                                    }),
+                              ),
                       ],
                     ),
                   )
@@ -307,9 +320,24 @@ class _TakeActionState extends State<TakeAction> {
     if (userRole == "admin") {
       await getAssociatedDoctors();
 
+      List selectedDoctorsList = [];
+      for (var i = 0; i < listName.length; i++) {
+        Map<String, dynamic> doctor = {
+          "ID": listID[i],
+          "EMRID": listEMR[i],
+          "name": listName[i],
+        };
+
+        if (_checkBoxes[i] == true) {
+          selectedDoctorsList.add(jsonEncode(doctor));
+        }
+      }
+      print("Selected Doctors ${selectedDoctorsList}");
+
       await AdminConstants.sendPOST(
           AdminConstants.acceptExternalDoctorRequest, <String, dynamic>{
-        "selectedEMR": jsonDecode(selectedEMR),
+        // "selectedEMR": jsonDecode(selectedEMR),
+        "selectedEMR": selectedDoctorsList,
         "data": data,
         "notifObj": widget.notification,
       }).then((response) async {

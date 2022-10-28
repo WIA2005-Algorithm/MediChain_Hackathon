@@ -209,20 +209,20 @@ class _DoctorDetailsState extends State<DoctorDetails> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          // onPressedDynamic(context);
-        },
-        label: Text(
-          "Discharge Patient",
-          style: TextStyle(color: Colors.black),
-        ),
-        icon: const Icon(
-          Icons.add,
-          color: kPrimaryColor,
-        ),
-        backgroundColor: kSecondaryColor,
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () async {
+      //     // onPressedDynamic(context);
+      //   },
+      //   label: Text(
+      //     "Discharge Patient",
+      //     style: TextStyle(color: Colors.black),
+      //   ),
+      //   icon: const Icon(
+      //     Icons.add,
+      //     color: kPrimaryColor,
+      //   ),
+      //   backgroundColor: kSecondaryColor,
+      // ),
     );
   }
 

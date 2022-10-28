@@ -103,15 +103,41 @@ class _NotificationPageState extends State<NotificationPage> {
               ),
               SizedBox(height: defaultPadding),
               widget.notification.length == 0
-                  ? Center(
-                      child: Text(
-                      "No notifications available",
-                      style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Inter'),
-                    ))
+                  ? Container(
+                      child: Center(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 100),
+                            Image.asset(
+                              "assets/images/empty_blockchain.png",
+                              height: 200,
+                              width: 200,
+                            ),
+                            const SizedBox(height: 5),
+                            const Text(
+                              "No Notification Available Yet",
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: "Inter",
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 5),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 30),
+                              child: Text(
+                                "",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: "Inter",
+                                    color: Colors.white54),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       shrinkWrap: true,
                       itemCount: widget.notification.length,
